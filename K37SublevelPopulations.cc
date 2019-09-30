@@ -1,6 +1,17 @@
+// Author: Melissa Anholm - 2019
+
 #include "K37SublevelPopulations.hh"
 
-sublevel_populations::sublevel_populations(int the_sigma)
+using std::cout;
+using std::endl;
+
+// ------------------------------------------------------------- //
+K37SublevelPopulations::K37SublevelPopulations()
+{
+	K37SublevelPopulations(1);
+}
+
+K37SublevelPopulations::K37SublevelPopulations(int the_sigma)
 {
 	excited_F1.push_back(0);
 	excited_F1.push_back(0);
@@ -29,7 +40,13 @@ sublevel_populations::sublevel_populations(int the_sigma)
 	// if it's sigma-, swap everything.
 	if(!is_sigma_plus) { swap_states(); }
 }
-void sublevel_populations::swap_states()
+K37SublevelPopulations::~K37SublevelPopulations()
+{
+	G4cout << "Deleting the sublevel populations. " << G4endl;
+}
+
+// ------------------------------------------------------------- //
+void K37SublevelPopulations::swap_states()
 {
 	bool verbose = true;
 	
@@ -60,7 +77,7 @@ void sublevel_populations::swap_states()
 		print_pops();
 	}
 }
-int sublevel_populations::get_sigma() // returns +/- 1 (or 0 if it's broken)
+int K37SublevelPopulations::get_sigma() // returns +/- 1 (or 0 if it's broken)
 {
 	bool physics_sigma_plus;
 	if(get_Mz()>=0) { physics_sigma_plus=true; }
@@ -79,7 +96,7 @@ int sublevel_populations::get_sigma() // returns +/- 1 (or 0 if it's broken)
 	}
 }
 
-void sublevel_populations::set_sigma_plus()
+void K37SublevelPopulations::set_sigma_plus()
 {
 	bool verbose = true;
 	if(get_sigma()>0) 
@@ -104,7 +121,7 @@ void sublevel_populations::set_sigma_plus()
 		assert(0);
 	}
 }
-void sublevel_populations::set_sigma_minus()
+void K37SublevelPopulations::set_sigma_minus()
 {
 	bool verbose = true;
 	if(get_sigma()>0) 
@@ -130,7 +147,7 @@ void sublevel_populations::set_sigma_minus()
 	}
 }
 
-double sublevel_populations::get_Mz()
+double K37SublevelPopulations::get_Mz()
 {
 	bool verbose=false;
 	renormalize();
@@ -169,7 +186,7 @@ double sublevel_populations::get_Mz()
 	
 	return running_Mz;
 }
-double sublevel_populations::get_Mz2()
+double K37SublevelPopulations::get_Mz2()
 {
 	renormalize();
 	double running_Mz2 = 0.0;
@@ -201,7 +218,7 @@ double sublevel_populations::get_Mz2()
 	
 	return running_Mz2;
 }
-double sublevel_populations::get_Mz3()
+double K37SublevelPopulations::get_Mz3()
 {
 	renormalize();
 	double running_Mz3 = 0.0;
@@ -233,20 +250,20 @@ double sublevel_populations::get_Mz3()
 	
 	return running_Mz3;
 }
-double sublevel_populations::get_P()
+double K37SublevelPopulations::get_P()
 {
 	// spin 3/2 only
 	double P = get_Mz()/(3.0/2.0);
 	return P;
 }
-double sublevel_populations::get_T()
+double K37SublevelPopulations::get_T()
 {
 	// spin 3/2 only
 	double T = 5.0/4.0 - get_Mz2();
 	return T;
 }
 
-void sublevel_populations::set_pop(string level, int F, int M_F, double the_pop)
+void K37SublevelPopulations::set_pop(string level, int F, int M_F, double the_pop)
 {
 	// sanity checks first.
 	if( level.compare(string("ground"))!=0 && level.compare(string("excited"))!=0 )
@@ -294,7 +311,7 @@ void sublevel_populations::set_pop(string level, int F, int M_F, double the_pop)
 //	use_this_vector[M_F+offset] = the_pop;
 	return;
 }
-double sublevel_populations::get_pop(string level, int F, int M_F)
+double K37SublevelPopulations::get_pop(string level, int F, int M_F)
 {
 //	cout << "Getting population." << endl;
 	// sanity checks first.
@@ -339,7 +356,7 @@ double sublevel_populations::get_pop(string level, int F, int M_F)
 	return the_pop;
 }
 
-bool sublevel_populations::sanity(int F, int M_F)
+bool K37SublevelPopulations::sanity(int F, int M_F)
 {
 	if( F!=1 && F!=2)
 	{
@@ -353,7 +370,7 @@ bool sublevel_populations::sanity(int F, int M_F)
 	}
 	return true;
 }
-double sublevel_populations::get_scale(string the_parameter, int F, int M_F)
+double K37SublevelPopulations::get_scale(string the_parameter, int F, int M_F)
 {
 	if( the_parameter.compare(string("M_z")) != 0
 	 && the_parameter.compare(string("M_z2")) != 0
@@ -420,7 +437,7 @@ double sublevel_populations::get_scale(string the_parameter, int F, int M_F)
 	}
 	return the_scale;
 }
-void sublevel_populations::renormalize()
+void K37SublevelPopulations::renormalize()
 {
 	double running_sum = 0.0;
 	for(int i=0; i<(int)excited_F1.size(); i++)
@@ -473,7 +490,7 @@ void sublevel_populations::renormalize()
 	}
 	return;
 }
-void sublevel_populations::print_pops()
+void K37SublevelPopulations::print_pops()
 {
 	int the_width=12;
 	int the_precision=the_width-4;
