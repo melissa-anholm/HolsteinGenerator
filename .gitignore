@@ -1,0 +1,12 @@
+._*
+._.*
+*.root
+*.key
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+holstein
+holsteinview
+Unversioned/
+Output/
