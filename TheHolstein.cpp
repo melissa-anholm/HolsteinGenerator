@@ -4,37 +4,35 @@
 // this is beta+ decay, and both the parent and daughter have spin 3/2.
 // this information is likely baked in somewhere.
 
-
+// System:
 #include <iostream>  // cout, endl
-//#include <cmath>     // pow
-//#include "fstream"   // 
 #include <iomanip>   // setw
-
+#include <iterator>
 
 #include <sys/time.h>
 
-//#include <map>     // for text input function
-
 #undef NDEBUG
 #include<assert.h>
-#include<iterator>
 
-#include<Randomize.hh>
+
+//#include <map>     // for text input function
+//#include <cmath>     // pow
+//#include "fstream"   // 
+
+// G4:  
+#include <Randomize.hh>
+
 //#include<G4ThreeVector.hh> // probably the correct way to include ThreeVector.h.
 // #include <CLHEP/Units/SystemOfUnits.h> in HolsteinVars.cpp.  actually G4SystemOfUnits.hh
 // #include<G4SystemOfUnits.hh> in HolsteinVars.cpp.  *That* includes <CLHEP/Units/SystemOfUnits.h>.
-
 // #include <G4SystemOfUnits.hh> now in HolsteinDecay.hh
 
-
+// Root:
 #include "TFile.h"
 #include <TTree.h>
 #include <TBranch.h> // might not need this...
 
-// link them, don't include them.
-//#include "HolsteinVars.cpp"
-//#include "HolsteinDecay.cpp"
-
+// Project:
 #include "HolsteinVars.hh"
 #include "HolsteinDecay.hh"
 #include "K37SublevelPopulations.hh"
@@ -44,7 +42,7 @@ using std::cout;
 using std::endl;
 
 // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // 
-// // // // 
+// ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // 
 int main(int argc, char *argv[]) 
 {
 	cout << "Hello, world!" << endl;
@@ -344,4 +342,5 @@ int main(int argc, char *argv[])
 
 
 
+// ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // 
 

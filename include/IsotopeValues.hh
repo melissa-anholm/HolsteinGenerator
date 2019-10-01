@@ -3,7 +3,7 @@
 #include <iomanip>   // setw
 
 using std::string;
-
+using std::cout;
 
 class isotope_values
 {

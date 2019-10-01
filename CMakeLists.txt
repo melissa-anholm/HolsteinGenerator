@@ -1,5 +1,5 @@
-cmake_minimum_required (VERSION 2.7)
-project (holstein_generator CXX) # This is where it looks for the compiler in env. vars CC and/or CXX.  Anything set afterwards doesn't matter.
+CMAKE_MINIMUM_REQUIRED(VERSION 2.7)
+PROJECT(holstein_generator CXX) # This is where it looks for the compiler in env. vars CC and/or CXX.  Anything set afterwards doesn't matter.
 
 #SET(CMAKE_CXX_COMPILER $ENV{GCC_DIR}/g++)  # apparently this has to go before "project(...)" otherwise it doesn't work.
 #SET(CMAKE_C_COMPILER $ENV{GCC_DIR}/gcc)
@@ -16,8 +16,8 @@ project (holstein_generator CXX) # This is where it looks for the compiler in en
 #message("* This is a message.  Geant4_USE_FILE = " ${Geant4_USE_FILE} )
 
 FIND_PACKAGE(Geant4 REQUIRED ui_all vis_all)
-INCLUDE($ENV{MISC_INCLUDE_DIR}/FindROOT.cmake)  # because findroot.cmake now lives in *this* directory.
 #INCLUDE(FindROOT.cmake)
+INCLUDE($ENV{MISC_INCLUDE_DIR}/FindROOT.cmake)  # because findroot.cmake now lives in *this* directory.
 INCLUDE(${Geant4_USE_FILE})
 
 
@@ -27,6 +27,8 @@ INCLUDE_DIRECTORIES(SYSTEM ${ROOT_INCLUDE_DIR})
 INCLUDE_DIRECTORIES ($ENV{MISC_INCLUDE_DIR})  # Do I need this for anything?  maybe not right now.
 
 
+SET(a_bunch_of_root_libraries
+	Gui Core RIO Net Hist Graf Graf3d Gpad Tree Rint Postscript Matrix Physics MathCore Thread pthread m dl )
 
 #INCLUDE_DIRECTORIES ($ENV{G4_INCLUDE_DIR})  # The 'ENV' *must* be included, and it still only finds files in "" style quotes.  To do it with <> style quotes, this directory must *also* be in the path.
 #message("* This is a message.  ROOT_INCLUDE_DIR = " ${ROOT_INCLUDE_DIR})
@@ -45,38 +47,65 @@ SET(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-g -O2 -pthread -m64 -std=c++11")
 #SET(CMAKE_BUILD_TYPE ReLWithDebInfo)  # this makes the .dSYM file.  idk why this happens.  
 
 #INCLUDE_DIRECTORIES(include)
+
 ADD_SUBDIRECTORY(src)
+ADD_EXECUTABLE(holstein TheHolstein.cpp)
+  
+target_link_libraries(holstein
+	holstein_lib ${Geant4_LIBRARIES} ${a_bunch_of_root_libraries} )
+
+#add_executable (holsteinview holsteinview.cpp)
+#target_link_libraries(holsteinview
+#	holstein_lib ${Geant4_LIBRARIES} ${a_bunch_of_root_libraries} )
+
+#add_executable (holsteinview roc_compare.cpp)
+#target_link_libraries(holsteinview
+#	holstein_lib ${Geant4_LIBRARIES} ${a_bunch_of_root_libraries} )
+
+
+###  Everything is compiled, so let's copy some files over.  ###
+###  ===========================================================
+SET(setup_files K_37_INPUT.txt)
+
+foreach(_file ${setup_files})
+	configure_file(
+		${CMAKE_SOURCE_DIR}/${_file}
+		${CMAKE_BINARY_DIR}/${_file}
+		COPYONLY
+		)
+endforeach()
+
 
 
 #Linking the Executable ================
-add_executable (holstein TheHolstein.cpp)
+#add_executable (holstein TheHolstein.cpp)
 #add_executable (holsteinview holsteinview.cpp)
 #add_executable (holsteinview roc_compare.cpp)
 
 #link this library with everything that is needed
 #to pop up a windows with the plots at the end
-target_link_libraries (holstein
-                      holstein_lib
-                      ${Geant4_LIBRARIES}
-                      Gui
-                      Core
-                      RIO
-                      Net
-                      Hist
-                      Graf
-                      Graf3d
-                      Gpad
-                      Tree
-                      Rint
-                      Postscript
-                      Matrix
-                      Physics
-                      MathCore
-                      Thread
-                      pthread
-                      m
-                      dl
-                      )   ## 
+#target_link_libraries (holstein
+#                      holstein_lib
+#                      ${Geant4_LIBRARIES}
+#                      Gui
+#                      Core
+#                      RIO
+#                      Net
+#                      Hist
+#                      Graf
+#                      Graf3d
+#                      Gpad
+#                      Tree
+#                      Rint
+#                      Postscript
+#                      Matrix
+#                      Physics
+#                      MathCore
+#                      Thread
+#                      pthread
+#                      m
+#                      dl
+#                      )   ## 
 
 
 #target_link_libraries (holsteinview
