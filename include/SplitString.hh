@@ -1,5 +1,4 @@
 // Authors: Spencer Behling, Benjamin Fenker, and Melissa Anholm  - 2013
-
 #ifndef SplitString_h
 #define SplitString_h 1
 
@@ -9,6 +8,8 @@
 
 using std::cout;
 using std::endl;
+using std::string;
+using std::vector;
 
 namespace SS
 {
@@ -42,4 +43,6 @@ namespace SS
 		return elems;
 	}
 }
+
+
 #endif

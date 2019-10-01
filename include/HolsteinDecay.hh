@@ -3,6 +3,15 @@
 #ifndef HolsteinDecay_h
 #define HolsteinDecay_h 1
 
+#include <G4SystemOfUnits.hh>
+#include <G4ThreeVector.hh> // probably the correct way to include ThreeVector.h.
+
+
+#include "HolsteinVars.hh"
+#include "K37SublevelPopulations.hh"
+
+
+// ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- //
 //  HolsteinDecay class relies on other classes: 
 //  	HolsteinVars
 //  		isotope_values
@@ -12,7 +21,7 @@ class HolsteinDecay
 {
 public:
 	HolsteinDecay();    /// this one seems broken?!?!?
-	HolsteinDecay(HolsteinVars* HV, K37SublevelPopulations * pops);
+	HolsteinDecay(HolsteinVars * HV, K37SublevelPopulations * pops);
 //	HolsteinDecay(HolsteinVars  HV) { HolsteinDecay( (HolsteinVars*)(&HV) ); };
 	
 	// The cone!

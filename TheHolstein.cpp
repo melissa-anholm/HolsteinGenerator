@@ -6,8 +6,8 @@
 
 
 #include <iostream>  // cout, endl
-#include <cmath>     // pow
-#include "fstream"   // 
+//#include <cmath>     // pow
+//#include "fstream"   // 
 #include <iomanip>   // setw
 
 
@@ -20,20 +20,30 @@
 #include<iterator>
 
 #include<Randomize.hh>
-#include<G4ThreeVector.hh> // probably the correct way to include ThreeVector.h.
+//#include<G4ThreeVector.hh> // probably the correct way to include ThreeVector.h.
 // #include <CLHEP/Units/SystemOfUnits.h> in HolsteinVars.cpp.  actually G4SystemOfUnits.hh
 // #include<G4SystemOfUnits.hh> in HolsteinVars.cpp.  *That* includes <CLHEP/Units/SystemOfUnits.h>.
+
+// #include <G4SystemOfUnits.hh> now in HolsteinDecay.hh
+
 
 #include "TFile.h"
 #include <TTree.h>
 #include <TBranch.h> // might not need this...
 
-//
-#include "HolsteinVars.cpp"
-#include "HolsteinDecay.cpp"
-// ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- //
-	
+// link them, don't include them.
+//#include "HolsteinVars.cpp"
+//#include "HolsteinDecay.cpp"
 
+#include "HolsteinVars.hh"
+#include "HolsteinDecay.hh"
+#include "K37SublevelPopulations.hh"
+
+
+using std::cout;
+using std::endl;
+
+// ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // 
 // // // // 
 int main(int argc, char *argv[]) 
 {
@@ -48,8 +58,8 @@ int main(int argc, char *argv[])
 	string filename = "output.root";
 	
 	K37SublevelPopulations * thepops     = new K37SublevelPopulations(1);
-	HolsteinVars         * pointervars = new HolsteinVars();
-	HolsteinDecay        * the_decay   = new HolsteinDecay(pointervars, thepops);
+	HolsteinVars           * pointervars = new HolsteinVars();
+	HolsteinDecay          * the_decay   = new HolsteinDecay(pointervars, thepops);
 	
 	the_decay->run_fast(true);
 	the_decay->set_use_cone(true);

@@ -4,13 +4,12 @@
 #include <sstream> // for SS
 #include <vector>  // for SS
 
-//#include "SplitString.hh"
-#include "K37SublevelPopulations.cc"
-//#include "IsotopeValues.hh"
-#include "HolsteinVars.hh"
+#undef NDEBUG
+#include<assert.h>
 
-//#include <CLHEP/Units/SystemOfUnits.h>
-//#include <G4SystemOfUnits.hh>
+#include "HolsteinVars.hh"
+#include "K37SublevelPopulations.hh"
+#include "SplitString.hh"
 
 
 using std::cout;
@@ -18,7 +17,7 @@ using std::endl;
 using std::string;
 using std::vector;
 
-const double pi = std::atan(1.0)*4.0;
+//const double pi = std::atan(1.0)*4.0;
 
 void check_if_NDEBUG()
 {

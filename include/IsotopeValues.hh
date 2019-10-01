@@ -1,4 +1,6 @@
 #include <string> 
+#include <iostream>  // cout, endl
+#include <iomanip>   // setw
 
 using std::string;
 

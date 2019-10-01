@@ -1,11 +1,20 @@
 #ifndef HolsteinVars_h
 #define HolsteinVars_h 1
 
+#include <iostream>  // cout, endl
+#include <string> 
+#include <cmath>     // pow, atan
+#include <map>
+#include "fstream"   // 
+
+#include <G4Types.hh>
 #include <G4SystemOfUnits.hh>
 
 #include "IsotopeValues.hh"
-#include "SplitString.hh"
+//#include "SplitString.hh"
 
+
+const double pi = std::atan(1.0)*4.0;
 
 // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- //
 struct chamber_geometry // numbers indirectly imported from G4.

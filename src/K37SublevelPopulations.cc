@@ -1,5 +1,13 @@
 // Author: Melissa Anholm - 2019
 
+#include <iostream>  // cout, endl
+#include <iomanip>   // setw
+
+#undef NDEBUG
+#include<assert.h>
+
+#include "G4UIsession.hh"  // G4cout, G4endl;
+
 #include "K37SublevelPopulations.hh"
 
 using std::cout;
