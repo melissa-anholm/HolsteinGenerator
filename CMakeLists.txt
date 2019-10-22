@@ -65,7 +65,10 @@ target_link_libraries(holstein
 
 ###  Everything is compiled, so let's copy some files over.  ###
 ###  ===========================================================
-SET(setup_files K_37_INPUT.txt)
+SET(setup_files 
+	K_37_INPUT.txt
+	K_37_POPULATIONS_INPUT.txt
+	)
 
 foreach(_file ${setup_files})
 	configure_file(

@@ -56,6 +56,13 @@ int main(int argc, char *argv[])
 	string filename = "output.root";
 	
 	K37SublevelPopulations * thepops     = new K37SublevelPopulations(1);
+	
+	thepops -> print_pops();
+	thepops -> renormalize();
+	thepops -> print_pops();
+	thepops -> print_moments();
+	
+	
 	HolsteinVars           * pointervars = new HolsteinVars();
 	HolsteinDecay          * the_decay   = new HolsteinDecay(pointervars, thepops);
 	
@@ -64,6 +71,7 @@ int main(int argc, char *argv[])
 //	the_decay->set_use_cone(false);
 	the_decay->set_conecostheta( 0.90 );
 	cout << "get_conecostheta() = " << the_decay->get_conecostheta() << endl;
+	
 	
 	
 	/*
@@ -83,9 +91,32 @@ int main(int argc, char *argv[])
 	cout << "Abeta = -2*rho*(sqrt(3/5) - rho/5) / (1+rho^2) = " << Abeta << endl;
 	*/
 	
+	
+	cout << "-- -- --" << endl; // << endl;
+	/*
+	thepops -> Setup_FromPolarizationOnly(0.95);
+	thepops -> Setup_FromPolarizationOnly(0.99);
+	thepops -> Setup_FromPolarizationOnly(1.0);
+//	thepops -> Setup_FromPolarizationOnly(1.5);
+	thepops -> Setup_FromPolarizationOnly(-1.0);
+	thepops -> Setup_FromPolarizationOnly(-0.95);
+	thepops -> Setup_FromPolarizationOnly(-0.9912);
+	*/
+	/*
+	thepops -> Setup_FromPolarizationOnly(0.9912);
+	thepops -> print_pops();
+	thepops -> print_moments();
+	*/
+	/*
+	thepops -> Setup_FromPolarizationAlignment(1.0, -1.0);
+	thepops -> Setup_FromPolarizationAlignment(-0.9912, -0.9736);
+	thepops -> Setup_FromPolarizationAlignment(-0.9912, -0.96);
+//	thepops -> print_pops();
+	*/
 	cout << "-- -- --" << endl; // << endl;
 	
 	
+	/*
 	TFile * f = new TFile(filename.c_str(), "RECREATE");
 	f -> cd();
 	TTree * tree = new TTree("ntuple", "ntuple");
@@ -328,7 +359,7 @@ int main(int argc, char *argv[])
 	tree -> GetCurrentFile() -> Close();
 	
 	cout << "Events are written and file " << filename << " is closed." << endl;
-	
+	*/
 	
 	return 0;
 }

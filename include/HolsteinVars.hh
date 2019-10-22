@@ -5,7 +5,7 @@
 #include <string> 
 #include <cmath>     // pow, atan
 #include <map>
-#include "fstream"   // 
+//#include "fstream"   // 
 
 #include <G4Types.hh>
 #include <G4SystemOfUnits.hh>
@@ -13,6 +13,7 @@
 #include "IsotopeValues.hh"
 //#include "SplitString.hh"
 
+using std::map;
 
 const double pi = std::atan(1.0)*4.0;
 
@@ -42,10 +43,15 @@ public:
 	double delta_uv, gamma_uv, lambda_uv, theta_uv, kappa_uv, epsilon_uv, rho_uv, sigma_uv, phi_uv;
 	
 	// Loading the text file.  Implementing code I inherited from Spencer.
-	string paramfilename;
-	std::string isotopeName;      // gets a value loaded into it, but probably doesn't ever get used.
-	std::map<std::string, isotope_values * > theInputs;
-	bool loadup_textfile();
+	// string paramfilename;
+	string nuclear_filename;
+//	string atomic_filename;
+	
+	string isotopeName;      // gets a value loaded into it, but probably doesn't ever get used.
+	map<string, isotope_values * > theInputs;
+//	map<string, isotope_values * > loadup_textfile(string paramfilename);
+//	bool loadup_textfile(string paramfilename);
+	
 	void print_isotope_values();  // for debugging.  prints from 'theInputs'.
 	double FindValue(const std::string &key_) const;
 	double FindUncertainty(const std::string &key_) const;

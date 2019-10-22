@@ -1,0 +1,22 @@
+K37_POPULATIONS:                                  # 'isotope' name 
+IS_SIGMA_PLUS:1:                                  #
+### ### ### ### Excited (P 1/2) States, F=2 ### ### ###
+EXCITED_F2_Mplus2:3.502E-05:                      #
+EXCITED_F2_Mplus1:1.872E-05:                      #
+EXCITED_F2_M0:9.212E-08:                          #
+EXCITED_F2_Mminus1:2.730E-08:                     #
+EXCITED_F2_Mminus2:2.006E-10:                     #
+### ### ### ### Excited (P 1/2) States, F=1 ### ### ###
+EXCITED_F1_Mplus1:3.300E-07:                      #
+EXCITED_F1_M0:1.435E-09:                          #
+EXCITED_F1_Mminus1:5.810E-10:                     #
+### ### ### ### Ground (S 1/2) States, F=2  ### ### ###
+GROUND_F2_Mplus2:9.850E-01:                       # Fully stretched state for sigma+.
+GROUND_F2_Mplus1:3.106E-03:                       #
+GROUND_F2_M0:1.007E-03:                           #
+GROUND_F2_Mminus1:7.267E-06:                      #
+GROUND_F2_Mminus2:2.570E-06:                      # Fully stretched state for sigma-.
+### ### ### ### Ground (S 1/2) States, F=1  ### ### ###
+GROUND_F1_Mplus1:8.480E-03:                       #
+GROUND_F1_M0:2.052E-03:                           #
+GROUND_F1_Mminus1:1.221E-05:                      #

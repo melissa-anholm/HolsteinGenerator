@@ -1,9 +1,22 @@
+// Authors: Spencer Behling, Benjamin Fenker, and Melissa Anholm  - 2013
+
+#ifndef IsotopeValues_h
+#define IsotopeValues_h 1
+
 #include <string> 
 #include <iostream>  // cout, endl
 #include <iomanip>   // setw
+#include <sstream>
+#include <vector>
+#include <map>
+#include "fstream"   // 
 
-using std::string;
 using std::cout;
+using std::endl;
+using std::string;
+using std::vector;
+using std::map;
+
 
 class isotope_values
 {
@@ -23,9 +36,9 @@ public:
 		{ value = value_; };
 	void Print() 
 	{
-		std::cout << std::setw(30) << name;
-		std::cout << std::setw(13) << value << std::setw(12) << uncertainty;
-		std::cout << "    " << message << std::endl;
+		cout << std::setw(30) << name;
+		cout << std::setw(13) << value << std::setw(12) << uncertainty;
+		cout << "    " << message << endl;
 	};
 	
 private:
@@ -34,3 +47,19 @@ private:
 	string message;
 	string name;  // added by MJA.  It probably isn't necessary.  the info is elsewhere.
 };
+
+
+namespace SS
+{
+	// below:  does this one *ever* get used?! ...yes, yes it does.
+	std::vector<std::string> & split(const std::string &s, const char &delim, std::vector<std::string> &elems);
+	
+	// below:  this one is used.
+	std::vector<std::string> split(const std::string &s, const char &delim);
+	
+	map<string, isotope_values * > loadup_textfile(string paramfilename);
+	
+}
+
+
+#endif

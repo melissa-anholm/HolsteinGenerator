@@ -9,7 +9,8 @@
 
 #include "HolsteinVars.hh"
 #include "K37SublevelPopulations.hh"
-#include "SplitString.hh"
+#include "IsotopeValues.hh"
+//#include "SplitString.hh"
 
 
 using std::cout;
@@ -54,9 +55,11 @@ HolsteinVars::HolsteinVars():
 	b(0), d(0), e(0), f(0), g(0), h(0), 
 	j2(0), j3(0), 
 	sigma_M1(0), sigma_M2(0),
-	paramfilename(string("K_37_INPUT.txt"))
+	nuclear_filename(string("K_37_INPUT.txt"))
+//	atomic_filename(string("K_37_POPULATIONS_INPUT.txt"))
 {
-	loadup_textfile();                    // reads the text file into 'theInputs'.
+	theInputs = SS::loadup_textfile(nuclear_filename);    // reads the nuclear text file into 'theInputs'.
+//	loadup_textfile(atomic_filename);     // reads the atomic text file into 'theInputs'.
 	initialize_physics_parameters();      //
 	initialize_spinfuncs(I_spin, I_spin); // sets u and v, and epsilon_uv and etc.
 	
@@ -388,7 +391,10 @@ bool HolsteinVars::initialize_spinfuncs(double u_, double v_)
 	return true;
 }
 
-bool HolsteinVars::loadup_textfile()
+/*
+//bool HolsteinVars::loadup_textfile(string paramfilename)
+map<string, isotope_values * > HolsteinVars::loadup_textfile(string paramfilename)
+map<string, isotope_values * > SS::loadup_textfile(string paramfilename)
 // puts the contents of the text file into 'theInputs'.
 {
 	bool verbose = false;
@@ -481,8 +487,11 @@ bool HolsteinVars::loadup_textfile()
 	}
 	inputfile.close();	
 	// check if we have all of the parameters we need?
-	return true;
+	//return true;
+	return theInputs;
 }
+*/
+
 double HolsteinVars::FindValue(const std::string &key_) const
 {
 	auto findIt = theInputs.find(key_);
