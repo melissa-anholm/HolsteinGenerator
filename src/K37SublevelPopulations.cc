@@ -8,9 +8,8 @@
 
 #include "G4UIsession.hh"  // G4cout, G4endl;
 
-//#include "IsotopeValues.hh"
-
 #include "K37SublevelPopulations.hh"
+#include "K37Config.hh"
 
 using std::cout;
 using std::endl;
@@ -23,9 +22,12 @@ K37SublevelPopulations::K37SublevelPopulations()
 
 K37SublevelPopulations::K37SublevelPopulations(int the_sigma) :  // fully polarized up or down.
 	allowed_mismatch(1.0e-15),  // 1e-15 works well for Wisely.
-	op_power_ratio(1.7557),     // 1.7557 +/- 0.2898 for 2014, from laser power measurements.  
-	atomic_filename(string("K_37_POPULATIONS_INPUT.txt"))
+	op_power_ratio(1.7557)//,     // 1.7557 +/- 0.2898 for 2014, from laser power measurements.  
+//	atomic_filename(string("K_37_POPULATIONS_INPUT.txt"))
 {
+	G4String configPath = CONFIGURATION_DIRECTORY;
+	atomic_filename = configPath + "K_37_POPULATIONS_INPUT.txt";
+
 	excited_F1.push_back(0);
 	excited_F1.push_back(0);
 	excited_F1.push_back(0);
@@ -710,7 +712,7 @@ void K37SublevelPopulations::AdjustPolarization(double new_Pol)
 	P_other_old     = old_Pol - P_stretched_old; // all positive because of how we've defined other things.  sigma+.
 	//
 	pop_other_old = 1.0 - pop_stretched_old;
-	double alpha_ratio = pop_other_old / P_other_old;
+//	double alpha_ratio = pop_other_old / P_other_old;
 	
 	double pop_stretched_new, pop_other_new;
 	pop_stretched_new = (pop_other_old*abs(new_Pol) - P_other_old) / (pop_other_old - P_other_old);
@@ -806,6 +808,144 @@ void K37SublevelPopulations::AdjustPolarization(double new_Pol)
 	renormalize(false);
 
 }
+
+
+// ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // 
+// ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // 
+// ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // 
+// The stuff below is just all copied from HolsteinVars.  It's a very inelegant solution.  
+// Originally, Spencer probably implemented this code in a much nicer way.  Sorry, Spencer.
+// ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // 
+/*
+bool K37SublevelPopulations::loadup_textfile(string paramfilename)
+// puts the contents of the text file into 'theInputs'.
+{
+	bool verbose = false;
+	string isotopeName;
+	
+	std::fstream inputfile(paramfilename.c_str(), std::fstream::in);
+	if(verbose)
+	{
+		if(inputfile) { cout << "paramfilename = " << paramfilename << " -- file opened." << endl; }
+		else          { cout << "Could not open file:  " << paramfilename << endl; }
+	}
+	if(inputfile)
+	{
+		std::string line;
+		std::vector<std::string> parsed;
+		int lineNumber = 1;
+		while(getline( inputfile, line ))
+		{
+			// don't even bother if the line starts with a "#".
+			if( line.find_first_of("#") == 0 )
+			{
+				if(verbose) { cout << "*Line " << lineNumber << " -- skipping" << endl; }
+				continue;
+			}
+			parsed = SS::split(line, ':');
+			switch(parsed.size())
+			{
+				case 1:
+				{
+					cout << "Problem with input line: " << lineNumber << endl;
+					break;
+				}
+				case 2:
+				{
+					isotopeName = parsed[0];
+					if(verbose)
+					{
+						cout << "Case 2:" << endl;
+						cout << "parsed[0] = " << parsed[0] << endl;
+					}
+					break;
+				}
+				case 3:
+				{
+					if (verbose)
+					{
+						cout << "before erasing, parsed[2] = " << parsed[2] << endl;
+					}
+					parsed[2].erase(parsed[2].begin(), parsed[2].begin() + parsed[2].find_first_of("#"));
+					theInputs[parsed[0]]= new isotope_values(std::stod(parsed[1]), 0, parsed[2], parsed[0]);
+					// in Case 3, parsed[0] is the name, parsed[1] is the value, 
+					//  	0 is the (implied) uncertainty, and parsed[2] is the comment.
+					if(verbose)
+					{
+						cout << "Case 3:" << "\t";
+						cout << "parsed[0] = " << parsed[0] << endl;
+						cout << "\tparsed[1] = " << parsed[1] << "\tparsed[2] = " << parsed[2];
+						cout << endl;
+					}
+					break;
+				}
+				case 4:
+				{
+					parsed[3].erase(parsed[3].begin(), parsed[3].begin() + parsed[3].find_first_of("#"));
+					theInputs[parsed[0]]= new isotope_values( std::stod(parsed[1]), std::stod(parsed[2]), parsed[3], parsed[0]);
+					// In case 4, parsed[0] is the name, parsed[1] is the value, 
+					//  	parsed[2] is the uncertainty, and parsed[3] is the comment.
+					if(verbose)
+					{
+						cout << "Case 4:" << "\t";
+						cout << "parsed[0] = " << parsed[0] << endl;
+						cout << "\tparsed[1] = " << parsed[1] << "\tparsed[2] = " << parsed[2] << "\tparsed[3] = " << parsed[3];
+						cout << endl;
+					}
+					break;
+				}
+				default:
+				{
+					cout << "Problem with input line: " << lineNumber << endl;
+					break;
+				}
+			}
+			parsed.clear();
+			++lineNumber;
+		}
+	}
+	else
+	{
+		std::cerr << "File: " << paramfilename << " could not be opened." << std::endl;
+		assert(0);
+	}
+	inputfile.close();	
+	// check if we have all of the parameters we need?
+	return true;
+}
+*/
+double K37SublevelPopulations::FindValue(const std::string &key_) const
+{
+	auto findIt = theInputs.find(key_);
+	if(findIt != theInputs.end()) { return findIt->second->GetValue(); }
+	else 
+	{ 
+		cout << "* Couldn't find entry for " << key_ << " (value)" << endl;
+		assert(0);
+		return 0; 
+	}
+}
+double K37SublevelPopulations::FindUncertainty(const std::string &key_) const
+{
+	auto findIt = theInputs.find(key_);
+	
+	if(findIt != theInputs.end()) { return findIt->second->GetUncertainty(); }
+	else 
+	{
+		cout << "* Couldn't find entry for " << key_ << " (uncertainty)" << endl;
+		assert(0);  // kill.
+		return 0;
+	}
+}
+void K37SublevelPopulations::print_isotope_values()
+// for debugging.  Only for values loaded from the file.
+{
+	for (auto themap : theInputs) 
+		{ themap.second -> Print(); }
+	return;
+}
+
+
 
 
 /*
@@ -958,153 +1098,119 @@ void K37SublevelPopulations::Setup_FromPolarizationAlignment(double pol, double 
 // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // 
 */
 
-
-
-// ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // 
-// ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // 
-// ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // 
-// The stuff below is just all copied from HolsteinVars.  It's a very inelegant solution.  
-// Originally, Spencer probably implemented this code in a much nicer way.  Sorry, Spencer.
-// ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // 
 /*
-bool K37SublevelPopulations::loadup_textfile(string paramfilename)
-// puts the contents of the text file into 'theInputs'.
+// ------------------------------------------------------------- //
+void K37SublevelPopulations::Setup_FromPolarizationOnly(double pol)
 {
-	bool verbose = false;
-	string isotopeName;
-	
-	std::fstream inputfile(paramfilename.c_str(), std::fstream::in);
-	if(verbose)
-	{
-		if(inputfile) { cout << "paramfilename = " << paramfilename << " -- file opened." << endl; }
-		else          { cout << "Could not open file:  " << paramfilename << endl; }
-	}
-	if(inputfile)
-	{
-		std::string line;
-		std::vector<std::string> parsed;
-		int lineNumber = 1;
-		while(getline( inputfile, line ))
-		{
-			// don't even bother if the line starts with a "#".
-			if( line.find_first_of("#") == 0 )
-			{
-				if(verbose) { cout << "*Line " << lineNumber << " -- skipping" << endl; }
-				continue;
-			}
-			parsed = SS::split(line, ':');
-			switch(parsed.size())
-			{
-				case 1:
-				{
-					cout << "Problem with input line: " << lineNumber << endl;
-					break;
-				}
-				case 2:
-				{
-					isotopeName = parsed[0];
-					if(verbose)
-					{
-						cout << "Case 2:" << endl;
-						cout << "parsed[0] = " << parsed[0] << endl;
-					}
-					break;
-				}
-				case 3:
-				{
-					if (verbose)
-					{
-						cout << "before erasing, parsed[2] = " << parsed[2] << endl;
-					}
-					parsed[2].erase(parsed[2].begin(), parsed[2].begin() + parsed[2].find_first_of("#"));
-					theInputs[parsed[0]]= new isotope_values(std::stod(parsed[1]), 0, parsed[2], parsed[0]);
-					// in Case 3, parsed[0] is the name, parsed[1] is the value, 
-					//  	0 is the (implied) uncertainty, and parsed[2] is the comment.
-					if(verbose)
-					{
-						cout << "Case 3:" << "\t";
-						cout << "parsed[0] = " << parsed[0] << endl;
-						cout << "\tparsed[1] = " << parsed[1] << "\tparsed[2] = " << parsed[2];
-						cout << endl;
-					}
-					break;
-				}
-				case 4:
-				{
-					parsed[3].erase(parsed[3].begin(), parsed[3].begin() + parsed[3].find_first_of("#"));
-					theInputs[parsed[0]]= new isotope_values( std::stod(parsed[1]), std::stod(parsed[2]), parsed[3], parsed[0]);
-					// In case 4, parsed[0] is the name, parsed[1] is the value, 
-					//  	parsed[2] is the uncertainty, and parsed[3] is the comment.
-					if(verbose)
-					{
-						cout << "Case 4:" << "\t";
-						cout << "parsed[0] = " << parsed[0] << endl;
-						cout << "\tparsed[1] = " << parsed[1] << "\tparsed[2] = " << parsed[2] << "\tparsed[3] = " << parsed[3];
-						cout << endl;
-					}
-					break;
-				}
-				default:
-				{
-					cout << "Problem with input line: " << lineNumber << endl;
-					break;
-				}
-			}
-			parsed.clear();
-			++lineNumber;
-		}
-	}
-	else
-	{
-		std::cerr << "File: " << paramfilename << " could not be opened." << std::endl;
-		assert(0);
-	}
-	inputfile.close();	
-	// check if we have all of the parameters we need?
-	return true;
+	SetPolarizationOnly(pol);
+	MakeAlignmentFromPolarization();
+	MakeOctopoleFromPolarizationAlignment();
+	return;
 }
-*/
-double K37SublevelPopulations::FindValue(const std::string &key_) const
+void K37SublevelPopulations::Setup_FromPolarizationAlignment(double pol, double ali)
 {
-	auto findIt = theInputs.find(key_);
-	if(findIt != theInputs.end()) { return findIt->second->GetValue(); }
-	else 
-	{ 
-		cout << "* Couldn't find entry for " << key_ << " (value)" << endl;
-		assert(0);
-		return 0; 
-	}
+	SetPolarizationOnly(pol);
+	SetAlignmentOnly(ali);
+	MakeOctopoleFromPolarizationAlignment();
+	return;
 }
-double K37SublevelPopulations::FindUncertainty(const std::string &key_) const
+void K37SublevelPopulations::Setup_FromPolarizationAlignmentOctopole(double pol, double ali, double oct)  // this method is stupid in that it mixes conventions.  Probably just avoid using it.
 {
-	auto findIt = theInputs.find(key_);
-	
-	if(findIt != theInputs.end()) { return findIt->second->GetUncertainty(); }
-	else 
-	{
-		cout << "* Couldn't find entry for " << key_ << " (uncertainty)" << endl;
-		assert(0);  // kill.
-		return 0;
-	}
+	SetPolarizationOnly(pol);
+	SetAlignmentOnly(ali);
+	SetOctopoleOnly(oct);
+	return;
 }
-void K37SublevelPopulations::print_isotope_values()
-// for debugging.  Only for values loaded from the file.
+void K37SublevelPopulations::Setup_FromDipoleQuadrupoleOctopole(double dip, double quad, double oct)
 {
-	for (auto themap : theInputs) 
-		{ themap.second -> Print(); }
+//	G4cout << "WARNING:  It is not yet supported to set up multipole moments directly." << G4endl;
+//	Set_Mz_Only();
+//	Set_Mz2_Only();
+	Set_Mz3_Only(oct);	
 	return;
 }
 
 
+void K37SublevelPopulations::MakeAlignmentFromPolarization()  // doesn't work yet!!
+{
+	G4cout << "*** WARNING:  Setting up the alignment parameter from only polarization information is not yet supported." << G4endl;
+	// T = 2.0-3.0*P ;
+	SetAlignmentOnly(1.0);
+	return;
+}
+void K37SublevelPopulations::MakeOctopoleFromPolarizationAlignment()
+{
+	G4cout << "*** WARNING:  Setting up the octopole moment from only polarization and alignment information is not yet supported." << G4endl;
+//	SetOctopoleOnly(1.0);  what even *is* a "default" octopole moment??
+	return;
+}
 
 
+// ------------------------------------------------------------- //
+void K37SublevelPopulations::SetPolarizationOnly(double pol) // Must be private!
+{
+	G4cout << "*** WARNING:  Setting up polarization directly is not yet supported." << G4endl;
+//	
+//	if (fabs(pol) <= 1.0) 
+//	{
+//		polarization_ = pol;
+//		G4cout << "Polarization set to " << pol << G4endl;
+//	} 
+//	else 
+//	{
+//		G4cout << "WARNING: Polarization " << pol
+//			   << " not in allowed range.  No changes made." << G4endl;
+//	}
+//	
+}
+void K37SublevelPopulations::SetAlignmentOnly(double ali) // Must be private!
+{
+	G4cout << "*** WARNING:  Setting up alignment directly is not yet supported." << G4endl;
+	
+//	if (ali <= 1.0 && ali >= 0.0) 
+//	{
+//		alignment_ = ali;
+//		G4cout << "Alignment set to " << ali << G4endl;
+//	} 
+//	else if (ali < 0.0 && ali >= -1.0) 
+//	{
+//		ali = fabs(ali);
+//		G4cout << "WARNING: Alignment must be positive (for both polarization states)";
+//		G4cout << G4endl;
+//		G4cout << "Note that this sign convention is opposite that in JTW 1957 and that";
+//		G4cout << G4endl;
+//		G4cout << "this change is fully documented in the \"JTWEvent.cc\" source file";
+//		G4cout << G4endl;
+//		G4cout << "*********************************************************" << G4endl;
+//		G4cout << "   Setting alignment to T = +" << ali << G4endl;
+//		G4cout << "*********************************************************" << G4endl;
+//		alignment_ = ali;
+//	} 
+//	else 
+//	{
+//		G4cout << "WARNING: Alignment " << ali
+//			   << " not in allowed range.  No changes made." << G4endl;
+//	}
+}
+void K37SublevelPopulations::SetOctopoleOnly(double oct)  // Must be private!
+{
+	G4cout << "*** WARNING:  Octopole moment is not yet supported." << G4endl;
+	return;
+}
 
-
-
-
-
-
-
-
-
-
+void K37SublevelPopulations::Set_Mz_Only(double new_Mz)
+{
+	G4cout << "*** WARNING:  Setting Mz directly is not yet supported." << G4endl;
+	return;
+}
+void K37SublevelPopulations::Set_Mz2_Only(double new_Mz2)
+{
+	G4cout << "*** WARNING:  Setting Mz2 directly is not yet supported." << G4endl;
+	return;
+}
+void K37SublevelPopulations::Set_Mz3_Only(double new_Mz3)
+{
+	G4cout << "*** WARNING:  Setting Mz3 directly is not yet supported." << G4endl;
+	return;
+}
+*/

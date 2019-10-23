@@ -1,0 +1,10 @@
+#ifndef K37CONFIG_H
+#define K37CONFIG_H
+  
+//#cmakedefine CONFIGFILES_ @CONFIGFILES_@
+
+#define CONFIGURATION_DIRECTORY "@CONFIGURATION_DIRECTORY@"
+#cmakedefine OUTDIR @OUTDIR@
+
+#endif // K37CONFIG_H
+

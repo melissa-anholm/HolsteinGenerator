@@ -48,6 +48,14 @@ SET(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-g -O2 -pthread -m64 -std=c++11")
 
 #INCLUDE_DIRECTORIES(include)
 
+SET (CONFIGURATION_DIRECTORY "${PROJECT_BINARY_DIR}/")  
+SET (OUTDIR "\"${PROJECT_SOURCE_DIR}/Output\"")  # no trailing slash?
+configure_file (
+	"${PROJECT_SOURCE_DIR}/include/K37Config.hh.in"
+	"${PROJECT_SOURCE_DIR}/include/K37Config.hh"
+	)
+
+
 ADD_SUBDIRECTORY(src)
 ADD_EXECUTABLE(holstein TheHolstein.cpp)
   
