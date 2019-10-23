@@ -40,11 +40,13 @@ public: // functions that already lived in G4, and are included here for backwar
 	double GetPolarization()  { return this->get_P(); }
 	double GetAlignment()     { return this->get_T(); }
 	
-	void renormalize();
+	void renormalize(bool verbose=false);
+	
+	void setup_sigma();
 	void set_sigma_plus();
 	void set_sigma_minus();
 	int get_sigma();  // checks both physical- and recorded polarization directions.  Might break for M_z=0.
-
+	
 	void AdjustPolarization(double);  // not implemented yet!
 	
 private:
@@ -57,9 +59,8 @@ private:
 	void print_isotope_values();  // for debugging.  prints from 'theInputs'.
 	//
 	
-	bool is_sigma_plus;
-	void swap_states();  // swap *only* the states, not the 'sigma' flag.  This MUST BE PRIVATE!
-	
+
+private:	
 	bool sanity(int F, int M_F);   // Checks that F==1 || F==2, and |M_F| <= F.
 	double get_scale(string, int, int);  // how to scale populations to get M_z, M_z2, M_z3.
 	
@@ -71,16 +72,25 @@ private:
 	
 
 public:
-	//	std::map<std::string, isotope_values * > theInputs;
-	void Setup_Pops_From_InputsMap( map<string, isotope_values * > theInputs);
+void Setup_Pops_From_InputsMap( map<string, isotope_values * > theInputs);
 	
+	/*
+	// failed functions:
+public:
 	void Setup_FromPolarizationOnly(double pol);  // use measured laser powers for OP:  <normal/repumper> to estimate NG2/NG1.  alignment comes out *almost* within 1 sigma experimental uncertainty.  
 	void Setup_FromPolarizationAlignment(double pol, double ali);
+private:
+	void killall_pops();  // must be private!!
+	void SetPops_Ns_NG1_NG2(double Ns, double NG1, double NG2, int sigma);
+	*/
 	
 	//
 private:
 	double allowed_mismatch;
 	double op_power_ratio;  // <P_op/P_re> = <NG2/NG2>, from laser power info with our toy model. 1.7557 +/- 0.2898 in 2014.
+	bool is_sigma_plus;
+	void swap_states();  // swap *only* the states, not the 'sigma' flag.  This MUST BE PRIVATE!
+	
 	
 	// things that are in the G4 code version of this file, but that aren't actually implemented fully yet.  They're just here for reading...
 	/*
@@ -112,9 +122,6 @@ public:
 	void MakeOctopoleFromPolarizationAlignment();
 	*/
 	
-private:
-	void killall_pops();  // must be private!!
-	void SetPops_Ns_NG1_NG2(double Ns, double NG1, double NG2, int sigma);
 };
 
 

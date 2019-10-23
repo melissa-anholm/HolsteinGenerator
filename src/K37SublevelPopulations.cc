@@ -97,6 +97,8 @@ void K37SublevelPopulations::Setup_Pops_From_InputsMap( /*map<string, isotope_va
 	
 	// ok, now what?  check if it's normalized?
 	renormalize();
+	
+	// check if it has the right sigma?
 }
 
 K37SublevelPopulations::~K37SublevelPopulations()
@@ -105,9 +107,9 @@ K37SublevelPopulations::~K37SublevelPopulations()
 }
 
 // ------------------------------------------------------------- //
-void K37SublevelPopulations::swap_states()
+void K37SublevelPopulations::swap_states() // PRIVATE!  swap populations, but not the sigma flag.
 {
-	bool verbose = true;
+	bool verbose = false;
 	
 	// clone the 4 vectors...
 	vector<double> tmp_eF1(excited_F1);
@@ -139,10 +141,10 @@ void K37SublevelPopulations::swap_states()
 int K37SublevelPopulations::get_sigma() // returns +/- 1 (or 0 if it's broken)
 {
 	bool physics_sigma_plus;
-	if(get_Mz()>=0) { physics_sigma_plus=true; }
-	else{ physics_sigma_plus=false; }
+	if(get_Mz()>=0) { physics_sigma_plus=true;  }
+	else            { physics_sigma_plus=false; }
 	
-	if(is_sigma_plus && physics_sigma_plus)        { return 1.0; }
+	if(is_sigma_plus && physics_sigma_plus)        { return  1.0; }
 	else if(!is_sigma_plus && !physics_sigma_plus) { return -1.0; }
 	else
 	{
@@ -154,18 +156,24 @@ int K37SublevelPopulations::get_sigma() // returns +/- 1 (or 0 if it's broken)
 		return 0;
 	}
 }
+void K37SublevelPopulations::setup_sigma() // sets is_sigma_plus from polarization value.
+{
+	double pol = get_P();
+	if(pol >= 0) { is_sigma_plus = true;  }
+	else         { is_sigma_plus = false; }
+}
 
-void K37SublevelPopulations::set_sigma_plus()
+void K37SublevelPopulations::set_sigma_plus() // calls functions to swap populations, *and* adjusts the is_sigma_plus flag.
 {
 	bool verbose = true;
-	if(get_sigma()>0) 
+	if(get_sigma()>0) // sigma +
 	{ 
 		if(verbose)
 		{
 			cout << "Called set_sigma_plus(), but there's nothing to be done." << endl;
 		}
 	} // don't do anything!
-	else if(get_sigma()<0)
+	else if(get_sigma()<0) // sigma -
 	{
 		if(verbose)
 		{
@@ -178,6 +186,7 @@ void K37SublevelPopulations::set_sigma_plus()
 	{
 		cout << "Welp.  That's bad." << endl;
 		assert(0);
+		return;
 	}
 }
 void K37SublevelPopulations::set_sigma_minus()
@@ -489,9 +498,9 @@ double K37SublevelPopulations::get_scale(string the_parameter, int F, int M_F)
 	}
 	return the_scale;
 }
-void K37SublevelPopulations::renormalize()
+void K37SublevelPopulations::renormalize(bool verbose)
 {
-	bool verbose = false;
+//	bool verbose = false;
 	bool do_the_thing = false;
 	double running_sum = 0.0;
 	
@@ -660,15 +669,146 @@ void K37SublevelPopulations::print_moments()
 	return;
 }
 // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // 
-/*
-void K37SublevelPopulations::AdjustPolarization(double new_pol)
-{
-	double old_pol = get_P();
-	
-	double adjust_stretched_state;
-}
-*/
 
+void K37SublevelPopulations::AdjustPolarization(double new_Pol)
+{
+	bool verbose=true;
+	if(verbose)
+	{
+		cout << "Adjusting polarization from P_old=" << get_P() << " to P_new=" << new_Pol << endl;
+	}
+	
+	// check normalization first?
+	renormalize();
+	
+	// check that new_pol and old_pol even have the same sigma??
+	bool new_is_sigma_plus;
+	if(new_Pol >= 0) { new_is_sigma_plus = true;  }
+	else             { new_is_sigma_plus = false; }
+	if(new_is_sigma_plus != is_sigma_plus) // if they're not the same sigma, we'll just swap the atomic states around now.
+	{
+		swap_states();
+		setup_sigma();  // sets is_sigma_plus to its new physically correct value.
+	}
+	if(new_is_sigma_plus != is_sigma_plus)
+	{
+		cout << "Well fuck, you just broke mathematical logic." << endl;
+		assert(0);
+		return;
+	}
+	
+	// OK, the sigma is the same now, in the correct "new" direction.  
+	double old_Pol = abs(get_P());
+	double P_stretched_old, P_other_old;
+	
+	double pop_stretched_old, pop_other_old;
+	if(is_sigma_plus) { pop_stretched_old = get_pop("ground", 2, 2);  }
+	else              { pop_stretched_old = get_pop("ground", 2, -2); }
+	
+	// for this math, we assume everything is sigma plus, then put the signs back in at the end.
+	P_stretched_old = pop_stretched_old;         // sigma +
+	P_other_old     = old_Pol - P_stretched_old; // all positive because of how we've defined other things.  sigma+.
+	//
+	pop_other_old = 1.0 - pop_stretched_old;
+	double alpha_ratio = pop_other_old / P_other_old;
+	
+	double pop_stretched_new, pop_other_new;
+	pop_stretched_new = (pop_other_old*abs(new_Pol) - P_other_old) / (pop_other_old - P_other_old);
+	pop_other_new = 1.0 - pop_stretched_new;
+	
+	double rescale_other = pop_other_new / pop_other_old;
+	if(rescale_other <= 0) 
+	{ 
+		cout << "This is bad.  Very bad." << endl; 
+		assert(0);
+		return;
+	}
+	
+//	bool verbose=false;
+//	if(verbose)
+//	{
+//		cout << "old_Pol:  " << old_Pol << ";\tnew_Pol:  " << new_Pol << endl;
+//		cout << "rescale_other   = " << rescale_other << endl;
+//		cout << "1/rescale_other = " << 1.0/rescale_other << endl;
+//		cout << "pop_stretched_old = " << pop_stretched_old << ";\tpop_other_old = " << pop_other_old << endl;
+//		cout << "pop_stretched_old + pop_other_old = " << pop_stretched_old + pop_other_old << endl;
+//		cout << "pop_stretched_new = " << pop_stretched_new << ";\tpop_other_new = " << pop_other_new << endl;
+//		cout << "pop_stretched_new + pop_other_new = " << pop_stretched_new + pop_other_new << endl;
+//	}
+	
+	
+	// Now we rescale:
+	int F, MF;
+	double new_tmp_pop;
+	
+	F=2; 
+	for(MF=2; MF>=-2; MF--)
+	{
+		new_tmp_pop = rescale_other*get_pop("excited", F, MF);
+		set_pop("excited", F, MF, new_tmp_pop );
+	}
+	//
+	F=2; MF=1;
+	new_tmp_pop = rescale_other*get_pop("ground", F, MF);
+	set_pop("ground", F, MF, new_tmp_pop );
+	F=2; MF=0;
+	new_tmp_pop = rescale_other*get_pop("ground", F, MF);
+	set_pop("ground", F, MF, new_tmp_pop );
+	F=2; MF=-1;
+	new_tmp_pop = rescale_other*get_pop("ground", F, MF);
+	set_pop("ground", F, MF, new_tmp_pop );
+	
+	if(is_sigma_plus)
+	{
+		F=2; MF=2;
+	//	new_tmp_pop = rescale_other*get_pop("ground", F, MF);
+		new_tmp_pop = pop_stretched_new;
+		set_pop("ground", F, MF, new_tmp_pop );
+		
+		F=2; MF=-2;  // sigma+.  treat this state like the others.
+		new_tmp_pop = rescale_other*get_pop("ground", F, MF);
+		set_pop("ground", F, MF, new_tmp_pop );
+	}
+	else
+	{
+		F=2; MF=2;  // sigma-.  treat this state like the others.
+		new_tmp_pop = rescale_other*get_pop("ground", F, MF);
+		set_pop("ground", F, MF, new_tmp_pop );
+		
+		F=2; MF=-2;
+	//	new_tmp_pop = rescale_other*get_pop("ground", F, MF);
+		new_tmp_pop = pop_stretched_new;
+		set_pop("ground", F, MF, new_tmp_pop );
+	}
+	//
+	F=1; 
+	for(MF=1; MF>=-1; MF--)
+	{
+		new_tmp_pop = rescale_other*get_pop("excited", F, MF);
+		set_pop("excited", F, MF, new_tmp_pop );
+	}
+	F=1; 
+	for(MF=1; MF>=-1; MF--)
+	{
+		new_tmp_pop = rescale_other*get_pop("ground", F, MF);
+		set_pop("ground", F, MF, new_tmp_pop );
+	}
+
+//	if(verbose)
+//	{
+//		cout << "Populations are rescaled according to polarization, but haven't been normalized again yet..." << endl;
+//		print_pops();
+//		print_moments();
+//		cout << "....Renormalizing now." << endl;
+//	}
+	
+	// Still normalized?
+	renormalize(false);
+
+}
+
+
+/*
 // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // 
 // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // 
 void K37SublevelPopulations::killall_pops() // when this gets done, there is no population. it's unphysical.  must be private.
@@ -774,7 +914,6 @@ void K37SublevelPopulations::Setup_FromPolarizationOnly(double pol)
 	//
 	return;
 }
-// ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // 
 void K37SublevelPopulations::Setup_FromPolarizationAlignment(double pol, double ali)
 {
 	bool verbose = true;
@@ -816,7 +955,8 @@ void K37SublevelPopulations::Setup_FromPolarizationAlignment(double pol, double 
 	//
 	return;
 }
-
+// ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // 
+*/
 
 
 

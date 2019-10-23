@@ -57,12 +57,30 @@ int main(int argc, char *argv[])
 	
 	K37SublevelPopulations * thepops     = new K37SublevelPopulations(1);
 	
-	thepops -> print_pops();
-	thepops -> renormalize();
+//	thepops -> print_pops();
+//	thepops -> renormalize();
+//	thepops -> print_pops();
+//	thepops -> print_moments();
+	
+//	thepops -> AdjustPolarization(0.9913);  // expect T = -0.9770±0.0017 (+) or T = -0.9761±0.0021 (-).
+	
+	thepops -> AdjustPolarization(0.9913);
 	thepops -> print_pops();
 	thepops -> print_moments();
+	thepops -> AdjustPolarization(-0.80);
+//	thepops -> print_pops();
+//	thepops -> print_moments();
+	thepops -> AdjustPolarization(0.9913);
+	thepops -> print_pops();
+	thepops -> print_moments();
+
+//	thepops -> AdjustPolarization(0.95);
+//	thepops -> print_pops();
+//	thepops -> print_moments();
+
+//	thepops -> AdjustPolarization(0.9);
 	
-	
+	/*
 	HolsteinVars           * pointervars = new HolsteinVars();
 	HolsteinDecay          * the_decay   = new HolsteinDecay(pointervars, thepops);
 	
@@ -71,7 +89,7 @@ int main(int argc, char *argv[])
 //	the_decay->set_use_cone(false);
 	the_decay->set_conecostheta( 0.90 );
 	cout << "get_conecostheta() = " << the_decay->get_conecostheta() << endl;
-	
+	*/
 	
 	
 	/*
