@@ -30,6 +30,7 @@ void HolsteinDecay::SetAcceptanceMode(string the_mode)
 	return;
 }
 
+/*
 HolsteinDecay::HolsteinDecay() // broken?
 {
 	cout << "Initializing HolsteinDecay without input parameters.  " << endl;
@@ -39,18 +40,20 @@ HolsteinDecay::HolsteinDecay() // broken?
 	assert(0);
 	
 	//
-	/*
-	HolsteinVars * HV           = new HolsteinVars();
-	K37SublevelPopulations * pops = new K37SublevelPopulations(1);
-	cout << "things are created." << endl;
-	HolsteinDecay( (HolsteinVars*)HV, (K37SublevelPopulations*)pops );
-	*/
+//	
+//	HolsteinVars * HV           = new HolsteinVars();
+//	K37SublevelPopulations * pops = new K37SublevelPopulations(1);
+//	cout << "things are created." << endl;
+//	HolsteinDecay( (HolsteinVars*)HV, (K37SublevelPopulations*)pops );
+//	
 	Params   = new HolsteinVars();
 	the_pops = new K37SublevelPopulations(1);
 	HolsteinDecay( (HolsteinVars*)Params, (K37SublevelPopulations*)the_pops );
 }
+*/
 
-HolsteinDecay::HolsteinDecay(HolsteinVars * HV, K37SublevelPopulations * pops):
+//HolsteinDecay::HolsteinDecay(HolsteinVars * HV, K37SublevelPopulations * pops):
+HolsteinDecay::HolsteinDecay(HolsteinVars * HV, K37AtomicSetup * atomic_setup):
 	// nuclear parameters:
 	delta_M1(0), delta_M2(0), delta_deltaC(0), 
 	delta_mu_parent(0), delta_mu_daughter(0), delta_quad_parent(0), delta_quad_daughter(0), 
@@ -59,6 +62,8 @@ HolsteinDecay::HolsteinDecay(HolsteinVars * HV, K37SublevelPopulations * pops):
 	use_cone(false), cone_costheta(0),
 	runfast(true), prob_max(0.2)
 {
+//	cout << "Called HolsteinDecay::HolsteinDecay(HolsteinVars * HV, K37AtomicSetup * atomic_setup)" << endl;
+	
 	// Nuclear:
 	Params = HV;
 	
@@ -125,10 +130,17 @@ HolsteinDecay::HolsteinDecay(HolsteinVars * HV, K37SublevelPopulations * pops):
 	
 	// Atomic:
 	// by default, the_pops is set to be fully polarized sigma+.
-	the_pops = pops;
-	Mz  = the_pops->get_Mz();   // 1.5
-	Mz2 = the_pops->get_Mz2();  // 2.25
-	Mz3 = the_pops->get_Mz3();  // 3.375
+	//the_pops = pops;
+//	cout << "HolsteinDecay is looking for the pops now." << endl;
+	the_atomic_setup = atomic_setup;
+//	the_pops = atomic_setup->GetPops();
+//	cout << "I guess we've found the pops?" << endl;
+	
+	Mz  = the_atomic_setup->GetPops()->get_Mz();   // 1.5
+	Mz2 = the_atomic_setup->GetPops()->get_Mz2();  // 2.25
+	Mz3 = the_atomic_setup->GetPops()->get_Mz3();  // 3.375
+	
+//	cout << "Found the M^x expectation values too.  Initializing lambdafuncs now." << endl;
 	
 	initialize_lambdafuncs();
 	
@@ -415,9 +427,9 @@ void HolsteinDecay::randomize_atomic(bool doit)
 	}
 	
 	// Do this step whether I randomize atomic params or not, because I might have adjusted the polarization before this event.
-	Mz  = this->the_pops->get_Mz();
-	Mz2 = this->the_pops->get_Mz2();
-	Mz3 = this->the_pops->get_Mz3();
+	Mz  = the_atomic_setup->GetPops()->get_Mz();
+	Mz2 = the_atomic_setup->GetPops()->get_Mz2();
+	Mz3 = the_atomic_setup->GetPops()->get_Mz3();
 	
 	initialize_lambdafuncs();  // this depends on the sublevel populations, which should be set up above.
 	return;
@@ -631,8 +643,6 @@ void HolsteinDecay::randomize_direction() // saves initial_momentum and initial_
 	bool verbose=false;
 	
 	// pick E
-//	double E = G4RandFlat::shoot(m_e, (E0/MeV));
-//	Ebeta = E;    // set Ebeta *here*.
 	Ebeta = G4RandFlat::shoot(m_e/MeV, E0/MeV)*MeV;  // m_e and E0 have to be in the same units.  also, in units of MeV.
 	
 	// pick costheta
@@ -701,8 +711,6 @@ bool HolsteinDecay::check_PDF_acceptance()  // uses initial_momentum .
 	{
 		cout << "No, this probably hasn't been initialized.  Rejected!"  << endl;
 		assert(0);
-	//	pdf_acceptance = false;
-	//	return pdf_acceptance;
 	}
 //	double prob_max = 0.2;  
 	double test_prob = G4RandFlat::shoot(0.0, prob_max);
@@ -814,7 +822,6 @@ bool HolsteinDecay::check_detector_acceptance()
 		vertical_distance_to_travel = initial_position.z()/mm - the_geometry.vdistance_center_to_dssd/mm;  // negative.
 	}
 	
-//	double time_to_travel = vertical_distance_to_travel / initial_velocity.z(); 
 	time_to_travel = vertical_distance_to_travel / initial_velocity.z(); 
 	// no negative times.
 	if(time_to_travel<=0) { cout << "Bad.  Negative times aren't allowed." << endl; assert(0); }

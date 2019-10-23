@@ -12,3 +12,4 @@ holsteinview
 build/*
 Unversioned/
 Output/
+include/K37Config.hh

@@ -15,16 +15,23 @@ using std::cout;
 using std::endl;
 
 // ------------------------------------------------------------- //
+/*
 K37SublevelPopulations::K37SublevelPopulations()
 {
-	K37SublevelPopulations(1);
+	cout << "Called K37SublevelPopulations() [without parameters!]." << endl;
+	
+	K37SublevelPopulations(1);  // this thing.  this thing is what fucks it up.
+	cout << "K37SublevelPopulations() is done creating K37SublevelPopulations(1)." << endl;
 }
+*/
 
 K37SublevelPopulations::K37SublevelPopulations(int the_sigma) :  // fully polarized up or down.
 	allowed_mismatch(1.0e-15),  // 1e-15 works well for Wisely.
 	op_power_ratio(1.7557)//,     // 1.7557 +/- 0.2898 for 2014, from laser power measurements.  
 //	atomic_filename(string("K_37_POPULATIONS_INPUT.txt"))
 {
+//	cout << "Called K37SublevelPopulations(" << the_sigma << ")." << endl;
+	
 	G4String configPath = CONFIGURATION_DIRECTORY;
 	atomic_filename = configPath + "K_37_POPULATIONS_INPUT.txt";
 
@@ -60,7 +67,10 @@ K37SublevelPopulations::K37SublevelPopulations(int the_sigma) :  // fully polari
 	// But actually, let's load population data from the text file instead. 
 	// I'll leave the above thing alone because I don't know whether my std::vectors 
 	// will be the right size otherwise.
+//	cout << "We'll setup the pops from the inputs map..." << endl;
+	
 	Setup_Pops_From_InputsMap();
+//	cout << "pops have been set up from the inputs map." << endl;
 }
 
 void K37SublevelPopulations::Setup_Pops_From_InputsMap( /*map<string, isotope_values * > theInputs*/)
@@ -75,6 +85,7 @@ void K37SublevelPopulations::Setup_Pops_From_InputsMap( /*map<string, isotope_va
 	else          { is_sigma_plus=false; }
 	
 //	set_pop(string level, int F, int M_F, double the_pop) // level=="ground" || level=="excited"
+//	cout << "ok, we're going to go set a bunch of pops now." << endl;
 	
 	set_pop("ground", 2,  2, FindValue("GROUND_F2_Mplus2") );
 	set_pop("ground", 2,  1, FindValue("GROUND_F2_Mplus1") );
@@ -98,6 +109,7 @@ void K37SublevelPopulations::Setup_Pops_From_InputsMap( /*map<string, isotope_va
 	set_pop("excited", 1, -1, FindValue("EXCITED_F1_Mminus1") );
 	
 	// ok, now what?  check if it's normalized?
+//	cout << "We'll renormalize." << endl;
 	renormalize();
 	
 	// check if it has the right sigma?
@@ -105,6 +117,7 @@ void K37SublevelPopulations::Setup_Pops_From_InputsMap( /*map<string, isotope_va
 
 K37SublevelPopulations::~K37SublevelPopulations()
 {
+//	cout << "why has this even been called??" << endl;
 	G4cout << "Deleting the sublevel populations.  Apparently." << G4endl;
 }
 
@@ -219,11 +232,12 @@ void K37SublevelPopulations::set_sigma_minus()
 
 double K37SublevelPopulations::get_Mz()
 {
+//	cout << "Called get_Mz()." << endl;
 	bool verbose=false;
+//	bool verbose = true;
 //	renormalize();
 	
 	double running_Mz = 0.0;
-	
 	double the_pop   = 0.0;
 	double the_scale = 0.0;
 
@@ -232,6 +246,8 @@ double K37SublevelPopulations::get_Mz()
 	for(int M_F=-2; M_F<=2; M_F++)
 	{
 		the_pop     = get_pop("excited", F, M_F);
+	//	cout << "get_Mz() hasn't died horribly at finding the_pop." << endl;
+	//	cout << "the_pop = " << the_pop << endl;
 		the_scale   = get_scale("M_z", F, M_F);
 		running_Mz += the_pop*the_scale;
 		//
@@ -502,7 +518,7 @@ double K37SublevelPopulations::get_scale(string the_parameter, int F, int M_F)
 }
 void K37SublevelPopulations::renormalize(bool verbose)
 {
-//	bool verbose = false;
+//	verbose = true;
 	bool do_the_thing = false;
 	double running_sum = 0.0;
 	
@@ -573,6 +589,10 @@ void K37SublevelPopulations::renormalize(bool verbose)
 		{
 			ground_F2[i] /= running_sum;
 		}
+	}
+	if(verbose)
+	{
+		cout << "We're done renormalizing." << endl;
 	}
 	return;
 }

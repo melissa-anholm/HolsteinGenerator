@@ -80,16 +80,23 @@ int main(int argc, char *argv[])
 
 //	thepops -> AdjustPolarization(0.9);
 	
-	/*
-	HolsteinVars           * pointervars = new HolsteinVars();
-	HolsteinDecay          * the_decay   = new HolsteinDecay(pointervars, thepops);
+	
+	HolsteinVars           * pointervars      = new HolsteinVars();
+//	HolsteinDecay          * the_decay        = new HolsteinDecay(pointervars, thepops);
+	
+	K37AtomicSetup         * the_atomic_setup = new K37AtomicSetup();
+	cout << "I guess the atomic setup is created.  Creating the HolsteinDecay now." << endl;
+	
+	HolsteinDecay          * the_decay        = new HolsteinDecay(pointervars, the_atomic_setup);
+	
+	cout << "I guess we've created the HolsteinDecay." << endl;
 	
 	the_decay->run_fast(true);
 	the_decay->set_use_cone(true);
 //	the_decay->set_use_cone(false);
 	the_decay->set_conecostheta( 0.90 );
 	cout << "get_conecostheta() = " << the_decay->get_conecostheta() << endl;
-	*/
+	
 	
 	
 	/*

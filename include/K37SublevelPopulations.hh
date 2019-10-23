@@ -20,8 +20,9 @@ using std::map;
 struct K37SublevelPopulations  // Spin 3/2 only!!
 {
 public:
-	K37SublevelPopulations();
-	K37SublevelPopulations(int the_sigma);  // completely polarized, so the_sigma=+/-1.
+//	K37SublevelPopulations();
+//	K37SublevelPopulations(int the_sigma);  // completely polarized, so the_sigma=+/-1.
+	K37SublevelPopulations(int the_sigma=1);  // completely polarized, so the_sigma=+/-1.
 	~K37SublevelPopulations();
 	
 	double get_pop(string, int, int);

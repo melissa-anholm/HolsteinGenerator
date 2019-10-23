@@ -8,7 +8,8 @@
 
 
 #include "HolsteinVars.hh"
-#include "K37SublevelPopulations.hh"
+// #include "K37SublevelPopulations.hh"
+#include "K37AtomicSetup.hh"
 
 
 // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- //
@@ -21,7 +22,8 @@ class HolsteinDecay
 {
 public:
 	HolsteinDecay();    /// this one seems broken?!?!?
-	HolsteinDecay(HolsteinVars * HV, K37SublevelPopulations * pops);
+//	HolsteinDecay(HolsteinVars * HV, K37SublevelPopulations * pops);
+	HolsteinDecay(HolsteinVars * HV, K37AtomicSetup * atomic_setup);
 //	HolsteinDecay(HolsteinVars  HV) { HolsteinDecay( (HolsteinVars*)(&HV) ); };
 	
 	// The cone!
@@ -31,7 +33,6 @@ public:
 	
 	// probably should put some sanity checks into functions that set cone_costheta...
 	void set_conecostheta(double costheta_max_)  { cone_costheta = costheta_max_; }; 
-//	void set_conetheta(double theta_max_) { set_conecostheta( cos(theta_max_) ); }; 
 	double get_conecostheta() { return cone_costheta; };
 	
 	void randomize_direction();
@@ -76,7 +77,7 @@ public:
 	
 	double FermiFunction(double Z_, G4double E) { return 1.0; };
 	
-	K37SublevelPopulations * the_pops;
+	
 	chamber_geometry the_geometry;
 
 	double Mz, Mz2, Mz3;
@@ -91,7 +92,6 @@ private:
 	bool use_cone;
 	double cone_costheta;
 	bool runfast; // don't look at detector acceptance if it's not accepted to the PDF.  Should check detector acceptance first, maybe...
-//	bool 
 	double prob_max;
 	
 	//, event_P, event_T, event_Mzcubed;
@@ -140,7 +140,10 @@ private:
 	double get_jtw_probability(G4double, double);
 	
 	HolsteinVars * Params;
-//	TTree * the_tree;
+	//
+	K37AtomicSetup * the_atomic_setup;
+//	K37Cloud * the_cloud;
+//	K37SublevelPopulations * the_pops;  // Do I *really* want this to be public??
 };
 
 #endif

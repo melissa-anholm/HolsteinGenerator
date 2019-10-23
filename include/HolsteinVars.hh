@@ -9,13 +9,15 @@
 
 #include <G4Types.hh>
 #include <G4SystemOfUnits.hh>
+#include "G4PhysicalConstants.hh"
+
 
 #include "IsotopeValues.hh"
 //#include "SplitString.hh"
 
 using std::map;
 
-const double pi = std::atan(1.0)*4.0;
+//const double pi = std::atan(1.0)*4.0;
 
 // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- //
 struct chamber_geometry // numbers indirectly imported from G4.
