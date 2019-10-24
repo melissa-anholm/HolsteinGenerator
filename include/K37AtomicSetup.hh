@@ -69,8 +69,8 @@ public:
 	G4double GetFreeExpansionTime()     { return the_cloud->GetFreeExpansionTime(); }
 	G4double GetOP_CycleTime()          { return the_cloud->GetOP_CycleTime();      }
 	// pops:
-	double GetPolarization()            { return the_pops->GetPolarization(); }
-	double GetAlignment()               { return the_pops->GetAlignment();    }
+	double GetPolarization()            { return the_pops->get_P(); }
+	double GetAlignment()               { return the_pops->get_T();    }
 	void SetPolarization(double pol)    { the_pops->AdjustPolarization(pol);  }
 	
 	/*

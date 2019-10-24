@@ -38,8 +38,8 @@ public:
 	double get_Mz3();
 	
 public: // functions that already lived in G4, and are included here for backward compatibility of some sort.
-	double GetPolarization()  { return this->get_P(); }
-	double GetAlignment()     { return this->get_T(); }
+//	double GetPolarization()  { return this->get_P(); }
+//	double GetAlignment()     { return this->get_T(); }
 	
 	void renormalize(bool verbose=false);
 	

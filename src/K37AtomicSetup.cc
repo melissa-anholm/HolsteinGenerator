@@ -5,6 +5,7 @@
 
 
 #include "globals.hh"
+#include "K37Config.hh"
 //#include "Randomize.hh"
 #include "G4SystemOfUnits.hh"  // it's in K37AtomicSetup.hh now.?  or not.
 #include "G4UnitsTable.hh"
@@ -21,19 +22,21 @@ class K37SublevelPopulations;
 
 K37AtomicSetup::K37AtomicSetup() : 
 	MatchedRunsetLetter( G4String("0") ), 
-	initialize_complete_(false) 
+	initialize_complete_(false)//,
+//	//#ifndef SIMPLE_MC
+//	AtomicMessenger(0),
+//	//#endif
+//	the_cloud(), 
+//	the_pops() // any argument is the int(sigma) value.
 {
-	G4cout << "Called K37AtomicSetup::K37AtomicSetup() [without parameters!]" << G4endl;
+	G4cout << "Called K37AtomicSetup::K37AtomicSetup()" << G4endl;
 	
 	the_cloud = new K37Cloud();
-	
-//	cout << "K37AtomicSetup() is about to create a new set of pops." << endl;
 	the_pops  = new K37SublevelPopulations();
-//	cout << "the pops are created." << endl;
 	
-#ifndef SIMPLE_MC
-	AtomicMessenger = new K37AtomicMessenger(this);
-#endif
+	#ifndef SIMPLE_MC
+	AtomicMessenger = new K37AtomicMessenger(this);  // this might break it?
+	#endif
 	
 //	cout << "K37AtomicSetup has created a new cloud, and a new set of pops.  In fact, we're done creating the K37AtomicSetup." << endl;
 }
@@ -41,7 +44,7 @@ K37AtomicSetup::K37AtomicSetup() :
 
 K37AtomicSetup::~K37AtomicSetup() 
 { 
-	G4cout << "Deleting the atomic setup, but maybe not its messenger... " << G4endl;
+	G4cout << "Deleting the atomic setup (including the_cloud and the_pops), but maybe not its messenger... " << G4endl;
 	delete the_cloud;
 	delete the_pops;
 }

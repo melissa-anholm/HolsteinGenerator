@@ -33,7 +33,7 @@ K37Cloud::K37Cloud() :
 
 K37Cloud::~K37Cloud() 
 { 
-	G4cout << "Deleting the cloud setup. " << G4endl;
+	G4cout << "Deleting the cloud. " << G4endl;
 }
 
 void K37Cloud::SetupVelocitySigma(G4ThreeVector temperature) 

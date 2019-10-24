@@ -77,8 +77,9 @@ int main(int argc, char *argv[])
 //	thepops -> AdjustPolarization(0.95);
 //	thepops -> print_pops();
 //	thepops -> print_moments();
-
 //	thepops -> AdjustPolarization(0.9);
+	
+	thepops -> AdjustPolarization(1.0);
 	
 	
 	HolsteinVars           * pointervars      = new HolsteinVars();

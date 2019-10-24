@@ -69,6 +69,7 @@ K37SublevelPopulations::K37SublevelPopulations(int the_sigma) :  // fully polari
 	// will be the right size otherwise.
 //	cout << "We'll setup the pops from the inputs map..." << endl;
 	
+	theInputs = SS::loadup_textfile(atomic_filename);     // reads the atomic text file into 'theInputs'.
 	Setup_Pops_From_InputsMap();
 //	cout << "pops have been set up from the inputs map." << endl;
 }
@@ -78,7 +79,7 @@ void K37SublevelPopulations::Setup_Pops_From_InputsMap( /*map<string, isotope_va
 // This will be a slow, computationally inefficient way to set up the populations.  
 // It will also be pretty inelegant.  I don't care.
 	
-	theInputs = SS::loadup_textfile(atomic_filename);     // reads the atomic text file into 'theInputs'.
+//	theInputs = SS::loadup_textfile(atomic_filename);     // reads the atomic text file into 'theInputs'.
 	
 	bool tmp_sigma = FindValue("IS_SIGMA_PLUS");
 	if(tmp_sigma) { is_sigma_plus=true;  }
@@ -274,6 +275,7 @@ double K37SublevelPopulations::get_Mz()
 }
 double K37SublevelPopulations::get_Mz2()
 {
+//	bool verbose = false;
 //	renormalize();
 	double running_Mz2 = 0.0;
 	
@@ -290,6 +292,15 @@ double K37SublevelPopulations::get_Mz2()
 		//
 		the_pop     = get_pop("ground", F, M_F);
 		running_Mz2 += the_pop*the_scale;
+		//
+	//	if(verbose)
+	//	{
+	//		G4cout << "Ground:   F=" << F << ", M_F=" << M_F << ":  pop=" << get_pop("ground", F, M_F)  << ", scale=" << get_scale("M_z2", F, M_F);
+	//			G4cout << ";\tsubtotal=" << get_pop("ground", F, M_F)*get_scale("M_z2", F, M_F) << G4endl;
+	//		G4cout << "Excited:  F=" << F << ", M_F=" << M_F << ":  pop=" << get_pop("excited", F, M_F) << ", scale=" << get_scale("M_z2", F, M_F);
+	//			G4cout << ";\tsubtotal=" << get_pop("excited", F, M_F)*get_scale("M_z2", F, M_F) << G4endl;
+	//		G4cout << "running_Mz2 = " << running_Mz2 << G4endl;
+	//	}
 	}
 	F=1;
 	for(int M_F=-F; M_F<=F; M_F++)
@@ -300,6 +311,15 @@ double K37SublevelPopulations::get_Mz2()
 		//
 		the_pop     = get_pop("ground", F, M_F);
 		running_Mz2 += the_pop*the_scale;
+		//
+	//	if(verbose)
+	//	{
+	//		G4cout << "Ground:   F=" << F << ", M_F=" << M_F << ":  pop=" << get_pop("ground", F, M_F)  << ", scale=" << get_scale("M_z2", F, M_F);// << G4endl;
+	//			G4cout << ";\tsubtotal=" << get_pop("ground", F, M_F)*get_scale("M_z2", F, M_F) << G4endl;
+	//		G4cout << "Excited:  F=" << F << ", M_F=" << M_F << ":  pop=" << get_pop("excited", F, M_F) << ", scale=" << get_scale("M_z2", F, M_F);// << G4endl;
+	//			G4cout << ";\tsubtotal=" << get_pop("excited", F, M_F)*get_scale("M_z2", F, M_F) << G4endl;
+	//		G4cout << "running_Mz2 = " << running_Mz2 << G4endl;
+	//	}
 	}
 	
 	return running_Mz2;
@@ -345,7 +365,10 @@ double K37SublevelPopulations::get_P()
 double K37SublevelPopulations::get_T()
 {
 	// spin 3/2 only
-	double T = 5.0/4.0 - get_Mz2();
+	double Mz2 = get_Mz2();
+//	G4cout << "Total Mz2 = " << Mz2 << G4endl;
+	
+	double T = 5.0/4.0 - Mz2;
 	return T;
 }
 
@@ -694,24 +717,53 @@ void K37SublevelPopulations::print_moments()
 
 void K37SublevelPopulations::AdjustPolarization(double new_Pol)
 {
-	bool verbose=true;
+	int verbose=2;
 	if(verbose)
 	{
 		cout << "Adjusting polarization from P_old=" << get_P() << " to P_new=" << new_Pol << endl;
+	}
+	double abs_old_Pol = abs(get_P());
+	if( abs_old_Pol+allowed_mismatch >= 1.0) // we've lost sublevel information.  reload states from inputs map.
+	{
+		K37SublevelPopulations::Setup_Pops_From_InputsMap(); // also sets the sigma.
+	//	if(verbose>1)
+	//	{
+	//		cout << "we've set up the populations from the saved inputs.  probably.  what even are the saved inputs?!" << endl;
+	//		print_pops();
+	//	}
+		abs_old_Pol = abs(get_P());  // we set this at the beginning, but we're going to use it for calculations later, and we want the reset value.
+	}
+	if(abs(new_Pol) > 1.0)
+	{
+		cout << "Can't set polarization to " << new_Pol << endl;
+		cout << "Polarization will remain unchanged." << endl;
+		return;
 	}
 	
 	// check normalization first?
 	renormalize();
 	
+	
 	// check that new_pol and old_pol even have the same sigma??
 	bool new_is_sigma_plus;
 	if(new_Pol >= 0) { new_is_sigma_plus = true;  }
 	else             { new_is_sigma_plus = false; }
+//	cout << "new_is_sigma_plus:  " << new_is_sigma_plus << endl;
+//	cout << "old is_sigma_plus:  " << is_sigma_plus << endl;
 	if(new_is_sigma_plus != is_sigma_plus) // if they're not the same sigma, we'll just swap the atomic states around now.
 	{
+	//	cout << "new sigma is different than (new) old sigma." << endl;
 		swap_states();
 		setup_sigma();  // sets is_sigma_plus to its new physically correct value.
 	}
+//	else if(new_is_sigma_plus == is_sigma_plus)
+//	{
+//		cout << "new sigma is same as old sigma." << endl;
+//	}
+//	else
+//	{
+//		cout << "sigma is broken." << endl;
+//	}
 	if(new_is_sigma_plus != is_sigma_plus)
 	{
 		cout << "Well fuck, you just broke mathematical logic." << endl;
@@ -720,7 +772,6 @@ void K37SublevelPopulations::AdjustPolarization(double new_Pol)
 	}
 	
 	// OK, the sigma is the same now, in the correct "new" direction.  
-	double old_Pol = abs(get_P());
 	double P_stretched_old, P_other_old;
 	
 	double pop_stretched_old, pop_other_old;
@@ -729,17 +780,24 @@ void K37SublevelPopulations::AdjustPolarization(double new_Pol)
 	
 	// for this math, we assume everything is sigma plus, then put the signs back in at the end.
 	P_stretched_old = pop_stretched_old;         // sigma +
-	P_other_old     = old_Pol - P_stretched_old; // all positive because of how we've defined other things.  sigma+.
+	P_other_old     = abs_old_Pol - P_stretched_old; // all positive because of how we've defined other things.  sigma+.
 	//
 	pop_other_old = 1.0 - pop_stretched_old;
-//	double alpha_ratio = pop_other_old / P_other_old;
 	
 	double pop_stretched_new, pop_other_new;
 	pop_stretched_new = (pop_other_old*abs(new_Pol) - P_other_old) / (pop_other_old - P_other_old);
 	pop_other_new = 1.0 - pop_stretched_new;
+	if( pop_stretched_new < 0 || pop_other_new < 0)
+	{
+		cout << "pop_stretched_new = " << pop_stretched_new << endl;
+		cout << "pop_other_new     = " << pop_other_new << endl;
+		cout << "*** Cannot set polarization to this value using the assumptions we've made about the sublevel population distribution." << endl;
+		cout << "*** Polarization remains unchanged." << endl;
+		return;
+	}
 	
 	double rescale_other = pop_other_new / pop_other_old;
-	if(rescale_other <= 0) 
+	if(rescale_other < 0)  // allow it to be equal to zero, for P=+/-1.  We don't divide by this.
 	{ 
 		cout << "This is bad.  Very bad." << endl; 
 		assert(0);
@@ -749,7 +807,7 @@ void K37SublevelPopulations::AdjustPolarization(double new_Pol)
 //	bool verbose=false;
 //	if(verbose)
 //	{
-//		cout << "old_Pol:  " << old_Pol << ";\tnew_Pol:  " << new_Pol << endl;
+//		cout << "abs_old_Pol:  " << abs_old_Pol << ";\tnew_Pol:  " << new_Pol << endl;
 //		cout << "rescale_other   = " << rescale_other << endl;
 //		cout << "1/rescale_other = " << 1.0/rescale_other << endl;
 //		cout << "pop_stretched_old = " << pop_stretched_old << ";\tpop_other_old = " << pop_other_old << endl;
