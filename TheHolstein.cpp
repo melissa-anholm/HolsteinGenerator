@@ -55,6 +55,7 @@ int main(int argc, char *argv[])
 	
 	string filename = "output.root";
 	
+	/*
 	K37SublevelPopulations * thepops     = new K37SublevelPopulations(1);
 	
 //	thepops -> print_pops();
@@ -80,17 +81,25 @@ int main(int argc, char *argv[])
 //	thepops -> AdjustPolarization(0.9);
 	
 	thepops -> AdjustPolarization(1.0);
+	*/
 	
-	
-	HolsteinVars           * pointervars      = new HolsteinVars();
-//	HolsteinDecay          * the_decay        = new HolsteinDecay(pointervars, thepops);
-	
+	HolsteinVars           * pointervars      = new HolsteinVars();	
 	K37AtomicSetup         * the_atomic_setup = new K37AtomicSetup();
-	cout << "I guess the atomic setup is created.  Creating the HolsteinDecay now." << endl;
-	
 	HolsteinDecay          * the_decay        = new HolsteinDecay(pointervars, the_atomic_setup);
-	
 	cout << "I guess we've created the HolsteinDecay." << endl;
+	
+	K37SublevelPopulations * thepops = the_atomic_setup->GetPops();
+	
+	cout << "We've got the pops." << endl;
+	thepops -> print_pops();
+	thepops -> print_moments();
+	thepops -> AdjustPolarization(-1.0);
+	thepops -> print_pops();
+	thepops -> print_moments();
+	thepops -> AdjustPolarization(0.99);
+	thepops -> print_pops();
+	thepops -> print_moments();
+	//
 	
 	the_decay->run_fast(true);
 	the_decay->set_use_cone(true);
@@ -98,6 +107,13 @@ int main(int argc, char *argv[])
 	the_decay->set_conecostheta( 0.90 );
 	cout << "get_conecostheta() = " << the_decay->get_conecostheta() << endl;
 	
+	
+	K37Cloud * the_cloud = the_atomic_setup->GetCloud();
+	
+	cout << "We've got the cloud." << endl;
+	the_cloud->SetInitialCloudPosition( G4ThreeVector(0.1*mm, 1*mm, 1.2*mm) );
+	the_cloud->SetInitialCloudSize( G4ThreeVector(2.0*mm, 3.0*mm, 1.0*mm) );
+	the_cloud->PrintCloud();
 	
 	
 	/*

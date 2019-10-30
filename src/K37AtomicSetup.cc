@@ -59,8 +59,10 @@ G4String K37AtomicSetup::GetMatchedRunsetLetter()
 	return MatchedRunsetLetter;
 }
 
+/*
 void K37AtomicSetup::Initialize() 
 {
 	the_cloud->Initialize(); 
 	initialize_complete_ = true;
 }
+*/

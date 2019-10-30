@@ -61,13 +61,19 @@ private:
 
 public:
 	// cloud:
-	G4ThreeVector GetCloudCenter()      { return the_cloud->GetCloudCenter();       }
-	G4ThreeVector GetInitialCloudSize() { return the_cloud->GetInitialCloudSize();  }
-	G4ThreeVector GetTemperature()      { return the_cloud->GetTemperature();       }
-	G4ThreeVector GetSailVelocity()     { return the_cloud->GetSailVelocity();      }
-	G4ThreeVector GetVelocitySigma()    { return the_cloud->GetVelocitySigma();     }  // must be already set up with temperature?
-	G4double GetFreeExpansionTime()     { return the_cloud->GetFreeExpansionTime(); }
-	G4double GetOP_CycleTime()          { return the_cloud->GetOP_CycleTime();      }
+//	G4ThreeVector GetCloudCenter()      { return the_cloud->GetCloudCenter();       }	//old
+	G4ThreeVector GetInitialCloudPosition() { return the_cloud->GetInitialCloudPosition(); }
+	G4ThreeVector GetFinalCloudPosition()   { return the_cloud->GetFinalCloudPosition();   }
+	G4ThreeVector GetInitialCloudSize()     { return the_cloud->GetInitialCloudSize();     }
+	G4ThreeVector GetFinalCloudSize()       { return the_cloud->GetFinalCloudSize();       }
+	
+	G4double GetFreeExpansionTime()         { return the_cloud->GetFreeExpansionTime();    }
+	G4double GetOP_CycleTime()              { return the_cloud->GetOP_CycleTime();         }
+	
+//	G4ThreeVector GetTemperature()      { return the_cloud->GetTemperature();       }
+//	G4ThreeVector GetSailVelocity()     { return the_cloud->GetSailVelocity();      }
+//	G4ThreeVector GetVelocitySigma()    { return the_cloud->GetVelocitySigma();     }  // must be already set up with temperature?
+
 	// pops:
 	double GetPolarization()            { return the_pops->get_P(); }
 	double GetAlignment()               { return the_pops->get_T();    }
@@ -81,14 +87,19 @@ public:
 	void Setup_FromDipoleQuadrupoleOctopole(double dip, double quad, double oct)      { the_pops->Setup_FromDipoleQuadrupoleOctopole(dip, quad, oct);     }
 	*/
 	
-	void SetCloudCenter(G4ThreeVector center)    { the_cloud->SetCloudCenter(center);     }
-	void SetTemperature(G4ThreeVector temp)      { the_cloud->SetTemperature(temp);       }
-	void SetTemperature(G4double temp)           { the_cloud->SetTemperature(temp);       }
-	void SetInitialCloudSize(G4ThreeVector size) { the_cloud->SetInitialCloudSize(size);  }
-	void SetInitialCloudSize(G4double size)      { the_cloud->SetInitialCloudSize(size);  }
-	void SetSailVelocity(G4ThreeVector vel)      { the_cloud->SetSailVelocity(vel);       }
-	void SetFreeExpansionTime(G4double time)     { the_cloud->SetFreeExpansionTime(time); }
-	void SetOP_CycleTime(G4double time)          { the_cloud->SetOP_CycleTime(time);      }
+	void SetInitialCloudPosition(G4ThreeVector center) { the_cloud->SetInitialCloudPosition(center); }
+	void SetFinalCloudPosition(G4ThreeVector center)   { the_cloud->SetFinalCloudPosition(center);   }
+	void SetInitialCloudSize(G4ThreeVector size)       { the_cloud->SetInitialCloudSize(size);       }
+	void SetInitialCloudSize(G4double size)            { the_cloud->SetInitialCloudSize(size);       }
+	void SetFinalCloudSize(G4ThreeVector size)         { the_cloud->SetFinalCloudSize(size);         }
+	void SetFinalCloudSize(G4double size)              { the_cloud->SetFinalCloudSize(size);         }
+	
+	void SetFreeExpansionTime(G4double time)           { the_cloud->SetFreeExpansionTime(time);      }
+	void SetOP_CycleTime(G4double time)                { the_cloud->SetOP_CycleTime(time);           }
+
+//	void SetTemperature(G4ThreeVector temp)            { the_cloud->SetTemperature(temp);            }
+//	void SetTemperature(G4double temp)                 { the_cloud->SetTemperature(temp);            }
+//	void SetSailVelocity(G4ThreeVector vel)            { the_cloud->SetSailVelocity(vel);            }
 
 	void SetMatchedRunsetLetter(G4String newRunsetLetter);
 	G4String GetMatchedRunsetLetter();
@@ -97,9 +108,9 @@ private:
 	G4String MatchedRunsetLetter;
 		
 	void SetupVelocitySigma(G4ThreeVector temperature) { the_cloud->SetupVelocitySigma(temperature); }
-	G4double CalcSigma(G4double temperature)           { return the_cloud->CalcSigma(temperature); }
+	G4double CalcSigma(G4double temperature)           { return the_cloud->CalcSigma(temperature);   }
 	G4bool initialize_complete_;
-	void Initialize();
+//	void Initialize();
 	
 //private:
 // these are private to prevent the user from calling them directly.
