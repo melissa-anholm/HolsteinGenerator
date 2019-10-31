@@ -33,8 +33,8 @@
 #include <TBranch.h> // might not need this...
 
 // Project:
-#include "HolsteinVars.hh"
-#include "HolsteinDecay.hh"
+#include "Holstein52Isotope.hh"    // formerly HolsteinVars
+#include "Holstein52Generator.hh"  // formerly HolsteinDecay
 #include "K37SublevelPopulations.hh"
 
 
@@ -85,7 +85,7 @@ int main(int argc, char *argv[])
 	
 	HolsteinVars           * pointervars      = new HolsteinVars();	
 	K37AtomicSetup         * the_atomic_setup = new K37AtomicSetup();
-	HolsteinDecay          * the_decay        = new HolsteinDecay(pointervars, the_atomic_setup);
+	Holstein52Generator    * the_decay        = new Holstein52Generator(pointervars, the_atomic_setup);
 	cout << "I guess we've created the HolsteinDecay." << endl;
 	
 	K37SublevelPopulations * thepops = the_atomic_setup->GetPops();

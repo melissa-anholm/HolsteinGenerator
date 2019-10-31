@@ -7,7 +7,7 @@
 #undef NDEBUG
 #include<assert.h>
 
-#include "HolsteinVars.hh"
+#include "Holstein52Isotope.hh"  // formerly HolsteinVars
 #include "K37SublevelPopulations.hh"
 #include "IsotopeValues.hh"
 //#include "SplitString.hh"

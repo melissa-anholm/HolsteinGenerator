@@ -1,30 +1,31 @@
 // Author: Melissa Anholm - 2019
 
-#ifndef HolsteinDecay_h
-#define HolsteinDecay_h 1
+#ifndef Holstein52Generator_h
+#define Holstein52Generator_h 1
 
 #include <G4SystemOfUnits.hh>
 #include <G4ThreeVector.hh> // probably the correct way to include ThreeVector.h.
 
 
-#include "HolsteinVars.hh"
+#include "Holstein52Isotope.hh"  // formerly HolsteinVars
 // #include "K37SublevelPopulations.hh"
 #include "K37AtomicSetup.hh"
 
 
 // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- //
-//  HolsteinDecay class relies on other classes: 
+//  Holstein52Generator class relies on other classes: 
 //  	HolsteinVars
 //  		isotope_values
 //  		SS (splitstring)
 //  	K37SublevelPopulations
-class HolsteinDecay
+
+//class HolsteinDecay
+class Holstein52Generator
 {
 public:
-	HolsteinDecay();    /// this one seems broken?!?!?
-//	HolsteinDecay(HolsteinVars * HV, K37SublevelPopulations * pops);
-	HolsteinDecay(HolsteinVars * HV, K37AtomicSetup * atomic_setup);
-//	HolsteinDecay(HolsteinVars  HV) { HolsteinDecay( (HolsteinVars*)(&HV) ); };
+//	Holstein52Generator();    /// this one seems broken?!?!?
+	Holstein52Generator(HolsteinVars * HV, K37AtomicSetup * atomic_setup);
+//	Holstein52Generator(HolsteinVars  HV) { Holstein52Generator( (HolsteinVars*)(&HV) ); };
 	
 	// The cone!
 	void set_use_cone(bool useit) { use_cone = useit; };

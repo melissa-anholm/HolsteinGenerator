@@ -7,8 +7,8 @@
 #include<Randomize.hh>
 
 
-#include "HolsteinDecay.hh"
-#include "HolsteinVars.hh"
+#include "Holstein52Generator.hh"
+#include "Holstein52Isotope.hh"  // formerly HolsteinVars
 //	//#include "IsotopeValues.hh"
 //	//#include "SplitString.hh"
 #include "K37SublevelPopulations.hh"
@@ -17,23 +17,28 @@
 using std::cout;
 using std::endl;
 
-//  HolsteinDecay class relies on other classes: 
+//  Holstein52Generator class relies on other classes: 
 //  	HolsteinVars
 //  		isotope_values
 //  		SS (splitstring)
 //  	K37SublevelPopulations
 
+
+// I think this is the equivalent class of K37EventGenerator.
+
+
+
 // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- //
-void HolsteinDecay::SetAcceptanceMode(string the_mode)
+void Holstein52Generator::SetAcceptanceMode(string the_mode)
 {
 	cout << "SetAcceptanceMode(...) doesn't work yet." << endl;
 	return;
 }
 
 /*
-HolsteinDecay::HolsteinDecay() // broken?
+Holstein52Generator::Holstein52Generator() // broken?
 {
-	cout << "Initializing HolsteinDecay without input parameters.  " << endl;
+	cout << "Initializing Holstein52Generator without input parameters.  " << endl;
 	cout << "Creating a new set of HolsteinVars, and a new set of K37SublevelPopulations.  " << endl;
 	cout << "I think this is broken and will cause segfaults when we try to look for the HolsteinVars or the K37SublevelPopulations." << endl;
 	cout << "Hard kill it now." << endl;
@@ -44,16 +49,17 @@ HolsteinDecay::HolsteinDecay() // broken?
 //	HolsteinVars * HV           = new HolsteinVars();
 //	K37SublevelPopulations * pops = new K37SublevelPopulations(1);
 //	cout << "things are created." << endl;
-//	HolsteinDecay( (HolsteinVars*)HV, (K37SublevelPopulations*)pops );
+//	Holstein52Generator( (HolsteinVars*)HV, (K37SublevelPopulations*)pops );
 //	
 	Params   = new HolsteinVars();
 	the_pops = new K37SublevelPopulations(1);
-	HolsteinDecay( (HolsteinVars*)Params, (K37SublevelPopulations*)the_pops );
+	Holstein52Generator( (HolsteinVars*)Params, (K37SublevelPopulations*)the_pops );
 }
 */
 
 //HolsteinDecay::HolsteinDecay(HolsteinVars * HV, K37SublevelPopulations * pops):
-HolsteinDecay::HolsteinDecay(HolsteinVars * HV, K37AtomicSetup * atomic_setup):
+//HolsteinDecay::HolsteinDecay(HolsteinVars * HV, K37AtomicSetup * atomic_setup):
+Holstein52Generator::Holstein52Generator(HolsteinVars * HV, K37AtomicSetup * atomic_setup):
 	// nuclear parameters:
 	delta_M1(0), delta_M2(0), delta_deltaC(0), 
 	delta_mu_parent(0), delta_mu_daughter(0), delta_quad_parent(0), delta_quad_daughter(0), 
@@ -62,7 +68,7 @@ HolsteinDecay::HolsteinDecay(HolsteinVars * HV, K37AtomicSetup * atomic_setup):
 	use_cone(false), cone_costheta(0),
 	runfast(true), prob_max(0.2)
 {
-//	cout << "Called HolsteinDecay::HolsteinDecay(HolsteinVars * HV, K37AtomicSetup * atomic_setup)" << endl;
+//	cout << "Called Holstein52Generator::Holstein52Generator(HolsteinVars * HV, K37AtomicSetup * atomic_setup)" << endl;
 	
 	// Nuclear:
 	Params = HV;
@@ -70,7 +76,7 @@ HolsteinDecay::HolsteinDecay(HolsteinVars * HV, K37AtomicSetup * atomic_setup):
 	M_F_isospin    = Params->M_F_isospin;    // exact
 	I_spin         = Params->I_spin;         // exact
 	A_nucleons     = Params->A_nucleons;     // exact
-	hbarc_eV_nm          = Params->hbarc_eV_nm;          // exact.  unitless. ... it is *not* fucking unitless.  ... it needs to be unitless for now though, because who fucking knows what units the matrix elements are supposed to have.
+	hbarc_eV_nm    = Params->hbarc_eV_nm;    // exact.  unitless. ... it is *not* fucking unitless.  ... it needs to be unitless for now though, because who fucking knows what units the matrix elements are supposed to have.
 	Z_daughter     = Params->Z_daughter;     // exact
 	speed_of_light = Params->speed_of_light; // exact.  double.  no G4units.
 	
@@ -129,34 +135,24 @@ HolsteinDecay::HolsteinDecay(HolsteinVars * HV, K37AtomicSetup * atomic_setup):
 	jtw_rho   = jtw_c1/jtw_a1;
 	
 	// Atomic:
-	// by default, the_pops is set to be fully polarized sigma+.
-	//the_pops = pops;
-//	cout << "HolsteinDecay is looking for the pops now." << endl;
 	the_atomic_setup = atomic_setup;
-//	the_pops = atomic_setup->GetPops();
-//	cout << "I guess we've found the pops?" << endl;
 	
 	Mz  = the_atomic_setup->GetPops()->get_Mz();   // 1.5
 	Mz2 = the_atomic_setup->GetPops()->get_Mz2();  // 2.25
 	Mz3 = the_atomic_setup->GetPops()->get_Mz3();  // 3.375
-	
-//	cout << "Found the M^x expectation values too.  Initializing lambdafuncs now." << endl;
-	
-	initialize_lambdafuncs();
+	initialize_lambdafuncs();  // must have Mz, Mz2, Mz3 set up already.
 	
 	// Decay-specific Parameters:
 	initial_momentum = G4ThreeVector(0.0*MeV,0.0*MeV,0.0*MeV);  // 
-	
 }
 
 
-bool HolsteinDecay::shoot_decayevent() // uses param. runfast to decide whether to check *both* acceptances if one has already failed.
+bool Holstein52Generator::shoot_decayevent() // uses param. runfast to decide whether to check *both* acceptances if one has already failed.
 {
 	bool verbose = false;
 	pdf_acceptance = false;  // obsolete?
 	jtw_acceptance = false;
 	holstein_acceptance = false;
-	
 	det_acceptance = false;
 	
 	this -> randomize_nuclear(false);
@@ -190,7 +186,7 @@ bool HolsteinDecay::shoot_decayevent() // uses param. runfast to decide whether 
 }
 
 
-void HolsteinDecay::randomize_nuclear(bool doit)
+void Holstein52Generator::randomize_nuclear(bool doit)  // needs Params.
 {
 	bool verbose = false;
 	//use_roc ?
@@ -417,7 +413,7 @@ void HolsteinDecay::randomize_nuclear(bool doit)
 	
 	return;
 }
-void HolsteinDecay::randomize_atomic(bool doit)
+void Holstein52Generator::randomize_atomic(bool doit)
 {
 	bool verbose=false;
 	if(verbose)
@@ -435,7 +431,7 @@ void HolsteinDecay::randomize_atomic(bool doit)
 	return;
 }
 
-void HolsteinDecay::initialize_lambdafuncs()
+void Holstein52Generator::initialize_lambdafuncs()
 {
 	get_lambda0();  // 1.0
 	get_lambda1();
@@ -443,23 +439,23 @@ void HolsteinDecay::initialize_lambdafuncs()
 	get_lambda3();
 	get_lambda4();  // 0.0
 }
-double HolsteinDecay::get_lambda0()
+double Holstein52Generator::get_lambda0()
 {
 	Lambda0=1; 
 	return Lambda0;
 }
-double HolsteinDecay::get_lambda1()
+double Holstein52Generator::get_lambda1()
 {
 	Lambda1 = Mz/I_spin; // Polarization.
 	return Lambda1;
 }
-double HolsteinDecay::get_lambda2()
+double Holstein52Generator::get_lambda2()
 {
 	double T = 5.0/4.0 - Mz2;
 	Lambda2 = T * (2.0*I_spin - 1.0)/(I_spin+1.0);
 	return Lambda2;
 }
-double HolsteinDecay::get_lambda3()
+double Holstein52Generator::get_lambda3()
 {
 	double numerator =   5.0*Mz3;
 	double denominator = I_spin*(3.0*I_spin*I_spin + 3.0*I_spin - 1.0);
@@ -467,13 +463,13 @@ double HolsteinDecay::get_lambda3()
 
 	return Lambda3;
 }
-double HolsteinDecay::get_lambda4()
+double Holstein52Generator::get_lambda4()
 {
 	Lambda4=0; 
 	return Lambda4; 
 }
 
-double HolsteinDecay::F_0(double E) // a1 a2 c1 c2 (M/MeV) (E0/MeV) (m_e/MeV) b d h
+double Holstein52Generator::F_0(double E) // a1 a2 c1 c2 (M/MeV) (E0/MeV) (m_e/MeV) b d h
 {
 	bool verbose=false;
 	double t1, t2, t3, t4, t5;
@@ -491,7 +487,7 @@ double HolsteinDecay::F_0(double E) // a1 a2 c1 c2 (M/MeV) (E0/MeV) (m_e/MeV) b 
 	}
 	return F0;
 }
-double HolsteinDecay::F_1(double E) // a1 c1 c2 a2 (E0/MeV) (m_e/MeV) (M/MeV) b d j2 g f 
+double Holstein52Generator::F_1(double E) // a1 c1 c2 a2 (E0/MeV) (m_e/MeV) (M/MeV) b d j2 g f 
 {
 	bool verbose=false;
 	
@@ -517,7 +513,7 @@ double HolsteinDecay::F_1(double E) // a1 c1 c2 a2 (E0/MeV) (m_e/MeV) (M/MeV) b 
 	} 
 	return F1;
 }
-double HolsteinDecay::F_2(double E) // c1 (E0/MeV) (M/MeV) a1 d b g j2 f j3 c2 (no dep. on a2 ??)
+double Holstein52Generator::F_2(double E) // c1 (E0/MeV) (M/MeV) a1 d b g j2 f j3 c2 (no dep. on a2 ??)
 {
 	bool verbose=false;
 	
@@ -534,7 +530,7 @@ double HolsteinDecay::F_2(double E) // c1 (E0/MeV) (M/MeV) a1 d b g j2 f j3 c2 (
 	if(verbose) { cout << "F2 = " << F2 << endl; }
 	return F2;
 }
-double HolsteinDecay::F_3(double E) // a1 j3 (M/MeV) c1 g j2 j3
+double Holstein52Generator::F_3(double E) // a1 j3 (M/MeV) c1 g j2 j3
 {
 	bool verbose=false;
 	
@@ -552,30 +548,30 @@ double HolsteinDecay::F_3(double E) // a1 j3 (M/MeV) c1 g j2 j3
 	return F3;
 }
 
-G4double HolsteinDecay::pbeta(G4double E)  // *only* in get_probability so far...
+G4double Holstein52Generator::pbeta(G4double E)  // *only* in get_probability so far...
 {
 	G4double pbetac = sqrt( pow(E/MeV,2) - pow((m_e/MeV),2) );  // MeV for everything...
 	return pbetac;  // comes out in G4units of MeV too.
 }
-G4double HolsteinDecay::get_Ebeta(G4double pbeta)  // not used???
+G4double Holstein52Generator::get_Ebeta(G4double pbeta)  // not used???
 {
 	G4double E = sqrt( pow(pbeta/MeV,2) + pow((m_e/MeV), 2) );
 	return E;
 }
-double HolsteinDecay::get_v_from_p(G4double pbeta) // [v] = unitless m/s, pbeta in G4units of MeV.
+double Holstein52Generator::get_v_from_p(G4double pbeta) // [v] = unitless m/s, pbeta in G4units of MeV.
 {
 	double beta = (pbeta/MeV)* sqrt( (1.0)/((m_e/MeV)*(m_e/MeV) + (pbeta/MeV)*(pbeta/MeV)) );
 	double v = beta*speed_of_light;  // meters/second 
 	return v;
 }
-G4double HolsteinDecay::get_p_from_v(double vbeta)  // ...
+G4double Holstein52Generator::get_p_from_v(double vbeta)  // ...
 {
 	double gamma = 1.0 / sqrt(1.0 - vbeta*vbeta/(speed_of_light*speed_of_light)); // unitless....
 	G4double pbeta = gamma*(m_e/MeV)*vbeta/speed_of_light * MeV;
 	return pbeta;
 }
 
-double HolsteinDecay::get_probability(G4double E, double costheta) // want to use costheta_lab
+double Holstein52Generator::get_probability(G4double E, double costheta) // want to use costheta_lab
 {
 	int verbose = 0;
 	
@@ -608,7 +604,7 @@ double HolsteinDecay::get_probability(G4double E, double costheta) // want to us
 	
 	if(verbose>1)
 	{
-		cout << "HolsteinDecay::get_probability:  the_prob = " << holstein_probability << endl;
+		cout << "Holstein52Generator::get_probability:  the_prob = " << holstein_probability << endl;
 		cout << "\tthe_scaling = " << the_scaling << endl;
 		cout << "\tholstein_Abeta = " << holstein_Abeta << endl;
 		cout << "\tt0 = " << t0 << endl;
@@ -620,7 +616,7 @@ double HolsteinDecay::get_probability(G4double E, double costheta) // want to us
 }
 
 
-double HolsteinDecay::get_jtw_probability(G4double E, double costheta)
+double Holstein52Generator::get_jtw_probability(G4double E, double costheta)
 {
 	double Gv2       = 1.0; // kludge
 	double cos2theta = 1.0; // kludge
@@ -638,7 +634,7 @@ double HolsteinDecay::get_jtw_probability(G4double E, double costheta)
 }
 
 
-void HolsteinDecay::randomize_direction() // saves initial_momentum and initial_velocity in class.  Also Ebeta.  
+void Holstein52Generator::randomize_direction() // saves initial_momentum and initial_velocity in class.  Also Ebeta.  
 {
 	bool verbose=false;
 	
@@ -699,7 +695,7 @@ void HolsteinDecay::randomize_direction() // saves initial_momentum and initial_
 }
 
 
-bool HolsteinDecay::check_PDF_acceptance()  // uses initial_momentum .
+bool Holstein52Generator::check_PDF_acceptance()  // uses initial_momentum .
 {
 	bool verbose = false;
 	
@@ -773,7 +769,7 @@ bool HolsteinDecay::check_PDF_acceptance()  // uses initial_momentum .
 	return pdf_acceptance;
 }
 
-void HolsteinDecay::randomize_start(bool doit)
+void Holstein52Generator::randomize_start(bool doit)
 {
 	bool verbose=false;
 	// pick start position.
@@ -790,7 +786,7 @@ void HolsteinDecay::randomize_start(bool doit)
 	return;
 }
 
-bool HolsteinDecay::check_detector_acceptance()
+bool Holstein52Generator::check_detector_acceptance()
 {
 	bool verbose=false;
 	// Should have already randomized start, randomized direction, and checked PDF acceptance.
@@ -846,7 +842,7 @@ bool HolsteinDecay::check_detector_acceptance()
 	return det_acceptance;
 }
 
-void HolsteinDecay::print_results()
+void Holstein52Generator::print_results()
 {
 	cout << "holstein_acceptance: " << holstein_acceptance << endl; 
 	cout << "pdf_acceptance: " << pdf_acceptance << endl; 
