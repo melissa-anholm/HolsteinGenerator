@@ -70,6 +70,7 @@ public:
 	bool going_up;
 	void SetAcceptanceMode(string);
 	
+	K37AtomicSetup * GetAtomicSetup() { return the_atomic_setup; };
 	
 	G4double pbeta(G4double E);  
 	G4double get_Ebeta(G4double pbeta);

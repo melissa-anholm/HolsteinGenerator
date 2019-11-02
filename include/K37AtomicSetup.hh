@@ -75,9 +75,16 @@ public:
 //	G4ThreeVector GetVelocitySigma()    { return the_cloud->GetVelocitySigma();     }  // must be already set up with temperature?
 
 	// pops:
-	double GetPolarization()            { return the_pops->get_P(); }
-	double GetAlignment()               { return the_pops->get_T();    }
+	double GetPolarization()            { return the_pops->get_P();           }
+	double GetAlignment()               { return the_pops->get_T();           }
 	void SetPolarization(double pol)    { the_pops->AdjustPolarization(pol);  }
+	
+	void set_sigma_plus()  { the_pops->set_sigma_plus();   };
+	void set_sigma_minus() { the_pops->set_sigma_minus();  };
+	int get_sigma()        { return the_pops->get_sigma(); };
+	
+	void print_pops()      { the_pops->print_pops();       };
+	void print_moments()   { the_pops->print_moments();    };
 	
 	/*
 	// Setup Multipole:

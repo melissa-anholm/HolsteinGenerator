@@ -156,9 +156,18 @@ bool Holstein52Generator::shoot_decayevent() // uses param. runfast to decide wh
 	det_acceptance = false;
 	
 	this -> randomize_nuclear(false);
-	this -> randomize_atomic(false);
-	this -> randomize_direction();           // pick Ebeta, costheta (possibly from the cone.)
 	
+//	this -> randomize_atomic(false);
+	// Instead of this->randomize_atomic(...), just do the things from the function.
+	// Later, for efficiency, I should avoid doing this every single event, but for now it's fine.
+	Mz  = the_atomic_setup->GetPops()->get_Mz();
+	Mz2 = the_atomic_setup->GetPops()->get_Mz2();
+	Mz3 = the_atomic_setup->GetPops()->get_Mz3();
+	initialize_lambdafuncs();  // this depends on the sublevel populations, which should be set up above.
+	//
+	
+	
+	this -> randomize_direction();           // pick Ebeta, costheta (possibly from the cone.)
 	if(runfast)  // true by default, but I'm pretty sure I disable it in main(...).  this is useful to turn off if I want to record *all* the events generated and check acceptance later.
 	{
 		this -> check_detector_acceptance(); // set:  det_acceptance.

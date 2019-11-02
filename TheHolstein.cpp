@@ -37,6 +37,8 @@
 #include "Holstein52Generator.hh"  // formerly HolsteinDecay
 #include "K37SublevelPopulations.hh"
 
+#include "K37MiniaturePGA.hh"
+
 
 using std::cout;
 using std::endl;
@@ -86,6 +88,18 @@ int main(int argc, char *argv[])
 	HolsteinVars           * pointervars      = new HolsteinVars();	
 	K37AtomicSetup         * the_atomic_setup = new K37AtomicSetup();
 	Holstein52Generator    * the_decay        = new Holstein52Generator(pointervars, the_atomic_setup);
+	K37MiniaturePGA        * the_PGA          = new K37MiniaturePGA(the_decay);
+	
+	the_atomic_setup -> SetPolarization(0.99);
+	the_atomic_setup -> print_pops();
+	the_atomic_setup -> print_moments();
+	
+	the_decay->run_fast(true);
+	the_decay->set_use_cone(true);
+	the_decay->set_conecostheta( 0.90 );
+	
+	
+	/*
 	cout << "I guess we've created the HolsteinDecay." << endl;
 	
 	K37SublevelPopulations * thepops = the_atomic_setup->GetPops();
@@ -114,7 +128,7 @@ int main(int argc, char *argv[])
 	the_cloud->SetInitialCloudPosition( G4ThreeVector(0.1*mm, 1*mm, 1.2*mm) );
 	the_cloud->SetInitialCloudSize( G4ThreeVector(2.0*mm, 3.0*mm, 1.0*mm) );
 	the_cloud->PrintCloud();
-	
+	*/
 	
 	/*
 	cout << "g_A = "  << pointervars->g_A << endl;
@@ -158,7 +172,7 @@ int main(int argc, char *argv[])
 	cout << "-- -- --" << endl; // << endl;
 	
 	
-	/*
+	
 	TFile * f = new TFile(filename.c_str(), "RECREATE");
 	f -> cd();
 	TTree * tree = new TTree("ntuple", "ntuple");
@@ -258,9 +272,9 @@ int main(int argc, char *argv[])
 	the_decay->use_roc=true;
 	
 	bool event_accepted = false;
-//	int nhalfevents =       100;
+	int nhalfevents =       100;
 //	int nhalfevents =   1000000;
-	int nhalfevents = 100000000;
+//	int nhalfevents = 100000000;
 	
 	int mismatch_eventcounter = 0;
 	cout << "Let's go!" << endl;
@@ -268,12 +282,12 @@ int main(int argc, char *argv[])
 	{
 		if(sigmacount==0)
 		{
-			the_decay->the_pops->set_sigma_plus();
+			the_decay->GetAtomicSetup()->set_sigma_plus();
 			cout << "Beginning event generation for sigma+." << endl;
 		}
 		else if(sigmacount==1)
 		{
-			the_decay->the_pops->set_sigma_minus();
+			the_decay->GetAtomicSetup()->set_sigma_minus();
 			cout << "Beginning event generation for sigma-." << endl;
 		}
 		else
@@ -348,8 +362,8 @@ int main(int argc, char *argv[])
 		//	cout << "      A_beta = " << jtw_Abeta << endl;
 			
 			//
-			if( the_decay->the_pops->get_sigma() > 0 ) { sigma_plus = 1; }
-			else                                       { sigma_plus = 0; }
+			if( the_decay->GetAtomicSetup()->get_sigma() > 0 ) { sigma_plus = 1; }
+			else                                               { sigma_plus = 0; }
 			
 			the_prob     = the_decay->the_probability;
 			jtw_prob     = the_decay->jtw_probability;
@@ -401,7 +415,7 @@ int main(int argc, char *argv[])
 	tree -> GetCurrentFile() -> Close();
 	
 	cout << "Events are written and file " << filename << " is closed." << endl;
-	*/
+	
 	
 	return 0;
 }

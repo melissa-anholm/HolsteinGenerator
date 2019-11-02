@@ -10,7 +10,9 @@
 #include "Holstein52Isotope.hh"  // formerly HolsteinVars
 #include "K37SublevelPopulations.hh"
 #include "IsotopeValues.hh"
+#include "K37Config.hh"
 //#include "SplitString.hh"
+#include "globals.hh"
 
 
 using std::cout;
@@ -54,10 +56,13 @@ HolsteinVars::HolsteinVars():
 	a1(0), a2(0), c1(0), c2(0), 
 	b(0), d(0), e(0), f(0), g(0), h(0), 
 	j2(0), j3(0), 
-	sigma_M1(0), sigma_M2(0),
-	nuclear_filename(string("K_37_INPUT.txt"))
+	sigma_M1(0), sigma_M2(0)
+//	nuclear_filename(string("K_37_INPUT.txt"))
 //	atomic_filename(string("K_37_POPULATIONS_INPUT.txt"))
 {
+	G4cout << "Creating a new HolsteinVars()." << G4endl;
+	G4String configPath = CONFIGURATION_DIRECTORY;
+	G4String nuclear_filename = configPath + "K_37_INPUT.txt";
 	theInputs = SS::loadup_textfile(nuclear_filename);    // reads the nuclear text file into 'theInputs'.
 //	loadup_textfile(atomic_filename);     // reads the atomic text file into 'theInputs'.
 	initialize_physics_parameters();      //
