@@ -41,8 +41,8 @@ public:
 	bool check_PDF_acceptance();         // uses initial_momentum
 	bool check_detector_acceptance();    // creates hit_position from initial_momentum and initial_position.  then checks.
 	void randomize_nuclear(bool doit=true);
-	void randomize_atomic(bool doit=true);
-	void randomize_start(bool doit=true);   // initial_position, in G4 mm.
+//	void randomize_atomic(bool doit=true);
+//	void randomize_start(bool doit=true);   // initial_position, in G4 mm.
 	bool shoot_decayevent();
 	void print_results();
 	void print_vars() { this->Params->print_vars(); };
@@ -83,7 +83,7 @@ public:
 	chamber_geometry the_geometry;
 
 	double Mz, Mz2, Mz3;
-	void run_fast(bool doit) { runfast=doit; };
+//	void run_fast(bool doit) { runfast=doit; };
 	
 	// For export only:
 	double jtw_xi, jtw_Abeta, jtw_rho; // not a function of E.  const. for a given set of parameters.
@@ -93,7 +93,7 @@ private:
 	// run parameters..
 	bool use_cone;
 	double cone_costheta;
-	bool runfast; // don't look at detector acceptance if it's not accepted to the PDF.  Should check detector acceptance first, maybe...
+//	bool runfast; // don't look at detector acceptance if it's not accepted to the PDF.  Should check detector acceptance first, maybe...
 	double prob_max;
 	
 	//, event_P, event_T, event_Mzcubed;

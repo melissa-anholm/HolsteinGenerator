@@ -16,11 +16,6 @@
 #include "globals.hh"
 
 //#include "G4VUserPrimaryGeneratorAction.hh"
-//#include "G4ParticleGun.hh"  // G4VPrimaryGenerator
-//#include "G4PhaseSpaceDecayChannel.hh"  
-//#include "G4DecayTable.hh"
-
-//
 #include "K37AtomicSetup.hh"
 #include "Holstein52Generator.hh"
 //#include "K37EventGenerator.hh"  
@@ -49,30 +44,11 @@ public:
 	void GeneratePrimaries();  // ok, what gets called after this?  what calls this??
 	G4double getVelocity(G4double kineticEnergy, G4double massOfParticle = 0.510998);
 	
-//	void setBetaVertex();
-//	void setDaughterVertex(G4double recoil_charge);
-//	void SetSOelectronVertices(G4Event *ev, G4int num_so_electron);
-//	void SetGammaVertex(G4Event *ev);
-	
 //	void SetPolarization(G4double pol);
 //	void SetAlignment(G4double ali);
-//	void SetRecoilCharge(G4int charge);
-//	G4int GetRecoilCharge()    { return recoil_charge_; }
-	
-//	void SetMakeBeta(G4bool flag)              { make_beta_               = flag; }
-//	void SetMakeRecoil(G4bool flag)            { make_recoil_             = flag; }
-//	void SetMakeShakeoffElectrons(G4bool flag) { make_shakeoff_electrons_ = flag; }
-//	void SetMakeUniformEnergy(G4bool flag)     { make_uniform_E_          = flag; }
 	
 //	K37EventGenerator* GetEventGenerator()      { return evGenerator; }  // this seems to break things.
 	Holstein52Generator* GetHolsteinGenerator() { return holstein52_generator; }  // does this break things too???
-	
-//	void ToggleUseGPS();
-//	void SetUseGPS(bool b);
-
-//	void SetChargeStatesFile(G4String filename);
-//	G4String GetChargeStatesFile();
-//	void GetChargeStates();
 	
 	void SetUse_Holstein52(bool tf) { use_holstein52 = tf;   }
 	bool GetUse_Holstein52()        { return use_holstein52; }
@@ -103,37 +79,22 @@ private:
 //	G4ParticleDefinition* electron;
 //	G4ParticleDefinition* positron;
 //	G4ParticleDefinition* gamma;
-
-//	G4double recoil_charge_;               // Also determines number of SOE
 	
 	// Ratios of recoil charge distribution...
 //	vector<G4double> charge_state_ratio_;      // Ar0 -> Ar+7
 //	vector<G4double> branching_ratio; //Just contains mainbrnach and 2% now. 
 //	                       //The other branches enter in at the 0.04% level. 
 
-//	K37PrimaryGeneratorMessenger* gunMessenger;   // messenger of this class
 	G4ThreeVector v;
-//	G4PrimaryVertex* vertex;
 	G4ThreeVector EventVertex;
-//	G4ParticleDefinition *K37Neutral;
-//	G4ParticleDefinition *K37Minus;
-//	G4DecayTable *decayTableAr37Minus;
-//	G4PhaseSpaceDecayChannel *K37MinusDecayMode;
 	
 //	K37EventGenerator                     *evGenerator;
 	Holstein52Generator                   *holstein52_generator;  // maybe *this* thing is what owns the atomic setup?  ... yes, I think that's true. Even in TheHolstein.
 //	K37EventGeneratorNoRecoilOrderEffects *twoPercent;
 
-//	G4ThreeVector GetMomentumIsotropic(G4double kinetic_energy, G4double mass);
-	
-//	G4bool make_beta_;
-//	G4bool make_recoil_;
-//	G4bool make_shakeoff_electrons_;
-//	G4bool make_uniform_E_;
 	G4bool makeTwoPercent;
 	G4bool thisEventIsATwoPercent;
 
-//	G4String recoil_charge_file_;
 private:
 	double P_thisevent;
 	double T_thisevent;

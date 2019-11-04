@@ -218,9 +218,6 @@ void K37Cloud::SetTemperature(G4double temp)
 	SetTemperature(G4ThreeVector(temp, temp, temp));
 	G4cout << "Set cloud temperature to:  " << temp / kelvin << " Kelvin." << G4endl;
 }
-*/
-
-/*
 void K37Cloud::set_up_temperature()    // must have initial_size, final_size, and cycleTime already set up.
 {
 	// initial_cloud_size

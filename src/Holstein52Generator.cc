@@ -66,73 +66,77 @@ Holstein52Generator::Holstein52Generator(HolsteinVars * HV, K37AtomicSetup * ato
 	// run parameters:
 	use_roc(true),
 	use_cone(false), cone_costheta(0),
-	runfast(true), prob_max(0.2)
+//	runfast(true), 
+	prob_max(0.2)
 {
 //	cout << "Called Holstein52Generator::Holstein52Generator(HolsteinVars * HV, K37AtomicSetup * atomic_setup)" << endl;
 	
 	// Nuclear:
 	Params = HV;
 	
-	M_F_isospin    = Params->M_F_isospin;    // exact
-	I_spin         = Params->I_spin;         // exact
-	A_nucleons     = Params->A_nucleons;     // exact
-	hbarc_eV_nm    = Params->hbarc_eV_nm;    // exact.  unitless. ... it is *not* fucking unitless.  ... it needs to be unitless for now though, because who fucking knows what units the matrix elements are supposed to have.
-	Z_daughter     = Params->Z_daughter;     // exact
-	speed_of_light = Params->speed_of_light; // exact.  double.  no G4units.
+	M_F_isospin    = Params->get_M_F_isospin();    // exact
+	I_spin         = Params->get_I_spin();         // exact
+	A_nucleons     = Params->get_A_nucleons();     // exact
+	hbarc_eV_nm    = Params->get_hbarc_eV_nm();    // exact.  unitless. ... it is *not* fucking unitless.  ... it needs to be unitless for now though, because who fucking knows what units the matrix elements are supposed to have.
+	Z_daughter     = Params->get_Z_daughter();     // exact
+	speed_of_light = Params->get_speed_of_light(); // exact.  double.  no G4units.
 	
-	E0    = Params->E0;    // uncertain (propagation) MeV.  comes out in MeV from HolsteinVars.
-	M     = Params->M;     // uncertain (propagation) MeV.  comes out in MeV from HolsteinVars.
-	Delta = Params->Delta; // uncertain (propagation) MeV.  comes out in MeV from HolsteinVars.  units propagated.
-	m_e   = Params->m_e;   // uncertain (direct).     MeV.  comes out in MeV from HolsteinVars.
+	E0    = Params->get_E0();    // uncertain (propagation) MeV.  comes out in MeV from HolsteinVars.
+	M     = Params->get_M();     // uncertain (propagation) MeV.  comes out in MeV from HolsteinVars.
+	Delta = Params->get_Delta(); // uncertain (propagation) MeV.  comes out in MeV from HolsteinVars.  units propagated.
+	m_e   = Params->get_m_e();   // uncertain (direct).     MeV.  comes out in MeV from HolsteinVars.
 	
-	deltaC = Params->deltaC; // uncertain (direct)
+	deltaC = Params->get_deltaC(); // uncertain (direct)
 	
-	quad_parent   = Params->quad_parent;   // uncertain (direct) 
-	quad_daughter = Params->quad_daughter; // uncertain (direct) 
-	mu_parent     = Params->mu_parent;     // uncertain (direct) 
-	mu_daughter   = Params->mu_daughter;   // uncertain (direct) 
+	quad_parent   = Params->get_quad_parent();   // uncertain (direct) 
+	quad_daughter = Params->get_quad_daughter(); // uncertain (direct) 
+	mu_parent     = Params->get_mu_parent();     // uncertain (direct) 
+	mu_daughter   = Params->get_mu_daughter();   // uncertain (direct) 
 	
-	g_V  = Params->g_V;  // exact
-	g_A  = Params->g_A;  // exact-ish??
-	g_II = Params->g_II; // exact
-	g_S  = Params->g_S;  // exact
-	g_P  = Params->g_P;  // exact
-	g_M  = Params->g_M;  // exact
+	g_V  = Params->get_g_V();  // exact
+	g_A  = Params->get_g_A();  // exact-ish??
+	g_II = Params->get_g_II(); // exact
+	g_S  = Params->get_g_S();  // exact
+	g_P  = Params->get_g_P();  // exact
+	g_M  = Params->get_g_M();  // exact
 	
-	M_F     = Params->M_F;     // uncertain (propagation, deltaC) 
-	M_GT    = Params->M_GT;    // uncertain (propagation, deltaC) 
-	M_r2    = Params->M_r2;    // exact
-	M_sr2   = Params->M_sr2;   // exact
-	M_sL    = Params->M_sL;    // exact
-	M_srp   = Params->M_srp;   // exact
-	M_rdotp = Params->M_rdotp; // exact
-	M_1y    = Params->M_1y;    // exact
-	M_2y    = Params->M_2y;    // exact
-	M_3y    = Params->M_3y;    // exact
-	M_Q     = Params->M_Q;     // uncertain (propagation) -- I think this doesn't get used directly...
-	M_rp    = Params->M_rp;    // uncertain (propagation)
+	M_F     = Params->get_M_F();     // uncertain (propagation, deltaC) 
+	M_GT    = Params->get_M_GT();    // uncertain (propagation, deltaC) 
+	M_r2    = Params->get_M_r2();    // exact
+	M_sr2   = Params->get_M_sr2();   // exact
+	M_sL    = Params->get_M_sL();    // exact
+	M_srp   = Params->get_M_srp();   // exact
+	M_rdotp = Params->get_M_rdotp(); // exact
+	M_1y    = Params->get_M_1y();    // exact
+	M_2y    = Params->get_M_2y();    // exact
+	M_3y    = Params->get_M_3y();    // exact
+	M_Q     = Params->get_M_Q();     // uncertain (propagation) -- I think this doesn't get used directly...
+	M_rp    = Params->get_M_rp();    // uncertain (propagation)
 	// M_L = Params->M_L;  // exact
 	
-	a1 = Params->a1; // uncertain (propagation, M1 M2, M_F)
-	a2 = Params->a2; // uncertain (propagation, M1 M2)
-	c1 = Params->c1; // uncertain (propagation, M1 M2, M_GT, (g_A) )
-	c2 = Params->c2; // uncertain (propagation, M1 M2, (g_A) )
+	a1 = Params->get_a1(); // uncertain (propagation, M1 M2, M_F)
+	a2 = Params->get_a2(); // uncertain (propagation, M1 M2)
+	c1 = Params->get_c1(); // uncertain (propagation, M1 M2, M_GT, (g_A) )
+	c2 = Params->get_c2(); // uncertain (propagation, M1 M2, (g_A) )
 	
-	b  = Params->b;  // uncertain (propagation, mu_parent mu_daughter)
-	d  = Params->d;  // uncertain (propagation, M1 M2, M_GT, (g_A) )
-	e  = Params->e;  // exact by isospin(?)+CVC.
-	g  = Params->g;  // uncertain (propagation, M1 M2, quad_parent, quad_daughter)
-	f  = Params->f;  // uncertain (propagation, M1 M2, quad_parent, quad_daughter)
-	h  = Params->h;  // uncertain (propagation, M1 M2, M_GT, (g_A) )
+	b  = Params->get_b();  // uncertain (propagation, mu_parent mu_daughter)
+	d  = Params->get_d();  // uncertain (propagation, M1 M2, M_GT, (g_A) )
+	e  = Params->get_e();  // exact by isospin(?)+CVC.
+	g  = Params->get_g();  // uncertain (propagation, M1 M2, quad_parent, quad_daughter)
+	f  = Params->get_f();  // uncertain (propagation, M1 M2, quad_parent, quad_daughter)
+	h  = Params->get_h();  // uncertain (propagation, M1 M2, M_GT, (g_A) )
 	
-	j2 = Params->j2; // uncertain (propagation, M1 M2, (g_A) )
-	j3 = Params->j3; // uncertain (propagation, M1 M2, (g_A) )
+	j2 = Params->get_j2(); // uncertain (propagation, M1 M2, (g_A) )
+	j3 = Params->get_j3(); // uncertain (propagation, M1 M2, (g_A) )
+	
+	
 	
 	jtw_a1 = g_V*Params->FindValue("M_F");  // hasn't had isospin correction turned on yet.
 	jtw_c1 = g_A*Params->FindValue("M_GT"); // hasn't had isospin correction turned on yet.
 	jtw_xi    = 2.0*(jtw_a1*jtw_a1 + jtw_c1*jtw_c1);
 	jtw_Abeta = 2.0*(jtw_c1*jtw_c1*(1.0/(3.0/2.0 + 1.0)) + 2.0*jtw_a1*jtw_c1*sqrt((3.0/2.0)/(3.0/2.0 + 1.0)) ) / (2.0*(jtw_a1*jtw_a1 + jtw_c1*jtw_c1));
 	jtw_rho   = jtw_c1/jtw_a1;
+	
 	
 	// Atomic:
 	the_atomic_setup = atomic_setup;
@@ -150,10 +154,10 @@ Holstein52Generator::Holstein52Generator(HolsteinVars * HV, K37AtomicSetup * ato
 bool Holstein52Generator::shoot_decayevent() // uses param. runfast to decide whether to check *both* acceptances if one has already failed.
 {
 	bool verbose = false;
-	pdf_acceptance = false;  // obsolete?
-	jtw_acceptance = false;
+	pdf_acceptance      = false;  // obsolete?
+	jtw_acceptance      = false;
 	holstein_acceptance = false;
-	det_acceptance = false;
+	det_acceptance      = false;
 	
 	this -> randomize_nuclear(false);
 	
@@ -167,20 +171,27 @@ bool Holstein52Generator::shoot_decayevent() // uses param. runfast to decide wh
 	//
 	
 	
-	this -> randomize_direction();           // pick Ebeta, costheta (possibly from the cone.)
-	if(runfast)  // true by default, but I'm pretty sure I disable it in main(...).  this is useful to turn off if I want to record *all* the events generated and check acceptance later.
-	{
-		this -> check_detector_acceptance(); // set:  det_acceptance.
-		if(det_acceptance)
-		{
-			this -> check_PDF_acceptance();  // set:  the_probability, pdf_acceptance.  jtw_probability, jtw_acceptance.  holstein_probability, holstein_acceptance.
-		}
-	}
-	else
-	{
-		this -> check_PDF_acceptance();      // set:  the_probability, pdf_acceptance.
-		this -> check_detector_acceptance(); // set:  det_acceptance.
-	}
+	this -> randomize_direction();           // pick Ebeta, costheta (using the cone, if we're doing that.)
+	
+	this -> check_PDF_acceptance();      // set:  the_probability, pdf_acceptance.
+	this -> check_detector_acceptance(); // set:  det_acceptance.  // maybe do this from the PGA?  We need to know the start position to do this.
+	
+	
+//	if(runfast)  // true by default, but I'm pretty sure I disable it in main(...).  this is useful to turn off if I want to record *all* the events generated and check acceptance later.
+//	{
+//		this -> check_detector_acceptance(); // set:  det_acceptance.
+//		if(det_acceptance)
+//		{
+//			this -> check_PDF_acceptance();  // set:  the_probability, pdf_acceptance.  jtw_probability, jtw_acceptance.  holstein_probability, holstein_acceptance.
+//		}
+//	}
+//	else
+//	{
+//		this -> check_PDF_acceptance();      // set:  the_probability, pdf_acceptance.
+//		this -> check_detector_acceptance(); // set:  det_acceptance.
+//	}
+	
+	
 	
 	if(verbose)
 	{
@@ -213,17 +224,17 @@ void Holstein52Generator::randomize_nuclear(bool doit)  // needs Params.
 	delta_M2 = 0.0*MeV;
 	if(doit)
 	{
-		delta_M1 = ( G4RandGauss::shoot(0, Params->sigma_M1/MeV) )*MeV;  // MeV
-		delta_M2 = ( G4RandGauss::shoot(0, Params->sigma_M2/MeV) )*MeV;  // MeV
+		delta_M1 = ( G4RandGauss::shoot(0, Params->get_sigma_M1()/MeV) )*MeV;  // MeV
+		delta_M2 = ( G4RandGauss::shoot(0, Params->get_sigma_M2()/MeV) )*MeV;  // MeV
 	}
 	
 	// masses and energies.  These are all in MeV.
 	G4double delta_M = (delta_M1 + delta_M2)/2.0;  // both things are already in G4units of MeV.
 	G4double delta_Delta = (delta_M1 - delta_M2);  // both things are already in G4units of MeV.
 	
-	M     = Params->M     + delta_M;      // both things in G4units of MeV already.
-	Delta = Params->Delta + delta_Delta;  // both things in G4units of MeV already.
-	m_e   = Params->m_e;     // don't even bother with this uncertainty right now.  comes out in G4units from HolsteinVars.
+	M     = Params->get_M()     + delta_M;      // both things in G4units of MeV already.
+	Delta = Params->get_Delta() + delta_Delta;  // both things in G4units of MeV already.
+	m_e   = Params->get_m_e();     // don't even bother with this uncertainty right now.  comes out in G4units from HolsteinVars.
 	E0    = (Delta/MeV)*(1.0+(m_e/MeV)*(m_e/MeV)/(2.0*(M/MeV)*(Delta/MeV)) )/(1.0+(Delta/MeV)/(2.0*(M/MeV))) * MeV;  // error is propagated already;  M1, M2 --> M, Delta --> E0.
 	rc    = 1.0 + (Delta/MeV)/(2.0*(M/MeV));  // unitless.
 	
@@ -234,11 +245,11 @@ void Holstein52Generator::randomize_nuclear(bool doit)  // needs Params.
 	double delta_deltaC = 0;
 	if(doit)
 	{
-		delta_deltaC = G4RandGauss::shoot(0, Params->sigma_deltaC);
+		delta_deltaC = G4RandGauss::shoot(0, Params->get_sigma_deltaC() );
 	}
-	deltaC = Params->deltaC + delta_deltaC;
-	M_F  = Params->M_F  * sqrt(1.0-Params->deltaC) / sqrt(1.0-deltaC);  // uncorrect the prev. correction, they re-correct with error.
-	M_GT = Params->M_GT * sqrt(1.0-Params->deltaC) / sqrt(1.0-deltaC);  // this probably doesn't capture all the physics of M_GT and deltaC ...
+	deltaC = Params->get_deltaC() + delta_deltaC;
+	M_F  = Params->get_M_F()  * sqrt(1.0-Params->get_deltaC() ) / sqrt(1.0-deltaC);  // uncorrect the prev. correction, they re-correct with error.
+	M_GT = Params->get_M_GT() * sqrt(1.0-Params->get_deltaC() ) / sqrt(1.0-deltaC);  // this probably doesn't capture all the physics of M_GT and deltaC ...
 	/// !!!  MELISSA LOOK HERE!  
 	/// !!!  I THINK THESE VALUES FOR M_F AND M_GT HAVE THE WRONG ISOSPIN SYMMETRY ERROR PROPAGATION, 
 	/// !!!  AND NOT JUST BECAUSE OF SUBTLETIES!
@@ -247,20 +258,20 @@ void Holstein52Generator::randomize_nuclear(bool doit)  // needs Params.
 	// magnetic moments:
 	if(doit)
 	{
-		delta_mu_parent   = G4RandGauss::shoot(0, Params->sigma_mu_parent);
-		delta_mu_daughter = G4RandGauss::shoot(0, Params->sigma_mu_daughter);
+		delta_mu_parent   = G4RandGauss::shoot(0, Params->get_sigma_mu_parent());
+		delta_mu_daughter = G4RandGauss::shoot(0, Params->get_sigma_mu_daughter());
 	}
-	mu_parent         = Params->mu_parent   + delta_mu_parent;   
-	mu_daughter       = Params->mu_daughter + delta_mu_daughter;
+	mu_parent         = Params->get_mu_parent()   + delta_mu_parent;   
+	mu_daughter       = Params->get_mu_daughter() + delta_mu_daughter;
 	
 	// quadrupole moments:
 	if(doit)
 	{
-		delta_quad_parent   = G4RandGauss::shoot(0, Params->sigma_quad_parent);    // MeV
-		delta_quad_daughter = G4RandGauss::shoot(0, Params->sigma_quad_daughter);  // MeV
+		delta_quad_parent   = G4RandGauss::shoot(0, Params->get_sigma_quad_parent());    // MeV
+		delta_quad_daughter = G4RandGauss::shoot(0, Params->get_sigma_quad_daughter());  // MeV
 	}
-	quad_parent   = Params->quad_parent   + delta_quad_parent;
-	quad_daughter = Params->quad_daughter + delta_quad_daughter;
+	quad_parent   = Params->get_quad_parent()   + delta_quad_parent;
+	quad_daughter = Params->get_quad_daughter() + delta_quad_daughter;
 	
 	// Use experimental quadrupole moments for 'g'-->M_Q, rather than calculated M_Q.
 	double jterm = sqrt( (I_spin + 1.0)*(2.0*I_spin + 3.0)/( I_spin*(2.0*I_spin - 1.0) ));
@@ -338,7 +349,7 @@ void Holstein52Generator::randomize_nuclear(bool doit)  // needs Params.
 		j2= 0.0;
 		j3= 0.0;
 	}
-	
+	/*
 	if(verbose)
 	{
 		cout << std::setprecision(12);
@@ -419,9 +430,10 @@ void Holstein52Generator::randomize_nuclear(bool doit)  // needs Params.
 		cout << endl;
 		cout << "Nuclear parameters have been randomized." << endl;
 	}
-	
+	*/
 	return;
 }
+/*
 void Holstein52Generator::randomize_atomic(bool doit)
 {
 	bool verbose=false;
@@ -430,15 +442,33 @@ void Holstein52Generator::randomize_atomic(bool doit)
 		if(doit) { cout << "Randomizing atomic parameters! (or I would be if this function did anything yet.)" << endl; }
 		else     { cout << "Not randomizing atomic parameters.  It's not implemented yet anyway." << endl; }
 	}
-	
 	// Do this step whether I randomize atomic params or not, because I might have adjusted the polarization before this event.
 	Mz  = the_atomic_setup->GetPops()->get_Mz();
 	Mz2 = the_atomic_setup->GetPops()->get_Mz2();
 	Mz3 = the_atomic_setup->GetPops()->get_Mz3();
-	
 	initialize_lambdafuncs();  // this depends on the sublevel populations, which should be set up above.
+	
 	return;
 }
+*/
+/*
+void Holstein52Generator::randomize_start(bool doit)
+{
+	bool verbose=false;
+	// pick start position.
+	if(verbose)
+	{
+		if(doit) { cout << "Trying to randomize start position, but this feature isn't actually implemented." << endl; }
+		else     { cout << "Selecting non-randomized start position.  It doesn't randomize yet anyway." << endl; }
+	}
+	initial_position.set(0.0*mm,0.0*mm,0.0*mm);
+	if(doit)
+	{
+		// pick some other position.
+	}
+	return;
+}
+*/
 
 void Holstein52Generator::initialize_lambdafuncs()
 {
@@ -502,6 +532,13 @@ double Holstein52Generator::F_1(double E) // a1 c1 c2 a2 (E0/MeV) (m_e/MeV) (M/M
 	
 	double f1, f2, f3;
 	double t1a, t1b, t2a, t2b, t3a, t3b;
+	//
+	double u          = Params->get_u(); 
+	double delta_uv   = Params->get_delta_uv();
+	double gamma_uv   = Params->get_gamma_uv();
+	double lambda_uv  = Params->get_lambda_uv(); 
+	
+	/*
 	f1 = Params->delta_uv*sqrt(Params->u/(Params->u+1)) * 2.0;
 	t1a = a1*c1 - ((E0/MeV)/(3.0*(M/MeV)))*(a1*c1 + a1*d - a1*b) + (E/(3.0*(M/MeV)))*(7.0*a1*c1 - a1*b + a1*d);  
 	t1b = (a1*c2 + c1*a2)*(4.0*E*((E0/MeV)-E)+3.0*(m_e/MeV)*(m_e/MeV))/(3.0*(M/MeV)*(M/MeV));
@@ -511,6 +548,19 @@ double Holstein52Generator::F_1(double E) // a1 c1 c2 a2 (E0/MeV) (m_e/MeV) (M/M
 	t2b = -2.0*(E0/MeV)/(3.0*(M/MeV))*(c1*c1 + c1*d - c1*b) + E/(3.0*(M/MeV))*(11.0*c1*c1 - c1*d - 5.0*c1*b);
 	
 	f3 = Params->lambda_uv/(Params->u+1.0);
+	t3a = -5.0*E/(M/MeV)*c1*f + sqrt(3.0/2.0)*c1*g*((E0/MeV)*(E0/MeV) - 11.0*(E0/MeV)*E + 6.0*(m_e/MeV)*(m_e/MeV) + 4.0*E*E)/(6.0*(M/MeV)*(M/MeV));
+	t3b = -3.0*c1*j2*(8.0*E*E - 5.0*(E0/MeV)*E - 3.0*(m_e/MeV)*(m_e/MeV))/(6.0*(M/MeV)*(M/MeV));
+	*/
+	
+	f1 = delta_uv*sqrt( u/(u+1)) * 2.0;
+	t1a = a1*c1 - ((E0/MeV)/(3.0*(M/MeV)))*(a1*c1 + a1*d - a1*b) + (E/(3.0*(M/MeV)))*(7.0*a1*c1 - a1*b + a1*d);  
+	t1b = (a1*c2 + c1*a2)*(4.0*E*((E0/MeV)-E)+3.0*(m_e/MeV)*(m_e/MeV))/(3.0*(M/MeV)*(M/MeV));
+	
+	f2 = gamma_uv/(u+1.0);
+	t2a = c1*c1 + 2.0*c1*c2*(8.0*E*((E0/MeV)-E) + 3.0*(m_e/MeV)*(m_e/MeV))/(3.0*(M/MeV)*(M/MeV));
+	t2b = -2.0*(E0/MeV)/(3.0*(M/MeV))*(c1*c1 + c1*d - c1*b) + E/(3.0*(M/MeV))*(11.0*c1*c1 - c1*d - 5.0*c1*b);
+	
+	f3 = lambda_uv/(u+1.0);
 	t3a = -5.0*E/(M/MeV)*c1*f + sqrt(3.0/2.0)*c1*g*((E0/MeV)*(E0/MeV) - 11.0*(E0/MeV)*E + 6.0*(m_e/MeV)*(m_e/MeV) + 4.0*E*E)/(6.0*(M/MeV)*(M/MeV));
 	t3b = -3.0*c1*j2*(8.0*E*E - 5.0*(E0/MeV)*E - 3.0*(m_e/MeV)*(m_e/MeV))/(6.0*(M/MeV)*(M/MeV));
 	
@@ -529,11 +579,26 @@ double Holstein52Generator::F_2(double E) // c1 (E0/MeV) (M/MeV) a1 d b g j2 f j
 	// did I double-check this?
 	double f2;
 	double t1, t2, t3, t4;
+	//
+	double u          = Params->get_u(); 
+	double theta_uv   = Params->get_theta_uv(); 
+	double delta_uv   = Params->get_delta_uv();
+	double kappa_uv   = Params->get_kappa_uv(); 
+	double epsilon_uv = Params->get_epsilon_uv();
+
+	t1 = theta_uv*E/(2.0*(M/MeV))*(c1*c1 + 8.0*c1*c2*((E0/MeV)-E)/(3.0*(M/MeV)) - c1*d - c1*b);
+	f2 = -1.0*delta_uv*E/(M/MeV)*sqrt( (u*(u+1.0))/((2.0*u-1.0)*(2.0*u+3.0)) );
+	t2 = sqrt(3.0/2.0)*a1*f + a1*g*(E+2.0*(E0/MeV))/(4.0*(M/MeV)) - sqrt(3.0/2.0)*a1*j2*((E0/MeV)-E)/(2.0*(M/MeV));
+	t3 = kappa_uv*E/(2.0*(M/MeV))*(-3.0*c1*f -sqrt(3.0/2.0)*c1*g*((E0/MeV)-E)/(M/MeV) + 3.0*c1*j2*((E0/MeV)-2.0*E)/(2.0*(M/MeV)));
+	t4 = epsilon_uv*c1*j3*(21.0*E*E)/(8.0*(M/MeV)*(M/MeV));
+
+	/*
 	t1 = Params->theta_uv*E/(2.0*(M/MeV))*(c1*c1 + 8.0*c1*c2*((E0/MeV)-E)/(3.0*(M/MeV)) - c1*d - c1*b);
 	f2 = -1.0*Params->delta_uv*E/(M/MeV)*sqrt( (Params->u*(Params->u+1.0))/((2.0*Params->u-1.0)*(2.0*Params->u+3.0)) );
 	t2 = sqrt(3.0/2.0)*a1*f + a1*g*(E+2.0*(E0/MeV))/(4.0*(M/MeV)) - sqrt(3.0/2.0)*a1*j2*((E0/MeV)-E)/(2.0*(M/MeV));
 	t3 = Params->kappa_uv*E/(2.0*(M/MeV))*(-3.0*c1*f -sqrt(3.0/2.0)*c1*g*((E0/MeV)-E)/(M/MeV) + 3.0*c1*j2*((E0/MeV)-2.0*E)/(2.0*(M/MeV)));
 	t4 = Params->epsilon_uv*c1*j3*(21.0*E*E)/(8.0*(M/MeV)*(M/MeV));
+	*/
 	
 	double F2 = t1 + f2*t2 + t3 + t4;
 	if(verbose) { cout << "F2 = " << F2 << endl; }
@@ -547,10 +612,22 @@ double Holstein52Generator::F_3(double E) // a1 j3 (M/MeV) c1 g j2 j3
 	double f1;
 	double t1, t2, t3;
 	
+	double u        = Params->get_u(); 
+	double delta_uv = Params->get_delta_uv();
+	double rho_uv   = Params->get_rho_uv();
+	double sigma_uv = Params->get_sigma_uv(); 
+	
+	f1 = -1.0*delta_uv*(3.0*u*u + 3.0*u-1.0)*sqrt(u)/sqrt( (u-1.0)*(u+1.0)*(u+2.0)*(2.0*u-1.0)*(2.0*u+3.0) );
+	t1 = a1*j3*sqrt(15.0)*E*E/(4.0*(M/MeV)*(M/MeV));
+	t2 = rho_uv/(u+1.0)*(5.0*E*E)/(4.0*(M/MeV)*(M/MeV))*(sqrt(3)*c1*g + sqrt(2)*c1*j2);
+	t3 = -1.0*sigma_uv/(u+1.0)*(5.0*E*E)/(2.0*(M/MeV)*(M/MeV))*c1*j3;
+	
+	/*
 	f1 = -1.0*Params->delta_uv*(3.0*Params->u*Params->u + 3.0*Params->u-1.0)*sqrt(Params->u)/sqrt( (Params->u-1.0)*(Params->u+1.0)*(Params->u+2.0)*(2.0*Params->u-1.0)*(2.0*Params->u+3.0) );
 	t1 = a1*j3*sqrt(15.0)*E*E/(4.0*(M/MeV)*(M/MeV));
 	t2 = Params->rho_uv/(Params->u+1.0)*(5.0*E*E)/(4.0*(M/MeV)*(M/MeV))*(sqrt(3)*c1*g + sqrt(2)*c1*j2);
 	t3 = -1.0*Params->sigma_uv/(Params->u+1.0)*(5.0*E*E)/(2.0*(M/MeV)*(M/MeV))*c1*j3;
+	*/
 	
 	double F3 = f1*t1 + t2 + t3;
 	if(verbose) { cout << "F3 = " << F3 << endl; }
@@ -588,7 +665,7 @@ double Holstein52Generator::get_probability(G4double E, double costheta) // want
 	double cos2theta = 1.0; // kludge
 	double prefactor = 2.0*Gv2*cos2theta/( pow(2.0*pi, 4) );
 	
-	double the_scaling = prefactor*FermiFunction(Params->Z_daughter, (E/MeV))*pow((E0/MeV)-(E/MeV), 2)*(E/MeV)*pbeta(E);
+	double the_scaling = prefactor*FermiFunction(Params->get_Z_daughter(), (E/MeV))*pow((E0/MeV)-(E/MeV), 2)*(E/MeV)*pbeta(E);
 	
 	if(verbose>0)
 	{
@@ -630,7 +707,7 @@ double Holstein52Generator::get_jtw_probability(G4double E, double costheta)
 	double Gv2       = 1.0; // kludge
 	double cos2theta = 1.0; // kludge
 	double prefactor = 2.0*Gv2*cos2theta/( pow(2.0*pi, 4) );
-	double the_scaling = prefactor*FermiFunction(Params->Z_daughter, (E/MeV))*pow((E0/MeV)-(E/MeV), 2)*(E/MeV)*pbeta(E);
+	double the_scaling = prefactor*FermiFunction(Params->get_Z_daughter(), (E/MeV))*pow((E0/MeV)-(E/MeV), 2)*(E/MeV)*pbeta(E);
 	
 	double fake_F0 = (jtw_a1*jtw_a1 + jtw_c1*jtw_c1);
 	double fake_F1 = jtw_c1*jtw_c1*(1.0/(3.0/2.0 + 1.0)) + 2.0*jtw_a1*jtw_c1*sqrt((3.0/2.0)/(3.0/2.0 + 1.0));
@@ -643,7 +720,7 @@ double Holstein52Generator::get_jtw_probability(G4double E, double costheta)
 }
 
 
-void Holstein52Generator::randomize_direction() // saves initial_momentum and initial_velocity in class.  Also Ebeta.  
+void Holstein52Generator::randomize_direction() // saves initial_momentum and initial_velocity in class.  Also Ebeta.  Checks the cone, and is optimized for that.
 {
 	bool verbose=false;
 	
@@ -679,7 +756,7 @@ void Holstein52Generator::randomize_direction() // saves initial_momentum and in
 	{
 		// test:
 		cout << "*" << endl;
-		cout << "(Ebeta/MeV)                                                     = " << (Ebeta/MeV) << endl;
+		cout << "(Ebeta/MeV)                                               = " << (Ebeta/MeV) << endl;
 		cout << "pbeta(Ebeta)                                              = " << pbeta(Ebeta) << endl;
 		cout << "get_v_from_p( pbeta(Ebeta) )                              = " << get_v_from_p( pbeta(Ebeta) ) << endl;
 		cout << "    initial_velocity.mag()                                = " << initial_velocity.mag() << endl;
@@ -689,15 +766,14 @@ void Holstein52Generator::randomize_direction() // saves initial_momentum and in
 					+ initial_velocity.y()*initial_velocity.y() 
 					+ initial_velocity.z()*initial_velocity.z() ) << endl;
 
-		cout << "get_p_from_v( get_v_from_p( pbeta(Ebeta) ) )/MeV              = " << get_p_from_v( get_v_from_p( pbeta(Ebeta)) )/MeV << endl;
-		cout << "    initial_momentum.mag()/MeV                                = " << initial_momentum.mag()/MeV << endl;
+		cout << "get_p_from_v( get_v_from_p( pbeta(Ebeta) ) )/MeV          = " << get_p_from_v( get_v_from_p( pbeta(Ebeta)) )/MeV << endl;
+		cout << "    initial_momentum.mag()/MeV                            = " << initial_momentum.mag()/MeV << endl;
 		cout << "    px/MeV=" << initial_momentum.x()/MeV << ";\tpy/MeV=" << initial_momentum.y()/MeV << ";\tpz/MeV=" << initial_momentum.z()/MeV  << endl;
 		cout << "    sqrt(px^2 + py^2 + pz^2)                              = ";
 		cout << sqrt( initial_momentum.x()/MeV*initial_momentum.x()/MeV 
 					+ initial_momentum.y()/MeV*initial_momentum.y()/MeV 
 					+ initial_momentum.z()/MeV*initial_momentum.z()/MeV ) << endl;
 		cout << "get_Ebeta( get_p_from_v( get_v_from_p( pbeta(Ebeta) ) ) )/MeV = " << get_Ebeta( get_p_from_v( get_v_from_p( pbeta(Ebeta)) ) )/MeV << endl;
-		
 	}
 	
 	return;
@@ -776,23 +852,6 @@ bool Holstein52Generator::check_PDF_acceptance()  // uses initial_momentum .
 //	cout << "holstein_acceptance=" << holstein_acceptance << endl;
 //	cout << "pdf_acceptance=" << pdf_acceptance << endl;
 	return pdf_acceptance;
-}
-
-void Holstein52Generator::randomize_start(bool doit)
-{
-	bool verbose=false;
-	// pick start position.
-	if(verbose)
-	{
-		if(doit) { cout << "Trying to randomize start position, but this feature isn't actually implemented." << endl; }
-		else     { cout << "Selecting non-randomized start position.  It doesn't randomize yet anyway." << endl; }
-	}
-	initial_position.set(0.0*mm,0.0*mm,0.0*mm);
-	if(doit)
-	{
-		// pick some other position.
-	}
-	return;
 }
 
 bool Holstein52Generator::check_detector_acceptance()

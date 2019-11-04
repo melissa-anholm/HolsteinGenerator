@@ -94,7 +94,7 @@ int main(int argc, char *argv[])
 	the_atomic_setup -> print_pops();
 	the_atomic_setup -> print_moments();
 	
-	the_decay->run_fast(true);
+//	the_decay->run_fast(true);
 	the_decay->set_use_cone(true);
 	the_decay->set_conecostheta( 0.90 );
 	
