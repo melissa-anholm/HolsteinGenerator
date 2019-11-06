@@ -151,6 +151,41 @@ Holstein52Generator::Holstein52Generator(HolsteinVars * HV, K37AtomicSetup * ato
 }
 
 
+bool Holstein52Generator::shoot_monoenergetic_decayevent(G4double the_monoenergy)  // currently, this is just a copy-paste from the regular generator, with an extra line added in.
+{
+	bool verbose = false;
+	pdf_acceptance      = false;  // obsolete?
+	jtw_acceptance      = false;
+	holstein_acceptance = false;
+	det_acceptance      = false;
+	
+	this -> randomize_nuclear(false);
+	
+	Mz  = the_atomic_setup->GetPops()->get_Mz();
+	Mz2 = the_atomic_setup->GetPops()->get_Mz2();
+	Mz3 = the_atomic_setup->GetPops()->get_Mz3();
+	initialize_lambdafuncs();  // this depends on the sublevel populations, which should be set up above.
+	//
+	
+//	this -> randomize_direction();           // pick Ebeta, costheta (using the cone, if we're doing that.)
+	this -> randomize_direction_monoenergetic( the_monoenergy );           // 
+	
+	this -> check_PDF_acceptance();      // set:  the_probability, pdf_acceptance.
+	this -> check_detector_acceptance(); // set:  det_acceptance.  // maybe do this from the PGA?  We need to know the start position to do this.
+	
+	
+	if(verbose)
+	{
+		cout << "pdf_acceptance  = " << int(pdf_acceptance) << endl;
+		cout << "holstein_acceptance = " << int(holstein_acceptance) << endl;
+		cout << "jtw_acceptance = " << int(jtw_acceptance) << endl;
+		cout << "det_acceptance  = " << int(det_acceptance) << endl;
+		cout << "Event accepted? = " << int(det_acceptance && (holstein_acceptance || jtw_acceptance)) << endl;
+	}
+	// permissive:
+	return ( det_acceptance && (holstein_acceptance || jtw_acceptance) );
+}
+
 bool Holstein52Generator::shoot_decayevent() // uses param. runfast to decide whether to check *both* acceptances if one has already failed.
 {
 	bool verbose = false;
@@ -717,6 +752,67 @@ double Holstein52Generator::get_jtw_probability(G4double E, double costheta)
 	
 	jtw_probability = the_prob;
 	return jtw_probability;
+}
+
+
+void Holstein52Generator::randomize_direction_monoenergetic(G4double the_monoenergy) // saves initial_momentum and initial_velocity in class.  Also Ebeta.  Checks the cone, and is optimized for that.
+{
+	bool verbose=false;
+	
+	// pick E
+//	Ebeta = G4RandFlat::shoot(m_e/MeV, E0/MeV)*MeV;  // m_e and E0 have to be in the same units.  also, in units of MeV.
+	Ebeta = the_monoenergy;
+	
+	// pick costheta
+	costheta_lab = G4RandFlat::shoot(1.0, -1.0);
+	while( use_cone && (abs(costheta_lab) <= cone_costheta) ) // the max. is on theta.  cos(theta_max) is the min.
+	{
+		costheta_lab = G4RandFlat::shoot(1.0, -1.0);
+	}
+	
+	// pick phi
+	double phi = G4RandFlat::shoot(0.0, 2.0*pi);
+	
+	double theta_lab = acos(costheta_lab);
+	double the_velocity = get_v_from_p( pbeta(Ebeta) );  // comes out as just a regular double.
+	
+	initial_velocity.setRThetaPhi(the_velocity, theta_lab, phi);
+	
+	// Don't set momentum in cartesian coordinates.  spherical coordinates are like a rotation to the best axis.
+	// initial_momentum.setRThetaPhi( get_p_from_v(the_velocity), theta_lab, phi); 
+	initial_momentum.setRThetaPhi( pbeta(Ebeta), theta_lab, phi); // initial_momentum comes out in G4units of MeV, because those are the units that pbeta has.
+	
+	// for export...
+	Ebeta_tot_MeV = Ebeta/MeV;
+	pbeta_MeV     = initial_momentum.mag()/MeV;
+	Ebeta_kin_MeV = (Ebeta - m_e)/MeV;
+	vbeta_over_c  = initial_velocity.mag();
+
+	if(verbose)
+	{
+		// test:
+		cout << "*" << endl;
+		cout << "(Ebeta/MeV)                                               = " << (Ebeta/MeV) << endl;
+		cout << "pbeta(Ebeta)                                              = " << pbeta(Ebeta) << endl;
+		cout << "get_v_from_p( pbeta(Ebeta) )                              = " << get_v_from_p( pbeta(Ebeta) ) << endl;
+		cout << "    initial_velocity.mag()                                = " << initial_velocity.mag() << endl;
+		cout << "    vx/c=" << initial_velocity.x()/speed_of_light << ";\tvy/c=" << initial_velocity.y()/speed_of_light << ";\tvz/c=" << initial_velocity.z()/speed_of_light << endl;
+		cout << "    sqrt(vx^2 + vy^2 + vz^2)                              = ";
+		cout << sqrt( initial_velocity.x()*initial_velocity.x() 
+					+ initial_velocity.y()*initial_velocity.y() 
+					+ initial_velocity.z()*initial_velocity.z() ) << endl;
+
+		cout << "get_p_from_v( get_v_from_p( pbeta(Ebeta) ) )/MeV          = " << get_p_from_v( get_v_from_p( pbeta(Ebeta)) )/MeV << endl;
+		cout << "    initial_momentum.mag()/MeV                            = " << initial_momentum.mag()/MeV << endl;
+		cout << "    px/MeV=" << initial_momentum.x()/MeV << ";\tpy/MeV=" << initial_momentum.y()/MeV << ";\tpz/MeV=" << initial_momentum.z()/MeV  << endl;
+		cout << "    sqrt(px^2 + py^2 + pz^2)                              = ";
+		cout << sqrt( initial_momentum.x()/MeV*initial_momentum.x()/MeV 
+					+ initial_momentum.y()/MeV*initial_momentum.y()/MeV 
+					+ initial_momentum.z()/MeV*initial_momentum.z()/MeV ) << endl;
+		cout << "get_Ebeta( get_p_from_v( get_v_from_p( pbeta(Ebeta) ) ) )/MeV = " << get_Ebeta( get_p_from_v( get_v_from_p( pbeta(Ebeta)) ) )/MeV << endl;
+	}
+	
+	return;
 }
 
 

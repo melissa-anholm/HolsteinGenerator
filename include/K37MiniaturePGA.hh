@@ -40,6 +40,11 @@ public:
 	~K37MiniaturePGA();
 
 public:
+//	K37EventGenerator* GetEventGenerator()      { return evGenerator; }  // this seems to break things.
+	Holstein52Generator* GetHolsteinGenerator() { return holstein52_generator; }  // does this break things too???
+
+
+public:
 //	void GeneratePrimaries(G4Event* anEvent);  // ok, what gets called after this?  what calls this??
 	void GeneratePrimaries();  // ok, what gets called after this?  what calls this??
 	G4double getVelocity(G4double kineticEnergy, G4double massOfParticle = 0.510998);
@@ -47,8 +52,10 @@ public:
 //	void SetPolarization(G4double pol);
 //	void SetAlignment(G4double ali);
 	
-//	K37EventGenerator* GetEventGenerator()      { return evGenerator; }  // this seems to break things.
-	Holstein52Generator* GetHolsteinGenerator() { return holstein52_generator; }  // does this break things too???
+	void SetMakeMonoenergetic(bool flag)             { make_monoenergetic   = flag;       }
+	bool GetMakeMonoenergetic()                      { return make_monoenergetic;         }
+	void SetMonoenergeticEnergy(G4double the_energy) { monoenergetic_energy = the_energy; }
+	G4double GetMonoenergeticEnergy()                { return monoenergetic_energy;       }
 	
 	void SetUse_Holstein52(bool tf) { use_holstein52 = tf;   }
 	bool GetUse_Holstein52()        { return use_holstein52; }
@@ -94,6 +101,10 @@ private:
 
 	G4bool makeTwoPercent;
 	G4bool thisEventIsATwoPercent;
+	
+private:
+	bool make_monoenergetic;
+	G4double monoenergetic_energy;
 
 private:
 	double P_thisevent;

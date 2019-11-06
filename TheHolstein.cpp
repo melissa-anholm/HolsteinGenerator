@@ -90,13 +90,16 @@ int main(int argc, char *argv[])
 	Holstein52Generator    * the_decay        = new Holstein52Generator(pointervars, the_atomic_setup);
 	K37MiniaturePGA        * the_PGA          = new K37MiniaturePGA(the_decay);
 	
+	the_PGA->SetMakeMonoenergetic(true);
+	the_PGA->SetMonoenergeticEnergy(2.0*MeV);
+	
 	the_atomic_setup -> SetPolarization(0.99);
 	the_atomic_setup -> print_pops();
 	the_atomic_setup -> print_moments();
 	
-//	the_decay->run_fast(true);
-	the_decay->set_use_cone(true);
-	the_decay->set_conecostheta( 0.90 );
+//	the_PGA->GetHolsteinGenerator()->run_fast(true);
+	the_PGA->GetHolsteinGenerator()->set_use_cone(true);
+	the_PGA->GetHolsteinGenerator()->set_conecostheta( 0.90 );
 	
 	
 	/*
@@ -115,11 +118,11 @@ int main(int argc, char *argv[])
 	thepops -> print_moments();
 	//
 	
-	the_decay->run_fast(true);
-	the_decay->set_use_cone(true);
-//	the_decay->set_use_cone(false);
-	the_decay->set_conecostheta( 0.90 );
-	cout << "get_conecostheta() = " << the_decay->get_conecostheta() << endl;
+	the_PGA->GetHolsteinGenerator()->run_fast(true);
+	the_PGA->GetHolsteinGenerator()->set_use_cone(true);
+//	the_PGA->GetHolsteinGenerator()->set_use_cone(false);
+	the_PGA->GetHolsteinGenerator()->set_conecostheta( 0.90 );
+	cout << "get_conecostheta() = " << the_PGA->GetHolsteinGenerator()->get_conecostheta() << endl;
 	
 	
 	K37Cloud * the_cloud = the_atomic_setup->GetCloud();
@@ -264,30 +267,33 @@ int main(int argc, char *argv[])
 	//
 	
 	cout << "Printing vars!" << endl;
-	the_decay->print_vars();
+	the_PGA->GetHolsteinGenerator()->print_vars();
 	cout << "Vars are printed." << endl;
 	
 	bool verbose = false;
 	
-	the_decay->use_roc=true;
+	the_PGA->GetHolsteinGenerator()->use_roc=true;
 	
 	bool event_accepted = false;
-	int nhalfevents =       100;
+//	int nhalfevents =       100;
+	int nhalfevents =      1000;
 //	int nhalfevents =   1000000;
 //	int nhalfevents = 100000000;
 	
-	int mismatch_eventcounter = 0;
+//	int mismatch_eventcounter = 0;
+	int jtw_accept_counter = 0;
+	int holstein_accept_counter = 0;
 	cout << "Let's go!" << endl;
 	for(int sigmacount = 0; sigmacount <2; sigmacount++)
 	{
 		if(sigmacount==0)
 		{
-			the_decay->GetAtomicSetup()->set_sigma_plus();
+			the_PGA->GetHolsteinGenerator()->GetAtomicSetup()->set_sigma_plus();
 			cout << "Beginning event generation for sigma+." << endl;
 		}
 		else if(sigmacount==1)
 		{
-			the_decay->GetAtomicSetup()->set_sigma_minus();
+			the_PGA->GetHolsteinGenerator()->GetAtomicSetup()->set_sigma_minus();
 			cout << "Beginning event generation for sigma-." << endl;
 		}
 		else
@@ -308,91 +314,109 @@ int main(int argc, char *argv[])
 			while( !event_accepted ) 
 			{ 
 			//	cout << "* shot " << j << endl;
-			//	event_accepted = the_decay -> shoot_decayevent(); 
-			//	event_accepted = the_decay -> pdf_acceptance;
-			//	event_accepted = the_decay -> det_acceptance;
+			//	event_accepted = the_PGA->GetHolsteinGenerator() -> shoot_decayevent(); 
+			//	event_accepted = the_PGA->GetHolsteinGenerator() -> pdf_acceptance;
+			//	event_accepted = the_PGA->GetHolsteinGenerator() -> det_acceptance;
 				
-				event_accepted = the_decay -> shoot_decayevent();
+				if(the_PGA->GetMakeMonoenergetic())
+				{
+					event_accepted = the_PGA->GetHolsteinGenerator() -> shoot_monoenergetic_decayevent( the_PGA->GetMonoenergeticEnergy() );
+				}
+				else
+				{
+					event_accepted = the_PGA->GetHolsteinGenerator() -> shoot_decayevent();
+				}
 				
-				jtw_acceptance = the_decay->jtw_acceptance;
-				holstein_acceptance = the_decay->holstein_acceptance;
+				jtw_acceptance = the_PGA->GetHolsteinGenerator()      -> jtw_acceptance;
+				holstein_acceptance = the_PGA->GetHolsteinGenerator() -> holstein_acceptance;
+				/*
+				// below:  this isn't a thing that makes sense anymore.
 				if( (jtw_acceptance && !holstein_acceptance) || (!jtw_acceptance && holstein_acceptance) )
 				{
 					mismatch_eventcounter++;
 					if(verbose)
 					{
 						cout << "** YAY!\ti=" << i << endl;
-						cout << "Ebeta = " << the_decay->Ebeta_tot_MeV << endl;
+						cout << "Ebeta = " << the_PGA->GetHolsteinGenerator()->Ebeta_tot_MeV << endl;
 						cout << "jtw_acceptance = " << jtw_acceptance << endl;
 						cout << "holstein_acceptance = " << holstein_acceptance << endl;
-						cout << "pdf_acceptance = " << the_decay->pdf_acceptance << endl;
+						cout << "pdf_acceptance = " << the_PGA->GetHolsteinGenerator()->pdf_acceptance << endl;
 						cout << "event_accepted = " << event_accepted << endl;
 					}
 				}
+				*/
 			//	j++;
 			}
 			if(verbose) 
 			{ 
 				cout << "* i = " << i << endl;
-				the_decay -> print_results(); 
+				the_PGA->GetHolsteinGenerator() -> print_results(); 
 			}
 			// Fill in the gen data:
-			px = the_decay->initial_momentum.x()/MeV;
-			py = the_decay->initial_momentum.y()/MeV;
-			pz = the_decay->initial_momentum.z()/MeV;
+			px = the_PGA->GetHolsteinGenerator()->get_beta_Px()/MeV;
+			py = the_PGA->GetHolsteinGenerator()->get_beta_Py()/MeV;
+			pz = the_PGA->GetHolsteinGenerator()->get_beta_Pz()/MeV;
 			
-			vx = the_decay->initial_velocity.x();
-			vy = the_decay->initial_velocity.y();
-			vz = the_decay->initial_velocity.z();
+			vx = the_PGA->GetHolsteinGenerator()->initial_velocity.x();
+			vy = the_PGA->GetHolsteinGenerator()->initial_velocity.y();
+			vz = the_PGA->GetHolsteinGenerator()->initial_velocity.z();
 			
-		//	pdf_acceptance = the_decay->pdf_acceptance;
-			det_acceptance = the_decay->det_acceptance;  // if runfast is enabled, 
-			the_traveltime = the_decay->time_to_travel;
+		//	pdf_acceptance = the_PGA->GetHolsteinGenerator()->pdf_acceptance;
+			det_acceptance = the_PGA->GetHolsteinGenerator()->det_acceptance;  // if runfast is enabled, 
+			the_traveltime = the_PGA->GetHolsteinGenerator()->time_to_travel;
 			
-			jtw_acceptance      = the_decay->jtw_acceptance;
-			holstein_acceptance = the_decay->holstein_acceptance;
+			jtw_acceptance      = the_PGA->GetHolsteinGenerator()->jtw_acceptance;
+			holstein_acceptance = the_PGA->GetHolsteinGenerator()->holstein_acceptance;
 			
+			if(jtw_acceptance)
+			{
+				jtw_accept_counter++;
+			}
+			if(holstein_acceptance)
+			{
+				holstein_accept_counter++;
+			}
 			
-			jtw_rho        = the_decay->jtw_rho;
-			jtw_xi         = the_decay->jtw_xi;
-			jtw_Abeta      = the_decay->jtw_Abeta;
-			holstein_Abeta = the_decay->holstein_Abeta;
+			jtw_rho        = the_PGA->GetHolsteinGenerator()->jtw_rho;
+			jtw_xi         = the_PGA->GetHolsteinGenerator()->jtw_xi;
+			jtw_Abeta      = the_PGA->GetHolsteinGenerator()->jtw_Abeta;
+			holstein_Abeta = the_PGA->GetHolsteinGenerator()->holstein_Abeta;
 		//	cout << "JTW:  rho    = " << jtw_rho   << endl;
 		//	cout << "      xi     = " << jtw_xi    << endl;
 		//	cout << "      A_beta = " << jtw_Abeta << endl;
 			
 			//
-			if( the_decay->GetAtomicSetup()->get_sigma() > 0 ) { sigma_plus = 1; }
+			if( the_PGA->GetHolsteinGenerator()->GetAtomicSetup()->get_sigma() > 0 ) { sigma_plus = 1; }
 			else                                               { sigma_plus = 0; }
 			
-			the_prob     = the_decay->the_probability;
-			jtw_prob     = the_decay->jtw_probability;
-			holstein_prob= the_decay->holstein_probability;
-			the_costheta = the_decay->costheta_lab;
+			the_prob     = the_PGA->GetHolsteinGenerator()->the_probability;
+			jtw_prob     = the_PGA->GetHolsteinGenerator()->jtw_probability;
+			holstein_prob= the_PGA->GetHolsteinGenerator()->holstein_probability;
+			the_costheta = the_PGA->GetHolsteinGenerator()->costheta_lab;
 			
-			gen_Ebeta_tot = the_decay->Ebeta_tot_MeV;
-			gen_Ebeta_kin = the_decay->Ebeta_kin_MeV;
-			gen_pbeta     = the_decay->pbeta_MeV;
-			gen_beta_beta = the_decay->vbeta_over_c;
+			gen_Ebeta_tot = the_PGA->GetHolsteinGenerator()->Ebeta_tot_MeV;
+			gen_Ebeta_kin = the_PGA->GetHolsteinGenerator()->Ebeta_kin_MeV;
+			gen_pbeta     = the_PGA->GetHolsteinGenerator()->pbeta_MeV;
+			gen_beta_beta = the_PGA->GetHolsteinGenerator()->vbeta_over_c;
 			
 			// Fill in stuff that looks like the data ntuples:
-			if(the_decay->going_up)
+			if(the_PGA->GetHolsteinGenerator()->going_up)
 			{
 				lower_E = 0.0;
 				scint_time_t -> push_back(0.0);
 			
-				upper_E = the_decay->Ebeta/MeV;
-				bb1_t_x -> push_back( the_decay->hit_position.x()/mm );
-				bb1_t_y -> push_back( the_decay->hit_position.y()/mm );
+				upper_E = the_PGA->GetHolsteinGenerator()->Ebeta/MeV;
+				bb1_t_x -> push_back( the_PGA->GetHolsteinGenerator()->hit_position.x()/mm );
+				bb1_t_y -> push_back( the_PGA->GetHolsteinGenerator()->hit_position.y()/mm );
 			}
-			else if( !the_decay->going_up )
+			else if( !the_PGA->GetHolsteinGenerator()->going_up )
 			{
 				upper_E = 0.0;
 				scint_time_b -> push_back(0.0);
-				lower_E = the_decay->Ebeta/MeV;
+				lower_E = the_PGA->GetHolsteinGenerator()->Ebeta/MeV;
 				
-				bb1_b_x -> push_back( the_decay->hit_position.x()/mm );
-				bb1_b_y -> push_back( the_decay->hit_position.y()/mm );
+				bb1_b_x -> push_back( the_PGA->GetHolsteinGenerator()->hit_position.x()/mm );
+				bb1_b_y -> push_back( the_PGA->GetHolsteinGenerator()->hit_position.y()/mm );
 			}
 			
 			//
@@ -409,7 +433,9 @@ int main(int argc, char *argv[])
 	
 	cout << "Done generating events!"  << endl;
 	cout << "Total events generated:  " << nhalfevents*2 << endl;
-	cout << "mismatched events:       " << mismatch_eventcounter << endl;
+//	cout << "mismatched events:       " << mismatch_eventcounter << endl;
+	cout << "JTW accepted events:     " << jtw_accept_counter << endl;
+	cout << "Holstein accepted events:" << holstein_accept_counter << endl;
 	
 	tree -> GetCurrentFile() -> Write("",TObject::kOverwrite);  
 	tree -> GetCurrentFile() -> Close();

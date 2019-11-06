@@ -41,7 +41,9 @@ K37MiniaturePGA::K37MiniaturePGA( Holstein52Generator* holstein52_gen ) :
 //	twoPercent(twoP),
 	is_2p(false),
 	thisEventIsATwoPercent(false),
-	makeTwoPercent(false)
+	makeTwoPercent(false),
+	make_monoenergetic(false),
+	monoenergetic_energy(2.5*MeV)
 	{
 	G4cout << "Created a new MiniPGA." << G4endl;
 	
@@ -127,6 +129,9 @@ void K37MiniaturePGA::GetMultipoleMomentsFromPops(K37AtomicSetup * the_atomic_se
 //void K37MiniaturePGA::GeneratePrimaries(G4Event* anEvent) 
 void K37MiniaturePGA::GeneratePrimaries() 
 {
+	cout << "Does K37MiniaturePGA::GeneratePrimaries() ever even get called?!  ... apparently so!" << endl;
+	
+	
 	if(makeTwoPercent /* && recoil_charge_ != -3 */ ) 
 	{ // 2% branch is allowed && not photoions.
 //		thisEventIsATwoPercent = TwoPercentEvent();
@@ -181,7 +186,14 @@ void K37MiniaturePGA::GeneratePrimaries()
 	{
 		if(use_holstein52)
 		{
-			holstein52_generator -> shoot_decayevent();
+			if(make_monoenergetic)
+			{
+				holstein52_generator -> shoot_monoenergetic_decayevent(monoenergetic_energy);
+			}
+			else
+			{
+				holstein52_generator -> shoot_decayevent();
+			}
 		}
 	//	else
 	//	{

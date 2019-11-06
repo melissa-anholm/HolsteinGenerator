@@ -37,13 +37,17 @@ public:
 	double get_conecostheta() { return cone_costheta; };
 	
 	void randomize_direction();
-	
+	void randomize_direction_monoenergetic(G4double the_monoenergy);
+
 	bool check_PDF_acceptance();         // uses initial_momentum
 	bool check_detector_acceptance();    // creates hit_position from initial_momentum and initial_position.  then checks.
 	void randomize_nuclear(bool doit=true);
 //	void randomize_atomic(bool doit=true);
 //	void randomize_start(bool doit=true);   // initial_position, in G4 mm.
+
 	bool shoot_decayevent();
+	bool shoot_monoenergetic_decayevent(G4double the_monoenergy);
+	
 	void print_results();
 	void print_vars() { this->Params->print_vars(); };
 	
@@ -60,10 +64,23 @@ public:
 	double the_probability; // obsolete.
 	double jtw_probability, holstein_probability; // specific to this value of Ebeta, costheta.
 	
+private:
 	G4ThreeVector initial_momentum;  // needs units of energy.
+public:
+	G4double get_beta_Px() { return initial_momentum.x(); };  // must return something in units of energy.  does it actually?  who the fuck knows.  ... I think it's ok.
+	G4double get_beta_Py() { return initial_momentum.y(); };  // must return something in units of energy.
+	G4double get_beta_Pz() { return initial_momentum.z(); };  // must return something in units of energy.
+	
+	// functions like from K37EventGenerator:  
+	G4double get_electron_T_MeV()      { return Ebeta_kin_MeV; }
+	G4double get_electron_E_MeV()      { return Ebeta_tot_MeV; }  // ok, but what does the rest of the G4 code think this thing is in units of?
+	double get_electron_costheta()     { return costheta_lab; }
+	
+public:
 	G4ThreeVector initial_velocity;  // needs units.  not unitless.
 	G4ThreeVector initial_position;  // needs units of position.  ...done in G4units.
 	G4ThreeVector hit_position;      // needs units of position.
+	
 	bool pdf_acceptance; // obsolete.
 	bool jtw_acceptance, holstein_acceptance;
 	bool det_acceptance;
