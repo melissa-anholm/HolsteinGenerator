@@ -111,6 +111,18 @@ void K37Cloud::SetInitialCloudPosition(G4ThreeVector center)
 		       << G4BestUnit(center.z(), "Length") << ")" << G4endl;
 	}
 }
+void K37Cloud::SetFinalCloudPosition(G4ThreeVector center)
+{
+	bool verbose = false;
+	final_position = center;
+	if(verbose)
+	{
+		G4cout << "Updating (initial) cloud center to (" << G4BestUnit(center.x(), "Length")
+		       << ", " << G4BestUnit(center.y(), "Length") << ", "
+		       << G4BestUnit(center.z(), "Length") << ")" << G4endl;
+	}
+}
+//
 void K37Cloud::SetInitialCloudSize(G4ThreeVector size) 
 {
 	bool verbose = false;
@@ -129,11 +141,6 @@ void K37Cloud::SetInitialCloudSize(G4ThreeVector size)
 		initial_cloud_size = size;
 	}
 }
-void K37Cloud::SetInitialCloudSize(G4double size) 
-{
-	SetInitialCloudSize(G4ThreeVector(size, size, size));
-}
-//
 void K37Cloud::SetFinalCloudSize(G4ThreeVector size)
 {
 	bool verbose = false;
@@ -152,12 +159,6 @@ void K37Cloud::SetFinalCloudSize(G4ThreeVector size)
 		final_cloud_size = size;
 	}
 }
-void K37Cloud::SetFinalCloudSize(G4double size) 
-{
-	SetFinalCloudSize(G4ThreeVector(size, size, size));
-}
-
-
 
 void K37Cloud::PrintCloud() 
 {
@@ -187,11 +188,12 @@ void K37Cloud::PrintCloud()
 //	sail_velocity = vel;
 //}
 */
+/*
 void K37Cloud::set_up_sail_velocity()  // initial_position, final_position, and cycleTime must already be set up.
 {
 	G4ThreeVector sail_velocity = (final_position - initial_position)/cycleTime;
 }
-
+*/
 /*
 void K37Cloud::SetTemperature(G4ThreeVector temp) 
 {
@@ -218,27 +220,7 @@ void K37Cloud::SetTemperature(G4double temp)
 	SetTemperature(G4ThreeVector(temp, temp, temp));
 	G4cout << "Set cloud temperature to:  " << temp / kelvin << " Kelvin." << G4endl;
 }
-void K37Cloud::set_up_temperature()    // must have initial_size, final_size, and cycleTime already set up.
-{
-	// initial_cloud_size
-	// 
-}
 */
-
-void K37Cloud::SetFinalCloudPosition(G4ThreeVector center)
-{
-	bool verbose = false;
-	initial_position = center;
-	if(verbose)
-	{
-		G4cout << "Updating (initial) cloud center to (" << G4BestUnit(center.x(), "Length")
-		       << ", " << G4BestUnit(center.y(), "Length") << ", "
-		       << G4BestUnit(center.z(), "Length") << ")" << G4endl;
-	}
-	// set up the sail velocity now?
-	// set_up_sail_velocity();
-}
-
 
 void K37Cloud::SetFreeExpansionTime(G4double this_time)
 {

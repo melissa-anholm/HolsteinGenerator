@@ -16,29 +16,32 @@ public:
 	~K37Cloud();
 
 public:
+	void PrintCloud();
+	
 	// For the whole cloud:
-//	G4ThreeVector GetCloudCenter()        { return initial_position;           }
 	G4ThreeVector GetInitialCloudPosition() { return initial_position;           }
 	G4ThreeVector GetFinalCloudPosition()   { return final_position;             }
+	
 	G4ThreeVector GetInitialCloudSize()     { return initial_cloud_size;         }
 	G4ThreeVector GetFinalCloudSize()       { return final_cloud_size;           }
 	
 	G4double GetFreeExpansionTime()         { return expansion_before_polarized; }
 	G4double GetOP_CycleTime()              { return cycleTime;                  }
 
+//	G4ThreeVector GetCloudCenter()        { return initial_position;           }
 //	G4ThreeVector GetTemperature()      { return temperature;                }
 //	G4ThreeVector GetSailVelocity()     { return sail_velocity;              }
 //	G4ThreeVector GetVelocitySigma()    { return velocity_sigma;             }  // must be already set up with temperature?
-	
 //	void SetCloudCenter(G4ThreeVector center);
+	
 	void SetInitialCloudPosition(G4ThreeVector center);
 	void SetFinalCloudPosition(G4ThreeVector center);
 	
 	void SetInitialCloudSize(G4ThreeVector size);
-	void SetInitialCloudSize(G4double size);
-	
 	void SetFinalCloudSize(G4ThreeVector size);
-	void SetFinalCloudSize(G4double size);
+	
+	void SetInitialCloudSize(G4double size) { SetInitialCloudSize(G4ThreeVector(size, size, size)); };
+	void SetFinalCloudSize(G4double size)   { SetFinalCloudSize(G4ThreeVector(size, size, size)); };
 	
 	void SetFreeExpansionTime(G4double time);
 	void SetOP_CycleTime(G4double time);
@@ -58,12 +61,10 @@ public:
 
 	
 private:
-	void set_up_sail_velocity();  // initial_position, final_position, and cycleTime must already be set up.
+//	void set_up_sail_velocity();  // initial_position, final_position, and cycleTime must already be set up.
 //	void set_up_temperature();    // must have initial_size, final_size, and cycleTime already set up.
 	
 	
-public:  
-	void PrintCloud();
 
 private:
 // For the whole cloud:
@@ -81,8 +82,8 @@ private:
 //	G4ThreeVector sail_velocity;  // legacy.
 	
 public:
-	void SetupVelocitySigma(G4ThreeVector temperature);  // We might like this to be private, but our instantiation of this class is itself private, so wev.
-	G4double CalcSigma(G4double temperature);            // We might like this to be private, but our instantiation of this class is itself private, so wev.
+//	void SetupVelocitySigma(G4ThreeVector temperature);  // We might like this to be private, but our instantiation of this class is itself private, so wev.
+//	G4double CalcSigma(G4double temperature);            // We might like this to be private, but our instantiation of this class is itself private, so wev.
 //	void Initialize();                                   // We might like this to be private, but our instantiation of this class is itself private, so wev.
 //private:	
 //	G4bool initialize_complete_;

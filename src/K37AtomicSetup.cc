@@ -21,8 +21,8 @@ class K37SublevelPopulations;
 //using std::ifstream;
 
 K37AtomicSetup::K37AtomicSetup() : 
-	MatchedRunsetLetter( G4String("0") ), 
-	initialize_complete_(false)//,
+	MatchedRunsetLetter( G4String("0") )
+//	initialize_complete_(false)//,
 //	//#ifndef SIMPLE_MC
 //	AtomicMessenger(0),
 //	//#endif
@@ -48,17 +48,18 @@ K37AtomicSetup::~K37AtomicSetup()
 	delete the_cloud;
 	delete the_pops;
 }
-
+/*
 void K37AtomicSetup::SetMatchedRunsetLetter(G4String newRunsetLetter)
 {
 	MatchedRunsetLetter = newRunsetLetter;
 }
-
+*/
+/*
 G4String K37AtomicSetup::GetMatchedRunsetLetter()
 {
 	return MatchedRunsetLetter;
 }
-
+*/
 /*
 void K37AtomicSetup::Initialize() 
 {
