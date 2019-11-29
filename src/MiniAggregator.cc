@@ -6,7 +6,7 @@
 
 MiniAggregator::MiniAggregator()
 {
-	filename = string("simpleoutput.root");
+	full_filename = string("simpleoutput.root");
 	
 	//
 	f = new TFile(full_filename.c_str(), "RECREATE");

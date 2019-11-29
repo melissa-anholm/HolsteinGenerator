@@ -1,11 +1,21 @@
 // Melissa Anholm - 2019
 
+#ifndef HolsteinMiniAggregator_h
+#define HolsteinMiniAggregator_h 1
+
+// C/C++:
+#include <string>
+#include <vector>
+
 
 // Root:
 #include "TFile.h"
 #include <TTree.h>
 #include <TBranch.h> // might not need this...
 
+
+using std::string;
+using std::vector;
 
 class MiniAggregator
 {
@@ -32,8 +42,8 @@ private:
 	
 	Int_t sigma_plus = -1;
 	//
-	vector<double> * scint_time_t = 0;  
-	vector<double> * scint_time_b = 0;  
+	vector<double> * scint_time_t = 0;
+	vector<double> * scint_time_b = 0;
 	
 //	Bool_t pdf_acceptance = kFALSE;
 	Bool_t det_acceptance = kFALSE;
@@ -65,4 +75,8 @@ private:
 	Double_t jtw_rho;
 	Double_t holstein_Abeta;
 };
+
+
+
+#endif
 

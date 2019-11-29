@@ -14,6 +14,7 @@
 //	//#include "IsotopeValues.hh"
 //	//#include "SplitString.hh"
 #include "K37SublevelPopulations.hh"
+#include "K37FermiFunction.hh"
 
 using std::cout;
 using std::endl;
@@ -69,7 +70,8 @@ Holstein52Generator::Holstein52Generator(HolsteinVars * HV, K37AtomicSetup * ato
 	use_roc(true),
 	use_cone(false), cone_costheta(0),
 //	runfast(true), 
-	prob_max(0.2)
+	prob_max(0.2), 
+	do_coulomb(true)
 {
 //	cout << "Called Holstein52Generator::Holstein52Generator(HolsteinVars * HV, K37AtomicSetup * atomic_setup)" << endl;
 	
@@ -380,42 +382,6 @@ void Holstein52Generator::randomize_nuclear(bool doit)  // needs Params.
 	*/
 	return;
 }
-/*
-void Holstein52Generator::randomize_atomic(bool doit)
-{
-	bool verbose=false;
-	if(verbose)
-	{
-		if(doit) { cout << "Randomizing atomic parameters! (or I would be if this function did anything yet.)" << endl; }
-		else     { cout << "Not randomizing atomic parameters.  It's not implemented yet anyway." << endl; }
-	}
-	// Do this step whether I randomize atomic params or not, because I might have adjusted the polarization before this event.
-	Mz  = the_atomic_setup->GetPops()->get_Mz();
-	Mz2 = the_atomic_setup->GetPops()->get_Mz2();
-	Mz3 = the_atomic_setup->GetPops()->get_Mz3();
-	initialize_lambdafuncs();  // this depends on the sublevel populations, which should be set up above.
-	
-	return;
-}
-*/
-/*
-void Holstein52Generator::randomize_start(bool doit)
-{
-	bool verbose=false;
-	// pick start position.
-	if(verbose)
-	{
-		if(doit) { cout << "Trying to randomize start position, but this feature isn't actually implemented." << endl; }
-		else     { cout << "Selecting non-randomized start position.  It doesn't randomize yet anyway." << endl; }
-	}
-	initial_position.set(0.0*mm,0.0*mm,0.0*mm);
-	if(doit)
-	{
-		// pick some other position.
-	}
-	return;
-}
-*/
 
 void Holstein52Generator::initialize_lambdafuncs()
 {
@@ -604,6 +570,13 @@ G4double Holstein52Generator::get_p_from_v(double vbeta)  // ...
 	return pbeta;
 }
 
+double Holstein52Generator::FermiFunction(double Z_, G4double E)
+{
+	if(!do_coulomb) { return 1.0; }
+	// otherwise...
+	
+}
+
 double Holstein52Generator::get_probability(G4double E, double costheta) // want to use costheta_lab
 {
 	int verbose = 0;
@@ -631,9 +604,10 @@ double Holstein52Generator::get_probability(G4double E, double costheta) // want
 	double t2 = F_2((E/MeV)) * Lambda2 * (pbeta(E)/MeV)*(pbeta(E)/MeV) / ((E/MeV)*(E/MeV)) * (costheta*costheta - 1.0/3.0);
 	double t3 = F_3((E/MeV)) * Lambda3 * ( pow(costheta*(pbeta(E)/MeV)/(E/MeV), 3) - 3.0/5.0*costheta*pow((pbeta(E)/MeV)/(E/MeV), 3) );
 	
-	double the_prob = the_scaling*(t0+t1+t2+t3);
-	holstein_probability = the_prob;
-	holstein_Abeta       = F_1((E/MeV))/t0;
+//	double the_prob      = the_scaling*(t0+t1+t2+t3);
+	holstein_Abeta       = F_1((E/MeV))/t0;  // Do I still believe this, what with the coulomb corrections?
+	
+	holstein_probability = the_scaling*(t0+t1+t2+t3);
 	
 	if(verbose>1)
 	{
@@ -647,6 +621,7 @@ double Holstein52Generator::get_probability(G4double E, double costheta) // want
 	}
 	return holstein_probability;
 }
+
 double Holstein52Generator::get_jtw_probability(G4double E, double costheta)
 {
 	double Gv2       = 1.0; // kludge
@@ -664,57 +639,15 @@ double Holstein52Generator::get_jtw_probability(G4double E, double costheta)
 	return jtw_probability;
 }
 
-
-/*
-bool Holstein52Generator::shoot_monoenergetic_decayevent(G4double the_monoenergy)  // currently, this is just a copy-paste from the regular generator, with an extra line added in.
-{
-	bool verbose = false;
-	pdf_acceptance      = false;  // obsolete?
-	jtw_acceptance      = false;
-	holstein_acceptance = false;
-	det_acceptance      = false;
-	
-	this -> randomize_nuclear(false);
-	
-	Mz  = the_atomic_setup->GetPops()->get_Mz();
-	Mz2 = the_atomic_setup->GetPops()->get_Mz2();
-	Mz3 = the_atomic_setup->GetPops()->get_Mz3();
-	initialize_lambdafuncs();  // this depends on the sublevel populations, which should be set up above.
-	//
-	
-//	this -> randomize_direction();           // pick Ebeta, costheta (using the cone, if we're doing that.)
-	this -> randomize_direction_monoenergetic( the_monoenergy );           // 
-	
-	this -> check_PDF_acceptance();      // set:  the_probability, pdf_acceptance.
-	this -> check_detector_acceptance(); // set:  det_acceptance.  // maybe do this from the PGA?  We need to know the start position to do this.
-	
-	
-	if(verbose)
-	{
-		cout << "pdf_acceptance  = " << int(pdf_acceptance) << endl;
-		cout << "holstein_acceptance = " << int(holstein_acceptance) << endl;
-		cout << "jtw_acceptance = " << int(jtw_acceptance) << endl;
-		cout << "det_acceptance  = " << int(det_acceptance) << endl;
-		cout << "Event accepted? = " << int(det_acceptance && (holstein_acceptance || jtw_acceptance)) << endl;
-	}
-	// permissive:
-	return ( det_acceptance && (holstein_acceptance || jtw_acceptance) );
-}
-*/
-
 bool Holstein52Generator::shoot_decayevent( G4double the_monoenergy ) // uses param. runfast to decide whether to check *both* acceptances if one has already failed.
 {
 	bool verbose        = false;
-//	pdf_acceptance      = false;  // obsolete?
 //	jtw_acceptance      = false;
 	holstein_acceptance = false;
 //	det_acceptance      = false;
 	
-	
 	this -> randomize_nuclear(false);
 //	print_vars();  // get values of E0 and m_e that we're using.
-	
-//	this -> randomize_atomic(false);
 	// Instead of this->randomize_atomic(...), just do the things from the function.
 	// Later, for efficiency, I should avoid doing this every single event, but for now it's fine.
 	Mz  = the_atomic_setup->GetPops()->get_Mz();
@@ -722,9 +655,6 @@ bool Holstein52Generator::shoot_decayevent( G4double the_monoenergy ) // uses pa
 	Mz3 = the_atomic_setup->GetPops()->get_Mz3();
 	initialize_lambdafuncs();  // this depends on the sublevel populations, which should be set up above.
 	//
-//	bool accept_it = false;
-	
-//	int printedcostheta=0;
 	did_the_printing=0;
 	while( !holstein_acceptance )
 	{
@@ -740,26 +670,6 @@ bool Holstein52Generator::shoot_decayevent( G4double the_monoenergy ) // uses pa
 		}
 		did_the_printing++;
 	}
-//	G4cout << "Picked cos(theta) = " << costheta_lab << G4endl;
-	
-//	this -> check_PDF_acceptance();              // set:  the_probability, pdf_acceptance.
-//	this -> check_detector_acceptance();         // set:  det_acceptance.  // maybe do this from the PGA?  We need to know the start position to do this.
-	
-//	if(runfast)  // true by default, but I'm pretty sure I disable it in main(...).  this is useful to turn off if I want to record *all* the events generated and check acceptance later.
-//	{
-//		this -> check_detector_acceptance(); // set:  det_acceptance.
-//		if(det_acceptance)
-//		{
-//			this -> check_PDF_acceptance();  // set:  the_probability, pdf_acceptance.  jtw_probability, jtw_acceptance.  holstein_probability, holstein_acceptance.
-//		}
-//	}
-//	else
-//	{
-//		this -> check_PDF_acceptance();      // set:  the_probability, pdf_acceptance.
-//		this -> check_detector_acceptance(); // set:  det_acceptance.
-//	}
-	
-	
 	
 	if(verbose)
 	{
@@ -769,9 +679,6 @@ bool Holstein52Generator::shoot_decayevent( G4double the_monoenergy ) // uses pa
 	//	cout << "det_acceptance  = " << int(det_acceptance) << endl;
 	//	cout << "Event accepted? = " << int(det_acceptance && (holstein_acceptance || jtw_acceptance)) << endl;
 	}
-	// permissive:
-	// return ( det_acceptance && (holstein_acceptance || jtw_acceptance) );
-	
 	return holstein_acceptance;
 }
 
@@ -788,18 +695,19 @@ void Holstein52Generator::randomize_direction( G4double the_monoenergy ) // save
 	}
 	else
 	{
-		Ebeta = the_monoenergy;
+	//	Ebeta = the_monoenergy;
+		Ebeta_kin_MeV = the_monoenergy/MeV;
+		Ebeta = Ebeta_kin_MeV*MeV + m_e;
+	
+	//	MeV*Ebeta_kin_MeV + m_e= Ebeta;
+	//	Ebeta = 
 	}
 	
 	// pick costheta
-//	costheta_lab = G4MTRandFlat::shoot(1.0, -1.0);
-//	costheta_lab = G4RandFlat::shoot(1.0, -1.0);
 	costheta_lab = G4RandFlat::shoot(-1.0, 1.0);
 	while( use_cone && (abs(costheta_lab) < cone_costheta) ) // the max. is on theta.  cos(theta_max) is the min.  this is a really slow way to do this.
 	{
 		cout << "shooting somemore." << endl;
-	//	costheta_lab = G4MTRandFlat::shoot(1.0, -1.0);
-	//	costheta_lab = G4RandFlat::shoot(1.0, -1.0);
 		costheta_lab = G4RandFlat::shoot(-1.0, 1.0);
 	}
 //	cout << "Picked cos(theta) = " << costheta_lab << endl;
@@ -924,84 +832,6 @@ bool Holstein52Generator::check_holstein_acceptance()  // uses initial_momentum
 	
 	return holstein_acceptance;
 }
-
-/*
-// possibly this is obsolete now?
-bool Holstein52Generator::check_PDF_acceptance()  // uses initial_momentum .
-{
-	bool verbose = false;
-	
-	pdf_acceptance      = false;
-	jtw_acceptance      = false;
-	holstein_acceptance = false;
-	
-	if(initial_momentum.mag() == 0)
-	{
-		cout << "No, this probably hasn't been initialized.  Rejected!"  << endl;
-		assert(0);
-	}
-//	double prob_max = 0.2;  
-	double test_prob = G4RandFlat::shoot(0.0, prob_max);
-	
-	holstein_probability = get_probability(Ebeta, costheta_lab ); // this is redundant, but whatevs.
-	jtw_probability = get_jtw_probability(Ebeta, costheta_lab);
-//	the_probability = holstein_probability;
-	
-	if(verbose)
-	{
-		cout << "the_prob = " << the_probability << ";  holstein_prob = " << holstein_probability << ";  jtw_prob = " << jtw_probability << ";  max = " << prob_max << ";  test_prob = " << test_prob << endl;
-	}
-	//
-	if(holstein_probability > prob_max)
-	{
-		cout << "Bad!  We've broken our acceptance/rejection method!" << endl;
-		cout << "You should increase prob_max within the code.  " << endl;
-		cout << "prob_max = " << prob_max << endl;
-		cout << "prob     = " << the_probability << endl;
-		assert(0); // hard kill.
-		return true;
-	}
-	if(jtw_probability > prob_max)
-	{
-		cout << "You broke JTW." << endl;
-		// don't kill.  
-	}
-	
-	
-	// Do we accept this event?  Check if the random number falls *under* the probability distribution.
-	// return the Holstein acceptance, even though we calculated the jtw acceptance above.
-	
-	// Check JTW Acceptance:
-	if( test_prob <= jtw_probability)
-	{
-		jtw_acceptance = true;
-		if(verbose) { cout << "\tEvent accepted by JTW PDF!" << endl; }
-	}
-	else
-	{
-		jtw_acceptance = false;
-		if(verbose) { cout << "\tEvent rejected by JTW PDF." << endl; }
-	}
-	
-	// Check Holstein Acceptance:
-	if( test_prob <= holstein_probability)
-	{
-		holstein_acceptance = true;
-		if(verbose) { cout << "\tEvent accepted by Holstein PDF!" << endl; }
-	}
-	else
-	{
-		holstein_acceptance = false;
-		if(verbose) { cout << "\tEvent rejected by Holstein PDF." << endl; }
-	}
-	
-	// permissive.
-	pdf_acceptance = (holstein_acceptance || jtw_acceptance);
-//	cout << "holstein_acceptance=" << holstein_acceptance << endl;
-//	cout << "pdf_acceptance=" << pdf_acceptance << endl;
-	return pdf_acceptance;
-}
-*/
 
 bool Holstein52Generator::check_detector_acceptance()  // probably only used in TheHolstein.
 {

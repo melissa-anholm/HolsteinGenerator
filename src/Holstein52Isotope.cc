@@ -41,7 +41,7 @@ HolsteinVars::HolsteinVars():
 	T_isospin(0), T3_parent(0), T3_daughter(0), M_F_isospin(0),
 	mu_parent(0), sigma_mu_parent(0), mu_daughter(0), sigma_mu_daughter(0),
 	quad_parent(0), sigma_quad_parent(0), quad_daughter(0), sigma_quad_daughter(0),
-	is_twopercent(false), 
+	is_twopercent(false), //do_radiativecorrections(true),
 //	hbarc_eV_nm(0), 
 	amu_to_mev(1), sigma_amu_to_mev(0), // uh ... these are terrible default values.
 //	E0(0), M(0), Delta(0), 
@@ -204,6 +204,14 @@ void HolsteinVars::initialize_physics_parameters()
 	
 	// j3 ?
 	j3   = -g_A*2.0*((M/MeV)*(M/MeV))*M_3y/3.0;
+	
+	
+	// Coulomb corrections!
+	// double R_coulomb, X_coulomb, Y_coulomb;
+	R_nucleus = 4.637/hbarc_eV_nm; // units are MeV^-1
+	X_coulomb = 9.0*M_PI*R_nucleus/140.0;  // what the hell is M_PI ?  I mean, clearly it's pi, but where the fuck is it defined?
+	Y_coulomb = X_coulomb;
+	
 	
 	if(verbose)
 	{

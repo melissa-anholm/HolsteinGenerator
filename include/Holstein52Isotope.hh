@@ -64,6 +64,7 @@ public:
 	
 	void initialize_physics_parameters();
 	bool is_twopercent;  // it's never two percent, within this class.  this set of stuff only gets called in the 98% case.
+//	bool do_radiativecorrections;
 	
 	void print_vars();
 	void print_matrixelements();
@@ -106,6 +107,9 @@ private:
 	double M_F, M_GT;
 	double M_r2, M_sr2, M_1y, M_sL, M_srp, M_rdotp, M_rp, M_2y, M_3y;
 	double M_L, M_Q; 
+	
+	double R_nucleus, X_coulomb, Y_coulomb;
+	
 	
 public:  // getter methods, so that we can copy the variables over to the generator without breaking things.
 	// spin funcs:

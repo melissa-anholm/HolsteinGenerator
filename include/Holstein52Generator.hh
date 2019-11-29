@@ -46,17 +46,12 @@ public:
 	double get_conecostheta() { return cone_costheta; };
 	
 	void randomize_direction(G4double the_monoenergy=-10.0 );
-//	void randomize_direction_monoenergetic(G4double the_monoenergy);
 
 	bool check_PDF_acceptance();         // uses initial_momentum
 	bool check_holstein_acceptance();
 	bool check_detector_acceptance();    // creates hit_position from initial_momentum and initial_position.  then checks.
 	void randomize_nuclear(bool doit=true);
-//	void randomize_atomic(bool doit=true);
-//	void randomize_start(bool doit=true);   // initial_position, in G4 mm.
-
 	bool shoot_decayevent( G4double the_monoenergy=-10.0  );
-//	bool shoot_monoenergetic_decayevent(G4double the_monoenergy);
 	
 	void print_results();
 	void print_vars() { this->Params->print_vars(); };
@@ -92,6 +87,8 @@ public:
 	G4double get_electron_E_MeV()      { return Ebeta_tot_MeV; }  // ok, but what does the rest of the G4 code think this thing is in units of?
 	double get_electron_costheta()     { return costheta_lab; }
 	
+	bool do_coulomb;
+	
 private:
 	double phi;  // only used for debug tests.  otherwise 'phi' doesn't need to get saved directly and ends up in initial_momentum and initial_velocity.
 	int did_the_printing; // only used for debug tests.
@@ -115,23 +112,21 @@ public:
 	double get_v_from_p(G4double pbeta);  
 	G4double get_p_from_v(double vbeta);
 	
-	double FermiFunction(double Z_, G4double E) { return 1.0; };
-	
+//	double FermiFunction(double Z_, G4double E) { return 1.0; };
+	double FermiFunction(double Z_, G4double E);  // this is now going to be a wrapper for K37FermiFunction.
 	
 	chamber_geometry the_geometry;
 
 	double Mz, Mz2, Mz3;
-//	void run_fast(bool doit) { runfast=doit; };
 	
 	// For export only:
 	double jtw_xi, jtw_Abeta, jtw_rho; // not a function of E.  const. for a given set of parameters.
 	double holstein_Abeta; // event-specific.  function of E.
-
+	
 private:
 	// run parameters..
 	bool use_cone;
 	double cone_costheta;
-//	bool runfast; // don't look at detector acceptance if it's not accepted to the PDF.  Should check detector acceptance first, maybe...
 	double prob_max;
 	
 	//, event_P, event_T, event_Mzcubed;
