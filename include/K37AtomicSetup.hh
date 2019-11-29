@@ -47,7 +47,14 @@ public:
 	K37AtomicSetup();
 	~K37AtomicSetup();
 	//
-	
+
+private:
+	// to make K37AtomicSetup non-copyable
+	K37AtomicSetup(const K37AtomicSetup &);
+	// to make K37AtomicSetup non-copyable
+	const K37AtomicSetup & operator=(const K37AtomicSetup &);
+
+
 public:
 	K37Cloud * GetCloud()              { return the_cloud; } // Is this ok for K37?
 	K37SublevelPopulations * GetPops() { return the_pops;  } // Is this OK for K37?  ... I don't think it's even ok for Holstein.

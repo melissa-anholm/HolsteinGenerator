@@ -13,11 +13,9 @@
 
 
 #include "IsotopeValues.hh"
-//#include "SplitString.hh"
 
 using std::map;
 
-//const double pi = std::atan(1.0)*4.0;
 
 // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- //
 struct chamber_geometry // numbers indirectly imported from G4.
@@ -40,7 +38,14 @@ class HolsteinVars
 {
 public:
 	HolsteinVars();
-		
+	
+private:
+	// to make HolsteinVars non-copyable
+	HolsteinVars(const HolsteinVars &);
+	// to make HolsteinVars non-copyable
+	const HolsteinVars & operator=(const HolsteinVars &);
+
+public:
 	bool initialize_spinfuncs(double u_, double v_);
 	
 	// Loading the text file.  Implementing code I inherited from Spencer.

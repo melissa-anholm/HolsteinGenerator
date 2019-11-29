@@ -334,8 +334,10 @@ void HolsteinVars::print_calculatedJTW()
 //	cout << "      = " << -2.0*rho*(sqrt(3.0/5.0) - rho/5.0) / (1.0+rho*rho) << endl;
 	cout << "Abeta = (2/5*rho^2 - 2*sqrt(3/5)*|rho|) / (rho^2+1) [from calculation]" << endl;
 	cout << "      = " << (2.0/5.0*rho*rho - 2.0*sqrt(3.0/5.0)*abs(rho) ) / (rho*rho+1.0) << endl;
-	cout << std::setprecision(8);
-	cout << "(E0/MeV) = " << (E0/MeV) << endl;
+//	cout << std::setprecision(8);
+	cout << std::setprecision(50);
+	cout << "(E0/MeV)  = " << (E0/MeV) << endl;
+	cout << "(m_e/MeV) = " << (m_e/MeV) <<  endl;
 }
 
 void HolsteinVars::print_holsteinalphabet()

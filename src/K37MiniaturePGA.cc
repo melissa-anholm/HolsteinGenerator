@@ -188,11 +188,11 @@ void K37MiniaturePGA::GeneratePrimaries()
 		{
 			if(make_monoenergetic)
 			{
-				holstein52_generator -> shoot_monoenergetic_decayevent(monoenergetic_energy);
+				holstein52_generator -> shoot_decayevent(monoenergetic_energy);
 			}
 			else
 			{
-				holstein52_generator -> shoot_decayevent();
+				holstein52_generator -> shoot_decayevent();  // this probably shoots from a different atomic position than we just calculated and will now save to the file...  ...wait, seriously?  No, it's fine -- this function literally doesn't deal with the initial position at all.  ...but it *does* re-calculate it in K37Run, before we save it.  .... wait, still?  Or did we fix it?
 			}
 		}
 	//	else

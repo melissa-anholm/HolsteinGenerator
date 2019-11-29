@@ -2,6 +2,7 @@
 
 #include <iostream>  // cout, endl
 #include <iomanip>   // setw
+#include <cmath>     // double abs(double).  If we remove this header, the compilation doesn't break, but the abs(...) function *might* return an int on trinat01 but not on wisely.  This is bad.  I think this header is probably included somewhere else anyhow, but we explicitly need it *here*.
 
 #undef NDEBUG
 #include<assert.h>
@@ -13,6 +14,9 @@
 
 using std::cout;
 using std::endl;
+using std::abs;  // If we don't set this here, the code doesn't break, but then abs(...) will return a different data type depending on which computer we're using.  That would be bad.  
+
+
 
 // ------------------------------------------------------------- //
 /*
@@ -110,7 +114,7 @@ void K37SublevelPopulations::Setup_Pops_From_InputsMap( /*map<string, isotope_va
 	set_pop("excited", 1, -1, FindValue("EXCITED_F1_Mminus1") );
 	
 	// ok, now what?  check if it's normalized?
-//	cout << "We'll renormalize." << endl;
+//	cout << "Setup_Pops_From_InputsMap:  We'll renormalize." << endl;
 	renormalize();
 	
 	// check if it has the right sigma?
@@ -586,10 +590,10 @@ void K37SublevelPopulations::renormalize(bool verbose)
 		cout << std::scientific << std::setprecision(4);
 		cout << "-" << endl;
 		cout << "renormalizeation:  " << endl;
-		cout << "running_sum       = " << running_sum << endl;
-		cout << "running_sum - 1.0 = " << running_sum - 1.0 << endl;
-		cout << "allowed_mismatch  = " << allowed_mismatch << endl;
-		cout << "do_the_thing = " << do_the_thing << endl;
+		cout << "running_sum            = " << running_sum << endl;
+		cout << "abs(running_sum - 1.0) = " << abs(running_sum - 1.0) << endl;
+		cout << "allowed_mismatch       = " << allowed_mismatch << endl;
+		cout << "do_the_thing           = " << do_the_thing << endl;
 		cout << "-" << endl;
 	}
 	
@@ -739,6 +743,13 @@ void K37SublevelPopulations::AdjustPolarization(double new_Pol)
 		cout << "Polarization will remain unchanged." << endl;
 		return;
 	}
+
+//	if(verbose>1)
+//	{
+//		G4cout << "Original populations:  " << G4endl;
+//		print_pops();
+//	}
+
 	
 	// check normalization first?
 	renormalize();
@@ -797,6 +808,11 @@ void K37SublevelPopulations::AdjustPolarization(double new_Pol)
 	}
 	
 	double rescale_other = pop_other_new / pop_other_old;
+//	if(verbose>1)
+//	{
+//		G4cout << "pop_stretched_old = " << pop_stretched_old << endl;
+//		G4cout << "pop_stretched_new = " << pop_stretched_new << endl;
+//	}
 	if(rescale_other < 0)  // allow it to be equal to zero, for P=+/-1.  We don't divide by this.
 	{ 
 		cout << "This is bad.  Very bad." << endl; 
@@ -883,8 +899,16 @@ void K37SublevelPopulations::AdjustPolarization(double new_Pol)
 //	}
 	
 	// Still normalized?
-	renormalize(false);
+	renormalize(false);  // argument is verbosity.
 
+//	if(verbose>1)
+//	{
+//		G4cout << "New set of moments:  " << G4endl;
+//		print_moments();
+//		G4cout << "New populations:  " << G4endl;
+//		print_pops();
+//	}
+//	renormalize(true);
 }
 
 

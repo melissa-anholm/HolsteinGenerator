@@ -33,20 +33,30 @@ public:
 	bool use_roc;  // don't even bother protecting it yet...
 	
 	// probably should put some sanity checks into functions that set cone_costheta...
-	void set_conecostheta(double costheta_max_)  { cone_costheta = costheta_max_; }; 
+	void set_conecostheta(double costheta_max_)
+	{ 
+		if (costheta_max_ < 0) 
+		{
+			G4cout << "Warning! Minimum cos(theta) should be positive!  No action taken." << G4endl;
+			return;
+		}
+		cone_costheta = costheta_max_;
+		return;
+	}; 
 	double get_conecostheta() { return cone_costheta; };
 	
-	void randomize_direction();
-	void randomize_direction_monoenergetic(G4double the_monoenergy);
+	void randomize_direction(G4double the_monoenergy=-10.0 );
+//	void randomize_direction_monoenergetic(G4double the_monoenergy);
 
 	bool check_PDF_acceptance();         // uses initial_momentum
+	bool check_holstein_acceptance();
 	bool check_detector_acceptance();    // creates hit_position from initial_momentum and initial_position.  then checks.
 	void randomize_nuclear(bool doit=true);
 //	void randomize_atomic(bool doit=true);
 //	void randomize_start(bool doit=true);   // initial_position, in G4 mm.
 
-	bool shoot_decayevent();
-	bool shoot_monoenergetic_decayevent(G4double the_monoenergy);
+	bool shoot_decayevent( G4double the_monoenergy=-10.0  );
+//	bool shoot_monoenergetic_decayevent(G4double the_monoenergy);
 	
 	void print_results();
 	void print_vars() { this->Params->print_vars(); };
@@ -61,7 +71,7 @@ public:
 	
 	double costheta_lab;
 	double time_to_travel;
-	double the_probability; // obsolete.
+//	double the_probability; // obsolete.
 	double jtw_probability, holstein_probability; // specific to this value of Ebeta, costheta.
 	
 private:
@@ -71,10 +81,21 @@ public:
 	G4double get_beta_Py() { return initial_momentum.y(); };  // must return something in units of energy.
 	G4double get_beta_Pz() { return initial_momentum.z(); };  // must return something in units of energy.
 	
+	double get_e_vX() { return initial_velocity.x(); }
+	double get_e_vY() { return initial_velocity.y(); }
+	double get_e_vZ() { return initial_velocity.z(); }
+	
+//	double get_beta_phi;
+	
 	// functions like from K37EventGenerator:  
 	G4double get_electron_T_MeV()      { return Ebeta_kin_MeV; }
 	G4double get_electron_E_MeV()      { return Ebeta_tot_MeV; }  // ok, but what does the rest of the G4 code think this thing is in units of?
 	double get_electron_costheta()     { return costheta_lab; }
+	
+private:
+	double phi;  // only used for debug tests.  otherwise 'phi' doesn't need to get saved directly and ends up in initial_momentum and initial_velocity.
+	int did_the_printing; // only used for debug tests.
+	double test_prob;  // only used for debug tests.  only set in check_holstein_acceptance(), but I want to print it out elsewhere.
 	
 public:
 	G4ThreeVector initial_velocity;  // needs units.  not unitless.
@@ -158,11 +179,9 @@ private:
 	double get_probability(G4double, double);  // E, costheta
 	double get_jtw_probability(G4double, double);
 	
-	HolsteinVars * Params;
-	//
+private:
+	HolsteinVars   * Params;
 	K37AtomicSetup * the_atomic_setup;
-//	K37Cloud * the_cloud;
-//	K37SublevelPopulations * the_pops;  // Do I *really* want this to be public??
 };
 
 #endif

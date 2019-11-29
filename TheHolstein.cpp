@@ -27,10 +27,12 @@
 // #include<G4SystemOfUnits.hh> in HolsteinVars.cpp.  *That* includes <CLHEP/Units/SystemOfUnits.h>.
 // #include <G4SystemOfUnits.hh> now in HolsteinDecay.hh
 
+/*
 // Root:
 #include "TFile.h"
 #include <TTree.h>
 #include <TBranch.h> // might not need this...
+*/
 
 // Project:
 #include "Holstein52Isotope.hh"    // formerly HolsteinVars
@@ -38,6 +40,7 @@
 #include "K37SublevelPopulations.hh"
 
 #include "K37MiniaturePGA.hh"
+#include "MiniAggregator.hh"
 
 
 using std::cout;
@@ -216,8 +219,8 @@ int main(int argc, char *argv[])
 	TBranch *jtw_acceptance_branch      = tree -> Branch("jtw_acceptance",      &jtw_acceptance);
 	TBranch *holstein_acceptance_branch = tree -> Branch("holstein_acceptance", &holstein_acceptance);
 	
-	Double_t the_prob;
-	TBranch *prob_branch           = tree -> Branch("PDF_probability",      &the_prob);
+//	Double_t the_prob;
+//	TBranch *prob_branch           = tree -> Branch("PDF_probability",      &the_prob);
 	Double_t jtw_prob;
 	Double_t holstein_prob;
 	TBranch *jtw_prob_branch       = tree -> Branch("jtw_probability",      &jtw_prob);
@@ -320,7 +323,8 @@ int main(int argc, char *argv[])
 				
 				if(the_PGA->GetMakeMonoenergetic())
 				{
-					event_accepted = the_PGA->GetHolsteinGenerator() -> shoot_monoenergetic_decayevent( the_PGA->GetMonoenergeticEnergy() );
+				//	event_accepted = the_PGA->GetHolsteinGenerator() -> shoot_monoenergetic_decayevent( the_PGA->GetMonoenergeticEnergy() );
+					event_accepted = the_PGA->GetHolsteinGenerator() -> shoot_decayevent( the_PGA->GetMonoenergeticEnergy() );
 				}
 				else
 				{
@@ -387,9 +391,9 @@ int main(int argc, char *argv[])
 			
 			//
 			if( the_PGA->GetHolsteinGenerator()->GetAtomicSetup()->get_sigma() > 0 ) { sigma_plus = 1; }
-			else                                               { sigma_plus = 0; }
+			else                                                                     { sigma_plus = 0; }
 			
-			the_prob     = the_PGA->GetHolsteinGenerator()->the_probability;
+		//	the_prob     = the_PGA->GetHolsteinGenerator()->the_probability;
 			jtw_prob     = the_PGA->GetHolsteinGenerator()->jtw_probability;
 			holstein_prob= the_PGA->GetHolsteinGenerator()->holstein_probability;
 			the_costheta = the_PGA->GetHolsteinGenerator()->costheta_lab;
