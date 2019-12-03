@@ -3,7 +3,7 @@
 #ifndef K37FermiFunction_h
 #define K37FermiFunction_h 1
 
-#include "K37FermiFunction.hh"
+//#include "K37FermiFunction.hh"
 #include "globals.hh"
 
 class K37ComplexGammaFunction;
@@ -16,6 +16,8 @@ public:
 	// acronym stands for get (V)alue of (F)ermi (F)unction takes kinetic energy
 	// as its argument
 	G4double getVFF(G4double kineticEnergyChoice);
+	// Kinetic energy should be in units of ???
+	// in Ben/Spencer's code it takes units of MeV.  Unless I changed that.
 
 private:
 	G4double A;                 // mass number of isotope

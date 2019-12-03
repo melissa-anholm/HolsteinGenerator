@@ -74,7 +74,7 @@ HolsteinVars::HolsteinVars():
 
 void HolsteinVars::initialize_physics_parameters()
 {
-	bool verbose = false;
+	bool verbose = true;
 	
 	hbarc_eV_nm      = FindValue("HBARC");
 	amu_to_mev       = FindValue("AMU_TO_MEV");
@@ -88,8 +88,11 @@ void HolsteinVars::initialize_physics_parameters()
 	u          = I_spin;
 	v          = I_spin; 
 	
+	
 	m_e        = ( FindValue("MASS_OF_ELECTRON") )*MeV;        // in MeV/c^2
 //	sigma_m    = ( FindUncertainty("MASS_OF_ELECTRON") )*MeV;  // 
+	alpha      = ( FindValue("ALPHA") );  // unitless.  I think.
+	
 	
 	M          = ( FindValue("AVERAGE_MASS_PARENT_DAUGHTER")*amu_to_mev + 0.5*m_e/MeV )*MeV;       // average mass. units propagated.
 	
@@ -208,13 +211,15 @@ void HolsteinVars::initialize_physics_parameters()
 	
 	// Coulomb corrections!
 	// double R_coulomb, X_coulomb, Y_coulomb;
-	R_nucleus = 4.637/hbarc_eV_nm; // units are MeV^-1
+//	R_nucleus = 4.637/hbarc_eV_nm; // units are MeV^-1  // this is the old value.  
+	R_nucleus = 4.419/hbarc_eV_nm; // units are MeV^-1  // new value, from a weird combo of JB's 1997 measurement and Angeli's 2004 measurement.
 	X_coulomb = 9.0*M_PI*R_nucleus/140.0;  // what the hell is M_PI ?  I mean, clearly it's pi, but where the fuck is it defined?
 	Y_coulomb = X_coulomb;
 	
 	
 	if(verbose)
 	{
+		cout << "alpha = " << alpha << endl;
 //		cout << "* experimental g = " << g << endl;
 //		cout << "* experimental M_Q = " << M_Q << endl;
 //		cout << "* experimental M_rp = " << M_rp << endl;
@@ -230,12 +235,12 @@ void HolsteinVars::initialize_physics_parameters()
 		cout << endl;
 	//	cout << "g_V = " << g_V << endl;
 	//	cout << "M_F = " << M_F << endl;
-		/*
-		cout << "a1        = " << a1 << endl;
+		
+		cout << "a1        = " << a1 << endl;  // a1 ~= 1.001854
 		cout << "by formula: " << g_V*(M_F - (Delta/MeV)*(Delta/MeV)/6.0*M_r2 + (Delta/MeV)/3.0*M_rdotp) / ( 1.0 + (Delta/MeV)/(2.0*(M/MeV)) ) << endl;
 		cout << "prev. a1  = " << g_V*M_F/recoil_correction << endl;
 		cout << "a2 = " << a2 << endl; 
-		*/
+		
 	//	cout << "g_A = " << g_A << endl;
 	//	cout << "M_GT = " << M_GT << endl;
 		/*
@@ -342,10 +347,11 @@ void HolsteinVars::print_calculatedJTW()
 //	cout << "      = " << -2.0*rho*(sqrt(3.0/5.0) - rho/5.0) / (1.0+rho*rho) << endl;
 	cout << "Abeta = (2/5*rho^2 - 2*sqrt(3/5)*|rho|) / (rho^2+1) [from calculation]" << endl;
 	cout << "      = " << (2.0/5.0*rho*rho - 2.0*sqrt(3.0/5.0)*abs(rho) ) / (rho*rho+1.0) << endl;
-//	cout << std::setprecision(8);
-	cout << std::setprecision(50);
+	cout << std::setprecision(8);
+//	cout << std::setprecision(50);
 	cout << "(E0/MeV)  = " << (E0/MeV) << endl;
 	cout << "(m_e/MeV) = " << (m_e/MeV) <<  endl;
+	cout << std::setprecision(4);
 }
 
 void HolsteinVars::print_holsteinalphabet()

@@ -19,6 +19,7 @@
 using std::cout;
 using std::endl;
 using std::abs;
+using std::sqrt;  // do I need this??  who knows, but I can't take the chance.
 
 //  Holstein52Generator class relies on other classes: 
 //  	HolsteinVars
@@ -60,8 +61,8 @@ Holstein52Generator::Holstein52Generator() // broken?
 }
 */
 
-//HolsteinDecay::HolsteinDecay(HolsteinVars * HV, K37SublevelPopulations * pops):
-//HolsteinDecay::HolsteinDecay(HolsteinVars * HV, K37AtomicSetup * atomic_setup):
+//Holstein52Generator::Holstein52Generator(HolsteinVars * HV, K37AtomicSetup * atomic_setup):
+//Holstein52Generator::Holstein52Generator(HolsteinVars * HV, K37AtomicSetup * atomic_setup, K37FermiFunction * FF):
 Holstein52Generator::Holstein52Generator(HolsteinVars * HV, K37AtomicSetup * atomic_setup):
 	// nuclear parameters:
 	delta_M1(0), delta_M2(0), delta_deltaC(0), 
@@ -69,12 +70,9 @@ Holstein52Generator::Holstein52Generator(HolsteinVars * HV, K37AtomicSetup * ato
 	// run parameters:
 	use_roc(true),
 	use_cone(false), cone_costheta(0),
-//	runfast(true), 
 	prob_max(0.2), 
 	do_coulomb(true)
 {
-//	cout << "Called Holstein52Generator::Holstein52Generator(HolsteinVars * HV, K37AtomicSetup * atomic_setup)" << endl;
-	
 	// Nuclear:
 	Params = HV;
 	
@@ -141,6 +139,13 @@ Holstein52Generator::Holstein52Generator(HolsteinVars * HV, K37AtomicSetup * ato
 	jtw_Abeta = 2.0*(jtw_c1*jtw_c1*(1.0/(3.0/2.0 + 1.0)) + 2.0*jtw_a1*jtw_c1*sqrt((3.0/2.0)/(3.0/2.0 + 1.0)) ) / (2.0*(jtw_a1*jtw_a1 + jtw_c1*jtw_c1));
 	jtw_rho   = jtw_c1/jtw_a1;
 	
+	
+	// Fermi Function:
+	the_FF = new K37FermiFunction();
+	X_coulomb = HV->get_X(); 
+	Y_coulomb = HV->get_Y();
+	alpha     = HV->get_alpha();
+
 	
 	// Atomic:
 	the_atomic_setup = atomic_setup;
@@ -547,6 +552,83 @@ double Holstein52Generator::F_3(double E) // a1 j3 (M/MeV) c1 g j2 j3
 	return F3;
 }
 
+double Holstein52Generator::FF_dF1_Euvs(double E)  
+// CC to the F_i(E, J, J', 0) functions of (B9).  E in units of MeV.  
+// I've used 'a1' in place of 'a' (same thing for c) for these expressions --
+// so the coulomb corrections don't get recoil-order corrections.
+{
+//	return 0.0;
+	double prefactor = +(8.0*alpha*Z_daughter)/(3.0*M_PI);
+	double a_term = a1*a1 * (4.0*E*(X_coulomb+Y_coulomb) + E0*X_coulomb + (m_e*m_e/E)*(X_coulomb+2.0*Y_coulomb) );
+	double c_term = c1*c1 * (E*(16.0/3.0*X_coulomb + 4.0*Y_coulomb) - 1.0/3.0*E0*X_coulomb + (m_e*m_e/E)*(X_coulomb+2.0*Y_coulomb) );
+	
+	double dF = prefactor*(a_term + c_term);
+	
+//	return sign*(-8.)*alpha*Z_d/3./M_PI* 
+//		( sq(a1_tot)*(4.*E*(X+Y) + E0*X + me2*(X+2.*Y)/E ) +
+//		  sq(c1_tot)*(4.*E*(4.*X/3.+Y) - E0*X/3. + me2*(X+2.*Y)/E )  );
+	//
+	return dF;
+}
+double Holstein52Generator::FF_dF4_Euvs(double E)
+{
+//	return 0.0;
+	double delta_uv   = Params->get_delta_uv();
+	double gamma_uv   = Params->get_gamma_uv();
+	double u          = 3.0/2.0;
+	
+	double prefactor = +(8.0*alpha*Z_daughter)/(3.0*M_PI) * E*(5.0*X_coulomb+4.0*Y_coulomb);
+	double ac_term = delta_uv * sqrt( u/(u+1.0) ) * 2.0*a1*c1;
+	double c_term  = (+1.0)*gamma_uv/(u+1.0)*c1*c1;
+	
+	double dF = prefactor*(ac_term + c_term);
+	
+//	double tmp1 =0;
+//	double tmp2 =0;
+//	double tmp3 =0;
+//	tmp1 = sign*(-8.)*alpha*Z_d*E*(5.*X+4.*Y)/3./M_PI;
+//	tmp2 = sqrt(J/(J+1.))*2.*a1_tot*c1_tot;
+//	tmp3 = sign*gamma_uv()*sq(c1_tot)/(J+1.);
+//	
+//	return tmp1*(tmp2-tmp3);
+	
+	return dF;
+}
+double Holstein52Generator::FF_dF7_Euvs(double E)
+{
+//	return 0.0;
+	double delta_uv   = Params->get_delta_uv();
+	double gamma_uv   = Params->get_gamma_uv();
+	double u          = 3.0/2.0;
+	
+	double prefactor = +(8.0*alpha*Z_daughter)/(3.0*M_PI) * (E0-E)*X_coulomb;
+	double ac_term = delta_uv * sqrt( u/(u+1.0) ) * 2.0*a1*c1;
+	double c_term  = (-1.0)*gamma_uv/(u+1.0)*c1*c1;
+	
+	double dF = prefactor*(ac_term + c_term);
+	
+//	double tmp1 =0;
+//	double tmp2 =0;
+//	double tmp3 =0;
+//	tmp1 = sign*(-8.)*alpha*Z_d/3./M_PI*(E0-E)*X;
+//	tmp2 = sqrt(J/(J+1.))*2.*a1_tot*c1_tot;
+//	tmp3 = sign*gamma_uv()*sq(c1_tot)/(J+1.);
+//	
+//	return tmp1*(tmp2+tmp3);
+
+	return dF;
+}
+
+double Holstein52Generator::dF0_coulomb(double E) // CC to the F_i(E) functions of (B10).  E in units of MeV.
+{
+	return FF_dF1_Euvs(E);
+}
+double Holstein52Generator::dF1_coulomb(double E)
+{
+	return ( FF_dF4_Euvs(E) + 1.0/3.0 * FF_dF7_Euvs(E) );
+}
+
+
 G4double Holstein52Generator::pbeta(G4double E)  // *only* in get_probability so far...
 {
 	G4double pbetac = sqrt( pow(E/MeV,2) - pow((m_e/MeV),2) );  // MeV for everything...
@@ -570,11 +652,21 @@ G4double Holstein52Generator::get_p_from_v(double vbeta)  // ...
 	return pbeta;
 }
 
-double Holstein52Generator::FermiFunction(double Z_, G4double E)
+double Holstein52Generator::FermiFunction( double E_kin_MeV )
 {
-	if(!do_coulomb) { return 1.0; }
-	// otherwise...
+//	bool verbose = false;
+	FF_val = 1.0;
+	if(!do_coulomb) { return FF_val; }
 	
+	// otherwise...
+	FF_val = the_FF->getVFF(E_kin_MeV);
+	
+//	if(verbose)
+//	{
+//		G4cout << "T_beta = " << E_kin_MeV << " MeV;\t F(Z,E) = " << FF_val << G4endl;
+//	}
+	
+	return FF_val;
 }
 
 double Holstein52Generator::get_probability(G4double E, double costheta) // want to use costheta_lab
@@ -585,9 +677,14 @@ double Holstein52Generator::get_probability(G4double E, double costheta) // want
 	double cos2theta = 1.0; // kludge
 	double prefactor = 2.0*Gv2*cos2theta/( pow(2.0*pi, 4) );
 	
-	double the_scaling = prefactor*FermiFunction(Params->get_Z_daughter(), (E/MeV))*pow((E0/MeV)-(E/MeV), 2)*(E/MeV)*pbeta(E);
+//	double the_scaling = prefactor*FermiFunction( Params->get_Z_daughter(), (E/MeV) ) * pow((E0/MeV)-(E/MeV), 2)*(E/MeV)*pbeta(E);
+	// Call FF using KE rather than Etot.
+//	double the_scaling = prefactor*FermiFunction( (E-m_e)/MeV ) * pow((E0/MeV)-(E/MeV), 2) * (E/MeV) * pbeta(E);
+	double the_scaling = prefactor * pow((E0/MeV)-(E/MeV), 2) * (E/MeV) * pbeta(E);
+	//Ebeta_kin_MeV = (Ebeta - m_e)/MeV;
 	
-	if(verbose>0)
+	
+	if(verbose>1)
 	{
 		double the_F0, the_F1;  // just to check on ROC.
 		the_F0 = F_0((E/MeV));
@@ -599,25 +696,28 @@ double Holstein52Generator::get_probability(G4double E, double costheta) // want
 		cout << "a1 = " << a1 << ";\tc1 = " << c1 << endl;
 	}
 	
-	double t0 = F_0((E/MeV));
-	double t1 = F_1((E/MeV)) * Lambda1 * costheta*(pbeta(E)/MeV)/(E/MeV);
-	double t2 = F_2((E/MeV)) * Lambda2 * (pbeta(E)/MeV)*(pbeta(E)/MeV) / ((E/MeV)*(E/MeV)) * (costheta*costheta - 1.0/3.0);
-	double t3 = F_3((E/MeV)) * Lambda3 * ( pow(costheta*(pbeta(E)/MeV)/(E/MeV), 3) - 3.0/5.0*costheta*pow((pbeta(E)/MeV)/(E/MeV), 3) );
+	double t0 = (F_0(E/MeV)*FermiFunction( (E-m_e)/MeV ) + dF0_coulomb(E/MeV) );
+	double t1 = (F_1(E/MeV)*FermiFunction( (E-m_e)/MeV ) + dF1_coulomb(E/MeV) ) * ( Lambda1 * costheta*(pbeta(E)/MeV)/(E/MeV) );
+	double t2 = (F_2(E/MeV)*FermiFunction( (E-m_e)/MeV ) )                      * ( Lambda2 * (pbeta(E)/MeV)*(pbeta(E)/MeV) / ((E/MeV)*(E/MeV)) * (costheta*costheta - 1.0/3.0) );
+	double t3 = (F_3(E/MeV)*FermiFunction( (E-m_e)/MeV ) )                      * ( Lambda3 * (pow(costheta*(pbeta(E)/MeV)/(E/MeV), 3) - 3.0/5.0*costheta*pow((pbeta(E)/MeV)/(E/MeV), 3)) );
 	
 //	double the_prob      = the_scaling*(t0+t1+t2+t3);
-	holstein_Abeta       = F_1((E/MeV))/t0;  // Do I still believe this, what with the coulomb corrections?
+	holstein_Abeta       = F_1(E/MeV)/t0;  // Do I still believe this, what with the coulomb corrections?
 	
 	holstein_probability = the_scaling*(t0+t1+t2+t3);
 	
-	if(verbose>1)
+	if(verbose>0)
 	{
 		cout << "Holstein52Generator::get_probability:  the_prob = " << holstein_probability << endl;
-		cout << "\tthe_scaling = " << the_scaling << endl;
-		cout << "\tholstein_Abeta = " << holstein_Abeta << endl;
-		cout << "\tt0 = " << t0 << endl;
-		cout << "\tt1 = " << t1 << endl;
-		cout << "\tt2 = " << t2 << endl;
-		cout << "\tt3 = " << t3 << endl;
+	//	cout << "\tthe_scaling = " << the_scaling << endl;
+	//	cout << "\tholstein_Abeta = " << holstein_Abeta << endl;
+	//	cout << "\tt0 = " << t0 << endl;
+	//	cout << "\tt1 = " << t1 << endl;
+	//	cout << "\tt2 = " << t2 << endl;
+	//	cout << "\tt3 = " << t3 << endl;
+		cout << "T_beta = " << (E-m_e)/MeV << " MeV;\t F(Z,E) = " << FF_val << G4endl;
+		cout << "F_0 = " << F_0(E/MeV) << ";\tdF0 = " << dF0_coulomb(E/MeV) << endl;
+		cout << "F_1 = " << F_1(E/MeV) << ";\tdF1 = " << dF1_coulomb(E/MeV) << endl;
 	}
 	return holstein_probability;
 }
@@ -627,7 +727,8 @@ double Holstein52Generator::get_jtw_probability(G4double E, double costheta)
 	double Gv2       = 1.0; // kludge
 	double cos2theta = 1.0; // kludge
 	double prefactor = 2.0*Gv2*cos2theta/( pow(2.0*pi, 4) );
-	double the_scaling = prefactor*FermiFunction(Params->get_Z_daughter(), (E/MeV))*pow((E0/MeV)-(E/MeV), 2)*(E/MeV)*pbeta(E);
+//	double the_scaling = prefactor*FermiFunction(Params->get_Z_daughter(), (E/MeV))*pow((E0/MeV)-(E/MeV), 2)*(E/MeV)*pbeta(E);
+	double the_scaling = prefactor * FermiFunction( (E-m_e)/MeV ) * pow((E0/MeV)-(E/MeV), 2)*(E/MeV)*pbeta(E);
 	
 	double fake_F0 = (jtw_a1*jtw_a1 + jtw_c1*jtw_c1);
 	double fake_F1 = jtw_c1*jtw_c1*(1.0/(3.0/2.0 + 1.0)) + 2.0*jtw_a1*jtw_c1*sqrt((3.0/2.0)/(3.0/2.0 + 1.0));
@@ -707,7 +808,7 @@ void Holstein52Generator::randomize_direction( G4double the_monoenergy ) // save
 	costheta_lab = G4RandFlat::shoot(-1.0, 1.0);
 	while( use_cone && (abs(costheta_lab) < cone_costheta) ) // the max. is on theta.  cos(theta_max) is the min.  this is a really slow way to do this.
 	{
-		cout << "shooting somemore." << endl;
+	//	cout << "shooting somemore." << endl;
 		costheta_lab = G4RandFlat::shoot(-1.0, 1.0);
 	}
 //	cout << "Picked cos(theta) = " << costheta_lab << endl;
@@ -787,20 +888,18 @@ bool Holstein52Generator::check_holstein_acceptance()  // uses initial_momentum
 	test_prob = G4RandFlat::shoot(0.0, prob_max);
 	
 	holstein_probability = get_probability(Ebeta, costheta_lab ); // this is redundant, but whatevs.
-//	the_probability = holstein_probability;
 	
-	if(verbose)
-	{
+//	if(verbose)
+//	{
 //		cout << "E = " << Ebeta << ";  costheta=" << costheta_lab << ";  holstein_prob = " << holstein_probability << ";  test_prob = " << test_prob << endl;
-	//	cout << "holstein_prob = " << holstein_probability << /*";  jtw_prob = " << jtw_probability << */";  max = " << prob_max << ";  test_prob = " << test_prob << endl;
-	}
+//	//	cout << "holstein_prob = " << holstein_probability << /*";  jtw_prob = " << jtw_probability << */";  max = " << prob_max << ";  test_prob = " << test_prob << endl;
+//	}
 	//
 	if(holstein_probability > prob_max)
 	{
 		cout << "Bad!  We've broken our acceptance/rejection method!" << endl;
 		cout << "You should increase prob_max within the code.  " << endl;
 		cout << "prob_max = " << prob_max << endl;
-	//	cout << "prob     = " << the_probability << endl;
 		assert(0); // hard kill.
 		return true;
 	}
@@ -816,19 +915,6 @@ bool Holstein52Generator::check_holstein_acceptance()  // uses initial_momentum
 		holstein_acceptance = false;
 	//	if(verbose) { cout << "\tEvent rejected by Holstein PDF." << endl; }
 	}
-	if(verbose) 
-	{ 
-	//	cout << "costheta=" << costheta_lab << ";  P_hol - P_test = " << holstein_probability - test_prob << endl;
-	//	cout << "{" << costheta_lab << ", " << holstein_probability << "}" << endl;
-	//	cout << "{" << costheta_lab << ", " << test_prob << "}, " << endl;
-	}
-//	cout << "{" << costheta_lab << ", " << holstein_probability << "}, " << endl;
-
-//	if(did_the_printing==1)
-//	{
-//	//	cout << "{" << costheta_lab << ", ";
-//		cout << costheta_lab << "}, " << endl;
-//	}
 	
 	return holstein_acceptance;
 }

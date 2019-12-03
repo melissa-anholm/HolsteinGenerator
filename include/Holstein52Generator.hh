@@ -10,6 +10,7 @@
 #include "Holstein52Isotope.hh"  // formerly HolsteinVars
 // #include "K37SublevelPopulations.hh"
 #include "K37AtomicSetup.hh"
+#include "K37FermiFunction.hh"
 
 
 // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- // ---- //
@@ -25,6 +26,7 @@ class Holstein52Generator
 public:
 //	Holstein52Generator();    /// this one seems broken?!?!?
 	Holstein52Generator(HolsteinVars * HV, K37AtomicSetup * atomic_setup);
+//	Holstein52Generator(HolsteinVars * HV, K37AtomicSetup * atomic_setup, K37FermiFunction * FF);
 //	Holstein52Generator(HolsteinVars  HV) { Holstein52Generator( (HolsteinVars*)(&HV) ); };
 	
 	// The cone!
@@ -113,7 +115,7 @@ public:
 	G4double get_p_from_v(double vbeta);
 	
 //	double FermiFunction(double Z_, G4double E) { return 1.0; };
-	double FermiFunction(double Z_, G4double E);  // this is now going to be a wrapper for K37FermiFunction.
+	double FermiFunction(double T_beta_MeV);  // this is now going to be a wrapper for K37FermiFunction.
 	
 	chamber_geometry the_geometry;
 
@@ -122,6 +124,7 @@ public:
 	// For export only:
 	double jtw_xi, jtw_Abeta, jtw_rho; // not a function of E.  const. for a given set of parameters.
 	double holstein_Abeta; // event-specific.  function of E.
+	double FF_val;
 	
 private:
 	// run parameters..
@@ -157,11 +160,23 @@ private:
 	
 	double jtw_a1, jtw_c1;
 	
+	double alpha;
+	double X_coulomb, Y_coulomb;
+	
 	// Need to evaluate the prob. dist. from within the daughter class..
-	double F_0(G4double);  // monopole
-	double F_1(G4double);  // dipole
-	double F_2(G4double);  // quadrupole
-	double F_3(G4double);  // octopole
+	double F_0(double);  // monopole
+	double F_1(double);  // dipole
+	double F_2(double);  // quadrupole
+	double F_3(double);  // octopole
+	
+	// coulomb corrections:
+	double FF_dF1_Euvs(double);
+	double FF_dF4_Euvs(double);
+	double FF_dF7_Euvs(double);
+	
+	double dF0_coulomb(double);
+	double dF1_coulomb(double);
+	
 	
 	double Lambda0, Lambda1, Lambda2, Lambda3, Lambda4;
 	void initialize_lambdafuncs();
@@ -175,8 +190,9 @@ private:
 	double get_jtw_probability(G4double, double);
 	
 private:
-	HolsteinVars   * Params;
-	K37AtomicSetup * the_atomic_setup;
+	HolsteinVars     * Params;
+	K37AtomicSetup   * the_atomic_setup;
+	K37FermiFunction * the_FF;
 };
 
 #endif

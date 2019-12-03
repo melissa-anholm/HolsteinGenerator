@@ -24,7 +24,8 @@ K37FermiFunction::K37FermiFunction(double zChoice, double aChoice)
 	gamma = sqrt(1.-(alpha*alpha*Z*Z));
 	twoGammaPlusTwo = 2.*(gamma + 1.);
 	twoGammaMinusTwo = 2.*(gamma - 1.);
-	massOfElectron = 0.510998;
+//	massOfElectron = 0.510998;  // in MeV.  
+	massOfElectron = 0.5109989461;  // in MeV.  Slightly more precise value.
 }
 
 K37FermiFunction::~K37FermiFunction() 

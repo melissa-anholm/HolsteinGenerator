@@ -38,6 +38,7 @@
 #include "Holstein52Isotope.hh"    // formerly HolsteinVars
 #include "Holstein52Generator.hh"  // formerly HolsteinDecay
 #include "K37SublevelPopulations.hh"
+#include "K37FermiFunction.hh"
 
 #include "K37MiniaturePGA.hh"
 #include "MiniAggregator.hh"
@@ -90,11 +91,14 @@ int main(int argc, char *argv[])
 	
 	HolsteinVars           * pointervars      = new HolsteinVars();	
 	K37AtomicSetup         * the_atomic_setup = new K37AtomicSetup();
+//	K37FermiFunction       * the_FF           = new K37FermiFunction();
+	
 	Holstein52Generator    * the_decay        = new Holstein52Generator(pointervars, the_atomic_setup);
+//	Holstein52Generator    * the_decay        = new Holstein52Generator(pointervars, the_atomic_setup, the_FF);
 	K37MiniaturePGA        * the_PGA          = new K37MiniaturePGA(the_decay);
 	
-	the_PGA->SetMakeMonoenergetic(true);
-	the_PGA->SetMonoenergeticEnergy(2.0*MeV);
+//	the_PGA->SetMakeMonoenergetic(true);
+//	the_PGA->SetMonoenergeticEnergy(2.0*MeV);
 	
 	the_atomic_setup -> SetPolarization(0.99);
 	the_atomic_setup -> print_pops();
@@ -278,13 +282,14 @@ int main(int argc, char *argv[])
 	the_PGA->GetHolsteinGenerator()->use_roc=true;
 	
 	bool event_accepted = false;
+	int nhalfevents =        10;
 //	int nhalfevents =       100;
-	int nhalfevents =      1000;
+//	int nhalfevents =      1000;
 //	int nhalfevents =   1000000;
 //	int nhalfevents = 100000000;
 	
 //	int mismatch_eventcounter = 0;
-	int jtw_accept_counter = 0;
+//	int jtw_accept_counter = 0;
 	int holstein_accept_counter = 0;
 	cout << "Let's go!" << endl;
 	for(int sigmacount = 0; sigmacount <2; sigmacount++)
@@ -369,13 +374,13 @@ int main(int argc, char *argv[])
 			det_acceptance = the_PGA->GetHolsteinGenerator()->det_acceptance;  // if runfast is enabled, 
 			the_traveltime = the_PGA->GetHolsteinGenerator()->time_to_travel;
 			
-			jtw_acceptance      = the_PGA->GetHolsteinGenerator()->jtw_acceptance;
+		//	jtw_acceptance      = the_PGA->GetHolsteinGenerator()->jtw_acceptance;  // not even checked anymore..
 			holstein_acceptance = the_PGA->GetHolsteinGenerator()->holstein_acceptance;
 			
-			if(jtw_acceptance)
-			{
-				jtw_accept_counter++;
-			}
+		//	if(jtw_acceptance)
+		//	{
+		//		jtw_accept_counter++;
+		//	}
 			if(holstein_acceptance)
 			{
 				holstein_accept_counter++;
@@ -438,7 +443,7 @@ int main(int argc, char *argv[])
 	cout << "Done generating events!"  << endl;
 	cout << "Total events generated:  " << nhalfevents*2 << endl;
 //	cout << "mismatched events:       " << mismatch_eventcounter << endl;
-	cout << "JTW accepted events:     " << jtw_accept_counter << endl;
+//	cout << "JTW accepted events:     " << jtw_accept_counter << endl;
 	cout << "Holstein accepted events:" << holstein_accept_counter << endl;
 	
 	tree -> GetCurrentFile() -> Write("",TObject::kOverwrite);  

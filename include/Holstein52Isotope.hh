@@ -90,6 +90,8 @@ private:
 	G4double E0, M, Delta;  // HolsteinVars: G4units propagated for Delta, E0, M.
 	G4double sigma_M1, sigma_M2;  // HolsteinVars:  G4 units propagated for both.  in MeV.
 	G4double m_e;//, sigma_m;  // HolsteinVars:  G4units propagated for m_e.  and sigma_m, even though it's unused.
+	//
+	G4double alpha;
 	
 	double mu_parent, sigma_mu_parent, mu_daughter, sigma_mu_daughter;
 	double quad_parent, sigma_quad_parent, quad_daughter, sigma_quad_daughter;
@@ -144,6 +146,11 @@ public:  // getter methods, so that we can copy the variables over to the genera
 	double get_amu_to_mev()       { return amu_to_mev; };
 	double get_sigma_amu_to_mev() { return sigma_amu_to_mev; };  // this is literally to convert units already.  it'll probably become obsolete.
 	double get_speed_of_light()   { return speed_of_light; };
+	
+	// coulomb corrections:
+	double get_X()       { return X_coulomb; }
+	double get_Y()       { return Y_coulomb; }
+	double get_alpha()   { return alpha;     }
 
 	// mass, energy, all in MeV.
 	G4double get_E0()                { return E0; };
@@ -205,7 +212,7 @@ public:  // getter methods, so that we can copy the variables over to the genera
 	double get_M_3y()    { return M_3y; };
 	double get_M_L()     { return M_L; };
 	double get_M_Q()     { return M_Q; };
-
+	
 
 //	// JTW parameters, with no isospin corrections.
 //	double jtw_a1, jtw_c1;
