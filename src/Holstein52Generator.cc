@@ -71,17 +71,19 @@ Holstein52Generator::Holstein52Generator(HolsteinVars * HV, K37AtomicSetup * ato
 	use_roc(true),
 	use_cone(false), cone_costheta(0),
 	prob_max(0.2), 
-	do_coulomb(true)
+	do_coulomb(true), 
+	b_kludge(0.0)
 {
 	// Nuclear:
 	Params = HV;
 	
-	M_F_isospin    = Params->get_M_F_isospin();    // exact
-	I_spin         = Params->get_I_spin();         // exact
-	A_nucleons     = Params->get_A_nucleons();     // exact
-	hbarc_eV_nm    = Params->get_hbarc_eV_nm();    // exact.  unitless. ... it is *not* fucking unitless.  ... it needs to be unitless for now though, because who fucking knows what units the matrix elements are supposed to have.
-	Z_daughter     = Params->get_Z_daughter();     // exact
-	speed_of_light = Params->get_speed_of_light(); // exact.  double.  no G4units.
+	M_F_isospin         = Params->get_M_F_isospin();    // exact
+	I_spin              = Params->get_I_spin();         // exact
+	A_nucleons          = Params->get_A_nucleons();     // exact
+	hbarc_eV_nm         = Params->get_hbarc_eV_nm();    // exact.  unitless. ... it is *not* fucking unitless.  ... it needs to be unitless for now though, because who fucking knows what units the matrix elements are supposed to have.
+	Z_daughter          = Params->get_Z_daughter();     // exact
+	speed_of_light      = Params->get_speed_of_light(); // exact.  double.  no G4units.
+	alpha_finestructure = Params->get_finestructure();
 	
 	E0    = Params->get_E0();    // uncertain (propagation) MeV.  comes out in MeV from HolsteinVars.
 	M     = Params->get_M();     // uncertain (propagation) MeV.  comes out in MeV from HolsteinVars.
@@ -139,6 +141,9 @@ Holstein52Generator::Holstein52Generator(HolsteinVars * HV, K37AtomicSetup * ato
 	jtw_Abeta = 2.0*(jtw_c1*jtw_c1*(1.0/(3.0/2.0 + 1.0)) + 2.0*jtw_a1*jtw_c1*sqrt((3.0/2.0)/(3.0/2.0 + 1.0)) ) / (2.0*(jtw_a1*jtw_a1 + jtw_c1*jtw_c1));
 	jtw_rho   = jtw_c1/jtw_a1;
 	
+	// b_kludge, but I'll need this later anyway:
+//	alpha_finestructure = 
+	jtw_gamma = sqrt(1.0-alpha_finestructure*alpha_finestructure * Z_daughter*Z_daughter);
 	
 	// Fermi Function:
 	the_FF = new K37FermiFunction();
@@ -701,10 +706,12 @@ double Holstein52Generator::get_probability(G4double E, double costheta) // want
 	double t2 = (F_2(E/MeV)*FermiFunction( (E-m_e)/MeV ) )                      * ( Lambda2 * (pbeta(E)/MeV)*(pbeta(E)/MeV) / ((E/MeV)*(E/MeV)) * (costheta*costheta - 1.0/3.0) );
 	double t3 = (F_3(E/MeV)*FermiFunction( (E-m_e)/MeV ) )                      * ( Lambda3 * (pow(costheta*(pbeta(E)/MeV)/(E/MeV), 3) - 3.0/5.0*costheta*pow((pbeta(E)/MeV)/(E/MeV), 3)) );
 	
+	double kludge_b_term = jtw_gamma*b_kludge*( (m_e/MeV)/(E/MeV) );
+	
 //	double the_prob      = the_scaling*(t0+t1+t2+t3);
 	holstein_Abeta       = F_1(E/MeV)/t0;  // Do I still believe this, what with the coulomb corrections?
 	
-	holstein_probability = the_scaling*(t0+t1+t2+t3);
+	holstein_probability = the_scaling*(t0+t1+t2+t3+kludge_b_term);
 	
 	if(verbose>0)
 	{
@@ -733,7 +740,9 @@ double Holstein52Generator::get_jtw_probability(G4double E, double costheta)
 	double fake_F0 = (jtw_a1*jtw_a1 + jtw_c1*jtw_c1);
 	double fake_F1 = jtw_c1*jtw_c1*(1.0/(3.0/2.0 + 1.0)) + 2.0*jtw_a1*jtw_c1*sqrt((3.0/2.0)/(3.0/2.0 + 1.0));
 	
-	double the_term = fake_F0 + fake_F1 * Lambda1 * costheta*(pbeta(E)/MeV)/(E/MeV);
+	double kludge_b_term = jtw_gamma*b_kludge*( (m_e/MeV)/(E/MeV) );  // have I definitely got the units right here??  ..if b_kludge==0, this term is zero too.
+	
+	double the_term = fake_F0 + fake_F1 * Lambda1 * costheta*(pbeta(E)/MeV)/(E/MeV) + kludge_b_term;
 	double the_prob = the_scaling*the_term;
 	
 	jtw_probability = the_prob;

@@ -107,6 +107,7 @@ int main(int argc, char *argv[])
 //	the_PGA->GetHolsteinGenerator()->run_fast(true);
 	the_PGA->GetHolsteinGenerator()->set_use_cone(true);
 	the_PGA->GetHolsteinGenerator()->set_conecostheta( 0.90 );
+	the_PGA->GetHolsteinGenerator()->set_b_kludge(0.05);
 	
 	
 	/*

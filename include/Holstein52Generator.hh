@@ -97,6 +97,10 @@ private:
 	double test_prob;  // only used for debug tests.  only set in check_holstein_acceptance(), but I want to print it out elsewhere.
 	
 public:
+	// b kludge:
+	void set_b_kludge(double test_b) { b_kludge = test_b; }
+	
+	
 	G4ThreeVector initial_velocity;  // needs units.  not unitless.
 	G4ThreeVector initial_position;  // needs units of position.  ...done in G4units.
 	G4ThreeVector hit_position;      // needs units of position.
@@ -127,6 +131,11 @@ public:
 	double FF_val;
 	
 private:
+	// b kludge:
+	double b_kludge;
+	double jtw_gamma;
+	double alpha_finestructure;
+	
 	// run parameters..
 	bool use_cone;
 	double cone_costheta;
