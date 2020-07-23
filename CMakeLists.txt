@@ -27,6 +27,48 @@ INCLUDE_DIRECTORIES(SYSTEM ${ROOT_INCLUDE_DIR})
 INCLUDE_DIRECTORIES ($ENV{MISC_INCLUDE_DIR})  # Do I need this for anything?  maybe not right now.
 
 
+#INCLUDE_DIRECTORIES (K37_include_dir)
+
+SET(K37_include_dir /Users/anholm/Desktop/Trinat_Geant/include)
+SET( shared_hh 
+	 Holstein52Generator.hh
+	 Holstein52Isotope.hh
+	 IsotopeValues.hh
+	 K37AtomicSetup.hh
+	 K37Cloud.hh
+	 K37ComplexGammaFunction.hh
+	 K37FermiFunction.hh
+	 K37SublevelPopulations.hh
+	)
+foreach(_file ${shared_hh})
+	configure_file(
+		${K37_include_dir}/${_file}
+		${CMAKE_SOURCE_DIR}/include/${_file}
+		COPYONLY
+		)
+endforeach()
+
+SET(K37_src_dir /Users/anholm/Desktop/Trinat_Geant/src)
+SET( shared_cc 
+	 Holstein52Generator.cc
+	 Holstein52Isotope.cc
+	 IsotopeValues.cc
+	 K37AtomicSetup.cc
+	 K37Cloud.cc
+	 K37ComplexGammaFunction.cc
+	 K37FermiFunction.cc
+	 K37SublevelPopulations.cc
+	)
+foreach(_file ${shared_cc})
+	configure_file(
+		${K37_src_dir}/${_file}
+		${CMAKE_SOURCE_DIR}/src/${_file}
+		COPYONLY
+		)
+endforeach()
+
+
+
 SET(a_bunch_of_root_libraries
 	Gui Core RIO Net Hist Graf Graf3d Gpad Tree Rint Postscript Matrix Physics MathCore Thread pthread m dl )
 
@@ -35,6 +77,8 @@ SET(a_bunch_of_root_libraries
 #message("* This is a message.  ROOT_INCLUDE_DIR = " $ENV{ROOT_INCLUDE_DIR})
 
 LINK_DIRECTORIES(${ROOT_LIBRARY_DIR})
+#LINK_DIRECTORIES(K37_src_dir)
+
 #LINK_DIRECTORIES (/usr/local/lib)  # for trinatdaq
 
 #Compiler Flags=========================
@@ -73,6 +117,7 @@ target_link_libraries(holstein
 
 ###  Everything is compiled, so let's copy some files over.  ###
 ###  ===========================================================
+SET(K37_shared_setup /Users/anholm/Desktop/Trinat_Geant/ConfigurationFiles)
 SET(setup_files 
 	K_37_INPUT.txt
 	K_37_POPULATIONS_INPUT.txt
@@ -80,7 +125,7 @@ SET(setup_files
 
 foreach(_file ${setup_files})
 	configure_file(
-		${CMAKE_SOURCE_DIR}/${_file}
+		${K37_shared_setup}/${_file}
 		${CMAKE_BINARY_DIR}/${_file}
 		COPYONLY
 		)
