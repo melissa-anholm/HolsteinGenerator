@@ -127,6 +127,11 @@ public:
 	double FF_val;
 	
 private:
+	// b kludge:
+//	double b_kludge;
+	double jtw_gamma;
+	double alpha_finestructure;
+	
 	// run parameters..
 	bool use_cone;
 	double cone_costheta;

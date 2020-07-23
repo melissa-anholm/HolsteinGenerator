@@ -22,12 +22,6 @@ class K37SublevelPopulations;
 
 K37AtomicSetup::K37AtomicSetup() : 
 	MatchedRunsetLetter( G4String("0") )
-//	initialize_complete_(false)//,
-//	//#ifndef SIMPLE_MC
-//	AtomicMessenger(0),
-//	//#endif
-//	the_cloud(), 
-//	the_pops() // any argument is the int(sigma) value.
 {
 	G4cout << "Called K37AtomicSetup::K37AtomicSetup()" << G4endl;
 	
@@ -48,22 +42,6 @@ K37AtomicSetup::~K37AtomicSetup()
 	delete the_cloud;
 	delete the_pops;
 }
-/*
-void K37AtomicSetup::SetMatchedRunsetLetter(G4String newRunsetLetter)
-{
-	MatchedRunsetLetter = newRunsetLetter;
-}
-*/
-/*
-G4String K37AtomicSetup::GetMatchedRunsetLetter()
-{
-	return MatchedRunsetLetter;
-}
-*/
-/*
-void K37AtomicSetup::Initialize() 
-{
-	the_cloud->Initialize(); 
-	initialize_complete_ = true;
-}
-*/
+
+// void K37AtomicSetup::SetMatchedRunsetLetter(G4String newRunsetLetter) { MatchedRunsetLetter = newRunsetLetter; };
+// G4String K37AtomicSetup::GetMatchedRunsetLetter() { return MatchedRunsetLetter; };

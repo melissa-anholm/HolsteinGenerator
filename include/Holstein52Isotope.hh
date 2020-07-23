@@ -14,6 +14,11 @@
 
 #include "IsotopeValues.hh"
 
+#ifndef SIMPLE_MC
+	#include "Holstein52_IsotopeMessenger.hh"
+	class Holstein52_IsotopeMessenger;
+#endif
+
 using std::map;
 
 
@@ -45,6 +50,10 @@ private:
 	// to make HolsteinVars non-copyable
 	const HolsteinVars & operator=(const HolsteinVars &);
 
+	#ifndef SIMPLE_MC
+		Holstein52_IsotopeMessenger     * Isotope52Messenger;   
+	#endif
+
 public:
 	bool initialize_spinfuncs(double u_, double v_);
 	
@@ -63,6 +72,7 @@ public:
 	double FindUncertainty(const std::string &key_) const;
 	
 	void initialize_physics_parameters();
+	void propagate_values();
 	bool is_twopercent;  // it's never two percent, within this class.  this set of stuff only gets called in the 98% case.
 //	bool do_radiativecorrections;
 	
@@ -76,7 +86,7 @@ public:
 private:
 	// spin funcs:
 	double delta_uv, gamma_uv, lambda_uv, theta_uv, kappa_uv, epsilon_uv, rho_uv, sigma_uv, phi_uv; 
-
+	
 	double I_spin, u, v;
 	double Z_parent, N_parent, A_nucleons;
 	double Z_daughter, N_daughter;
@@ -85,6 +95,7 @@ private:
 	double hbarc_eV_nm;  // don't use baked in G4 "hbarc" value, because we want things multiplied by this to be unitless.  At least some of the time...
 	double amu_to_mev, sigma_amu_to_mev;  // this is literally to convert units already.  it'll probably become obsolete.
 	double speed_of_light;
+	double alpha_finestructure;
 	
 	// mass, energy, all in MeV.
 	G4double E0, M, Delta;  // HolsteinVars: G4units propagated for Delta, E0, M.
@@ -112,6 +123,14 @@ private:
 	
 	double R_nucleus, X_coulomb, Y_coulomb;
 	
+	// some scalar and tensor couplings:
+	double g_Scalar, g_Tensor;
+	
+public:
+	void set_g_Vector(double);  // vector coupling constant
+	void set_g_Axial(double);   // axial coupling constant
+	void set_g_Scalar(double);  // scalar coupling constant
+	void set_g_Tensor(double);  // tensor coupling constant
 	
 public:  // getter methods, so that we can copy the variables over to the generator without breaking things.
 	// spin funcs:
@@ -146,6 +165,7 @@ public:  // getter methods, so that we can copy the variables over to the genera
 	double get_amu_to_mev()       { return amu_to_mev; };
 	double get_sigma_amu_to_mev() { return sigma_amu_to_mev; };  // this is literally to convert units already.  it'll probably become obsolete.
 	double get_speed_of_light()   { return speed_of_light; };
+	double get_finestructure()    { return alpha_finestructure; };
 	
 	// coulomb corrections:
 	double get_X()       { return X_coulomb; }
@@ -175,12 +195,18 @@ public:  // getter methods, so that we can copy the variables over to the genera
 	double get_sigma_deltaC()        { return sigma_deltaC; };
 	
 	// coupling constants (Ian Towner).
-	double get_g_V()  { return g_V; };
-	double get_g_A()  { return g_A; };
+	double get_g_Vector()  { return g_V; };
+	double get_g_Axial()   { return g_A; };
+	
 	double get_g_II() { return g_II; };
-	double get_g_S()  { return g_S; };
+	double get_g_S()  { return g_S; };   // a different g_S.
 	double get_g_P()  { return g_P; };
 	double get_g_M()  { return g_M; };
+
+	// BSM couplings:
+	double get_g_Scalar() { return g_Scalar; };
+	double get_g_Tensor() { return g_Tensor; };
+	
 	// lower-case decay parameters:
 	double get_a1() { return a1; }; 
 	double get_a2() { return a2; };

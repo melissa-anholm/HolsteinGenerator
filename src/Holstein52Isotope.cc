@@ -45,7 +45,7 @@ HolsteinVars::HolsteinVars():
 //	hbarc_eV_nm(0), 
 	amu_to_mev(1), sigma_amu_to_mev(0), // uh ... these are terrible default values.
 //	E0(0), M(0), Delta(0), 
-//	m_e(0), sigma_m(0),            // m_electron
+//	m_e(0), sigma_m(0),          // m_electron
 	deltaC(0), sigma_deltaC(0),  // isospin symmetry breaking.  somehow.
 	g_V(0), g_A(0), g_P(0), g_M(0), 
 	g_II(0), g_S(0), // the so-called "second-class" currents.
@@ -56,7 +56,8 @@ HolsteinVars::HolsteinVars():
 	a1(0), a2(0), c1(0), c2(0), 
 	b(0), d(0), e(0), f(0), g(0), h(0), 
 	j2(0), j3(0), 
-	sigma_M1(0), sigma_M2(0)
+	sigma_M1(0), sigma_M2(0), 
+	g_Scalar(0), g_Tensor(0)
 //	nuclear_filename(string("K_37_INPUT.txt"))
 //	atomic_filename(string("K_37_POPULATIONS_INPUT.txt"))
 {
@@ -64,7 +65,6 @@ HolsteinVars::HolsteinVars():
 	G4String configPath = CONFIGURATION_DIRECTORY;
 	G4String nuclear_filename = configPath + "K_37_INPUT.txt";
 	theInputs = SS::loadup_textfile(nuclear_filename);    // reads the nuclear text file into 'theInputs'.
-//	loadup_textfile(atomic_filename);     // reads the atomic text file into 'theInputs'.
 	initialize_physics_parameters();      //
 	initialize_spinfuncs(I_spin, I_spin); // sets u and v, and epsilon_uv and etc.
 	
@@ -74,7 +74,7 @@ HolsteinVars::HolsteinVars():
 
 void HolsteinVars::initialize_physics_parameters()
 {
-	bool verbose = true;
+	int verbose = 1;
 	
 	hbarc_eV_nm      = FindValue("HBARC");
 	amu_to_mev       = FindValue("AMU_TO_MEV");
@@ -82,18 +82,16 @@ void HolsteinVars::initialize_physics_parameters()
 	
 	// kludge in the speed of light:
 	speed_of_light = 299792458.0;// *meter/second;  // meters per second.
+	alpha_finestructure = 0.0072973525693;  // (11)
 	
 	// I_spin = u = v = 3/2 is only appropriate for the 98% branch.  Have to do something else for the 2% branch.
 	I_spin     = FindValue("SPIN");
 	u          = I_spin;
 	v          = I_spin; 
 	
-	
 	m_e        = ( FindValue("MASS_OF_ELECTRON") )*MeV;        // in MeV/c^2
 //	sigma_m    = ( FindUncertainty("MASS_OF_ELECTRON") )*MeV;  // 
 	alpha      = ( FindValue("ALPHA") );  // unitless.  I think.
-	
-	
 	M          = ( FindValue("AVERAGE_MASS_PARENT_DAUGHTER")*amu_to_mev + 0.5*m_e/MeV )*MeV;       // average mass. units propagated.
 	
 	Z_parent   = FindValue("NUMBER_OF_PROTONS");
@@ -124,7 +122,7 @@ void HolsteinVars::initialize_physics_parameters()
 	Delta = ( FindValue("MASS_OF_PARENT")*amu_to_mev - FindValue("MASS_OF_DAUGHTER")*amu_to_mev - m_e/MeV )*MeV;
 	E0    = ( (Delta/MeV)*(1.0+(m_e/MeV)*(m_e/MeV)/(2.0*(M/MeV)*(Delta/MeV)) )/(1.0+(Delta/MeV)/(2.0*M)) )*MeV;
 	
-	double recoil_correction       = ( 1.0 + (Delta/MeV)/(2.0*(M/MeV)) ); // this *should* come out unitless...
+//	double recoil_correction       = ( 1.0 + (Delta/MeV)/(2.0*(M/MeV)) ); // this *should* come out unitless...
 	
 	// deltaC from severijns 2008 "isospin symmetry breaking correction".  
 	// it seems to go into M_F and M_GT.  only those.  what the hell is it?!  
@@ -146,7 +144,6 @@ void HolsteinVars::initialize_physics_parameters()
 	// matrix elements...
 	M_F         = FindValue("M_F")  / sqrt(1.0-deltaC);  // corrected for *something*...  copied from g4.  makes it slightly bigger.
 	M_GT        = FindValue("M_GT") / sqrt(1.0-deltaC);  // corrected for *something*...  copied from g4.  isospin mixing, apparently.  It shouldn't get a correction.
-//	M_GT *= -1.0;  // KLUDGE KLUDGE KLUDGE
 	
 	// some other matrix elements...
 	M_r2    = FindValue("M_R2")   / (hbarc_eV_nm*hbarc_eV_nm);  
@@ -160,55 +157,6 @@ void HolsteinVars::initialize_physics_parameters()
 //	M_L     = FindValue("M_L");                     // 'b' th. calc.
 	// M_Q, M_RP:  don't load values from file, set them up later from experimental 'g'.
 	
-	
-	// calculate a1.  value copied from g4, error calculated by me.
-//	a1  = g_V*M_F/recoil_correction;  // copied from g4.
-	a1  = g_V*(M_F - (Delta/MeV)*(Delta/MeV)/6.0*M_r2 + (Delta/MeV)/3.0*M_rdotp) / ( 1.0 + (Delta/MeV)/(2.0*(M/MeV)) );
-	a2  = g_V*(M_r2/6.0)*((M/MeV)*(M/MeV)) / recoil_correction;  // copied from g4.  matches Dan, even though it's huge.
-	
-	c1  = g_A*(M_GT - (Delta/MeV)*(Delta/MeV)/6.0*M_sr2 + M_1y*2.0*(Delta/MeV)*(Delta/MeV)/(6.0*sqrt(10.)) + A_nucleons*(Delta/MeV)/(2.0*M)*M_sL + (Delta/MeV)/2.0*M_srp ) / recoil_correction;
-	c2  = g_A*((M_sr2/6.0) + (M_1y/(6.0*sqrt(10.))))*( ((M/MeV)*(M/MeV))/recoil_correction);
-	
-	M_F_isospin = sqrt( (T_isospin + T3_parent)*(T_isospin - T3_parent + 1.0) );  // use for b, g.
-	
-	// Holstein (21)-(22):
-	b       = A_nucleons*M_F_isospin * sqrt((I_spin+1.0)/I_spin) * (mu_parent-mu_daughter);
-	
-	// experimental 'b' makes the PDF less negative.
-	if(verbose)
-	{
-		cout << "M_F_isospin = " << M_F_isospin << endl;
-		cout << "* experimental b = " << b << endl;
-	}
-
-	double d_I  = g_A*(-1.0*M_GT + (Delta/MeV)*(Delta/MeV)*M_sr2/6.0 + M_1y*(Delta/MeV)*((M/MeV)+(Delta/MeV)/6.0)/sqrt(10.) + (A_nucleons*M_sL) + ((M/MeV)*M_srp) ) / recoil_correction;
-	double d_II = -1.0*g_II*A_nucleons*M_GT;
-	d = d_I + d_II;
-	
-	// Eq. (22).  assumes CVC.
-	e       = 0;
-	
-	// Use experimental quadrupole moments for 'g', rather than calculated M_Q.
-	double jterm = sqrt( (I_spin + 1.0)*(2.0*I_spin + 3.0)/( I_spin*(2.0*I_spin - 1.0) ));
-	g   = (2.0/3.0) * (M/MeV)*(M/MeV) * M_F_isospin * jterm*(quad_daughter-quad_parent) / (hbarc_eV_nm*hbarc_eV_nm);
-	// Set M_Q by experimental 'g' value:
-	M_Q = g / ( -4.0/3.0 * (M/MeV)*(M/MeV) * g_V );
-	// Set M_rp by M_Q:
-	M_rp = (E0/MeV)*M_Q/sqrt(6);
-	
-	// for f, use new value of M_rp
-	f   = 2.0*g_V*(M/MeV)*M_rp;
-	
-	// h ...
-	h   = -1.0*(g_A*2.0*((M/MeV)*(M/MeV))*M_1y/sqrt(10.) + g_P*(A_nucleons*A_nucleons)*M_GT) / recoil_correction;
-	
-	// j2 ..
-	j2   = -g_A*2.0*((M/MeV)*(M/MeV))*M_2y/3.0;
-	
-	// j3 ?
-	j3   = -g_A*2.0*((M/MeV)*(M/MeV))*M_3y/3.0;
-	
-	
 	// Coulomb corrections!
 	// double R_coulomb, X_coulomb, Y_coulomb;
 //	R_nucleus = 4.637/hbarc_eV_nm; // units are MeV^-1  // this is the old value.  
@@ -216,8 +164,22 @@ void HolsteinVars::initialize_physics_parameters()
 	X_coulomb = 9.0*M_PI*R_nucleus/140.0;  // what the hell is M_PI ?  I mean, clearly it's pi, but where the fuck is it defined?
 	Y_coulomb = X_coulomb;
 	
+	M_F_isospin = sqrt( (T_isospin + T3_parent)*(T_isospin - T3_parent + 1.0) );  // use for b, g.
+
+	// experimental 'b' makes the PDF less negative.
+//	if(verbose)
+//	{
+//		cout << "M_F_isospin = " << M_F_isospin << endl;
+//		cout << "* experimental b = " << b << endl;
+//	}
 	
-	if(verbose)
+	
+	//
+	propagate_values();
+	
+	
+	
+	if(verbose>=1)
 	{
 		cout << "alpha = " << alpha << endl;
 //		cout << "* experimental g = " << g << endl;
@@ -230,15 +192,15 @@ void HolsteinVars::initialize_physics_parameters()
 		cout << "hbarc_eV_nm = " << hbarc_eV_nm << "\t";
 		cout << "amu_to_mev = " << amu_to_mev << endl;
 		cout << endl;
-		cout << "recoil_correction = " << recoil_correction << endl;
+//		cout << "recoil_correction = " << recoil_correction << endl;
 		cout << "deltaC = " << deltaC << " +/- " << sigma_deltaC << endl;
 		cout << endl;
 	//	cout << "g_V = " << g_V << endl;
 	//	cout << "M_F = " << M_F << endl;
 		
 		cout << "a1        = " << a1 << endl;  // a1 ~= 1.001854
-		cout << "by formula: " << g_V*(M_F - (Delta/MeV)*(Delta/MeV)/6.0*M_r2 + (Delta/MeV)/3.0*M_rdotp) / ( 1.0 + (Delta/MeV)/(2.0*(M/MeV)) ) << endl;
-		cout << "prev. a1  = " << g_V*M_F/recoil_correction << endl;
+//		cout << "by formula: " << g_V*(M_F - (Delta/MeV)*(Delta/MeV)/6.0*M_r2 + (Delta/MeV)/3.0*M_rdotp) / ( 1.0 + (Delta/MeV)/(2.0*(M/MeV)) ) << endl;
+//		cout << "prev. a1  = " << g_V*M_F/recoil_correction << endl;
 		cout << "a2 = " << a2 << endl; 
 		
 	//	cout << "g_A = " << g_A << endl;
@@ -288,7 +250,54 @@ void HolsteinVars::initialize_physics_parameters()
 		print_calculatedJTW();
 		print_holsteinalphabet();
 	}
+	
+	#ifndef SIMPLE_MC
+		Isotope52Messenger = new Holstein52_IsotopeMessenger(this);  // this might break it?
+	#endif
 }
+
+void HolsteinVars::propagate_values()
+{
+	double recoil_correction       = ( 1.0 + (Delta/MeV)/(2.0*(M/MeV)) ); // this *should* come out unitless...
+	
+	// calculate a1.  value copied from g4, error calculated by me.
+//	a1  = g_V*M_F/recoil_correction;  // copied from g4.
+	a1  = g_V*(M_F - (Delta/MeV)*(Delta/MeV)/6.0*M_r2 + (Delta/MeV)/3.0*M_rdotp) / recoil_correction;
+	a2  = g_V*(M_r2/6.0)*((M/MeV)*(M/MeV)) / recoil_correction;  // copied from g4.  matches Dan, even though it's huge.
+	
+	c1  = g_A*(M_GT - (Delta/MeV)*(Delta/MeV)/6.0*M_sr2 + M_1y*2.0*(Delta/MeV)*(Delta/MeV)/(6.0*sqrt(10.)) + A_nucleons*(Delta/MeV)/(2.0*M)*M_sL + (Delta/MeV)/2.0*M_srp ) / recoil_correction;
+	c2  = g_A*((M_sr2/6.0) + (M_1y/(6.0*sqrt(10.))))*( ((M/MeV)*(M/MeV))/recoil_correction);
+	
+	// Holstein (21)-(22):
+	b       = A_nucleons*M_F_isospin * sqrt((I_spin+1.0)/I_spin) * (mu_parent-mu_daughter);
+	
+	double d_I  = g_A*(-1.0*M_GT + (Delta/MeV)*(Delta/MeV)*M_sr2/6.0 + M_1y*(Delta/MeV)*((M/MeV)+(Delta/MeV)/6.0)/sqrt(10.) + (A_nucleons*M_sL) + ((M/MeV)*M_srp) ) / recoil_correction;
+	double d_II = -1.0*g_II*A_nucleons*M_GT;
+	d = d_I + d_II;
+	
+	// Eq. (22).  assumes CVC.
+	e       = 0;
+	
+	// Use experimental quadrupole moments for 'g', rather than calculated M_Q.
+	double jterm = sqrt( (I_spin + 1.0)*(2.0*I_spin + 3.0)/( I_spin*(2.0*I_spin - 1.0) ));
+	g   = (2.0/3.0) * (M/MeV)*(M/MeV) * M_F_isospin * jterm*(quad_daughter-quad_parent) / (hbarc_eV_nm*hbarc_eV_nm);
+	// Set M_Q by experimental 'g' value:
+	M_Q = g / ( -4.0/3.0 * (M/MeV)*(M/MeV) * g_V );
+	// Set M_rp by M_Q:
+	M_rp = (E0/MeV)*M_Q/sqrt(6);
+	
+	// for f, use new value of M_rp
+	f   = 2.0*g_V*(M/MeV)*M_rp;
+	
+	h   = -1.0*(g_A*2.0*((M/MeV)*(M/MeV))*M_1y/sqrt(10.) + g_P*(A_nucleons*A_nucleons)*M_GT) / recoil_correction;
+	j2  = -g_A*2.0*((M/MeV)*(M/MeV))*M_2y/3.0;
+	j3  = -g_A*2.0*((M/MeV)*(M/MeV))*M_3y/3.0;
+	
+	
+	return;
+}
+
+
 
 void HolsteinVars::print_vars()
 {
@@ -334,6 +343,8 @@ void HolsteinVars::print_matrixelements()
 	//
 	cout << "M_Q     = " << M_Q  << "\t(experimental, from g)" << endl;
 	cout << "M_rp    = " << M_rp << "\t(experimental, from M_Q)" << endl;
+	//
+//	cout << "g_V = " << g_V << endl;
 }
 
 void HolsteinVars::print_calculatedJTW()
@@ -341,14 +352,14 @@ void HolsteinVars::print_calculatedJTW()
 	double rho = (g_A*M_GT)/(g_V*M_F);
 //	double Abeta = -2.0*rho*(sqrt(3.0/5.0) - abs(rho)/5.0) / (1.0+rho*rho);
 	
-	cout << "rho   = (g_A*M_GT)/(g_V*M_F)" << endl;
-	cout << "      = " << (g_A*M_GT)/(g_V*M_F) << endl;
-//	cout << "Abeta = -2*rho*(sqrt(3/5) - rho/5) / (1+rho^2) [from proposal]" << endl;
-//	cout << "      = " << -2.0*rho*(sqrt(3.0/5.0) - rho/5.0) / (1.0+rho*rho) << endl;
-	cout << "Abeta = (2/5*rho^2 - 2*sqrt(3/5)*|rho|) / (rho^2+1) [from calculation]" << endl;
-	cout << "      = " << (2.0/5.0*rho*rho - 2.0*sqrt(3.0/5.0)*abs(rho) ) / (rho*rho+1.0) << endl;
+	cout << "rho     = (g_A*M_GT)/(g_V*M_F)" << endl;
+	cout << "        = " << (g_A*M_GT)/(g_V*M_F) << endl;
+//	cout << "Abeta   = -2*rho*(sqrt(3/5) - rho/5) / (1+rho^2) [from proposal]" << endl;
+//	cout << "        = " << -2.0*rho*(sqrt(3.0/5.0) - rho/5.0) / (1.0+rho*rho) << endl;
+	cout << "Abeta   = (2/5*rho^2 - 2*sqrt(3/5)*|rho|) / (rho^2+1) [from calculation]" << endl;
+	cout << "        = " << (2.0/5.0*rho*rho - 2.0*sqrt(3.0/5.0)*abs(rho) ) / (rho*rho+1.0) << endl;
+	cout << "b_Fierz = ???" << endl;
 	cout << std::setprecision(8);
-//	cout << std::setprecision(50);
 	cout << "(E0/MeV)  = " << (E0/MeV) << endl;
 	cout << "(m_e/MeV) = " << (m_e/MeV) <<  endl;
 	cout << std::setprecision(4);
@@ -412,107 +423,6 @@ bool HolsteinVars::initialize_spinfuncs(double u_, double v_)
 	return true;
 }
 
-/*
-//bool HolsteinVars::loadup_textfile(string paramfilename)
-map<string, isotope_values * > HolsteinVars::loadup_textfile(string paramfilename)
-map<string, isotope_values * > SS::loadup_textfile(string paramfilename)
-// puts the contents of the text file into 'theInputs'.
-{
-	bool verbose = false;
-	
-	std::fstream inputfile(paramfilename.c_str(), std::fstream::in);
-	if(verbose)
-	{
-		if(inputfile) { cout << "paramfilename = " << paramfilename << " -- file opened." << endl; }
-		else          { cout << "Could not open file:  " << paramfilename << endl; }
-	}
-	if(inputfile)
-	{
-		std::string line;
-		std::vector<std::string> parsed;
-		int lineNumber = 1;
-		while(getline( inputfile, line ))
-		{
-			// don't even bother if the line starts with a "#".
-			if( line.find_first_of("#") == 0 )
-			{
-				if(verbose) { cout << "*Line " << lineNumber << " -- skipping" << endl; }
-				continue;
-			}
-			parsed = SS::split(line, ':');
-			switch(parsed.size())
-			{
-				case 1:
-				{
-					cout << "Problem with input line: " << lineNumber << endl;
-					break;
-				}
-				case 2:
-				{
-					isotopeName = parsed[0];
-					if(verbose)
-					{
-						cout << "Case 2:" << endl;
-						cout << "parsed[0] = " << parsed[0] << endl;
-					}
-					break;
-				}
-				case 3:
-				{
-					if (verbose)
-					{
-						cout << "before erasing, parsed[2] = " << parsed[2] << endl;
-					}
-					parsed[2].erase(parsed[2].begin(), parsed[2].begin() + parsed[2].find_first_of("#"));
-					theInputs[parsed[0]]= new isotope_values(std::stod(parsed[1]), 0, parsed[2], parsed[0]);
-					// in Case 3, parsed[0] is the name, parsed[1] is the value, 
-					//  	0 is the (implied) uncertainty, and parsed[2] is the comment.
-					if(verbose)
-					{
-						cout << "Case 3:" << "\t";
-						cout << "parsed[0] = " << parsed[0] << endl;
-						cout << "\tparsed[1] = " << parsed[1] << "\tparsed[2] = " << parsed[2];
-						cout << endl;
-					}
-					break;
-				}
-				case 4:
-				{
-					parsed[3].erase(parsed[3].begin(), parsed[3].begin() + parsed[3].find_first_of("#"));
-					theInputs[parsed[0]]= new isotope_values( std::stod(parsed[1]), std::stod(parsed[2]), parsed[3], parsed[0]);
-					// In case 4, parsed[0] is the name, parsed[1] is the value, 
-					//  	parsed[2] is the uncertainty, and parsed[3] is the comment.
-					if(verbose)
-					{
-						cout << "Case 4:" << "\t";
-						cout << "parsed[0] = " << parsed[0] << endl;
-						cout << "\tparsed[1] = " << parsed[1] << "\tparsed[2] = " << parsed[2] << "\tparsed[3] = " << parsed[3];
-						cout << endl;
-					}
-					break;
-				}
-				default:
-				{
-					cout << "Problem with input line: " << lineNumber << endl;
-					break;
-				}
-			}
-			parsed.clear();
-			++lineNumber;
-		}
-	}
-	else
-	{
-		std::cerr << "File: " << paramfilename << " could not be opened." << std::endl;
-		assert(0);
-	}
-	inputfile.close();	
-	// check if we have all of the parameters we need?
-	//return true;
-	return theInputs;
-}
-*/
-
 double HolsteinVars::FindValue(const std::string &key_) const
 {
 	auto findIt = theInputs.find(key_);
@@ -545,3 +455,28 @@ void HolsteinVars::print_isotope_values()
 }
 
 
+// MELISSA LOOK HERE AND FIX THIS, THIS IS REALLY WRONG!!!  THESE THINGS NEED TO BE PROPAGATED!!!!  
+void HolsteinVars::set_g_Vector(double new_g)       // vector coupling constant
+{
+	g_V = new_g;
+	propagate_values();
+	return;
+}
+void HolsteinVars::set_g_Axial(double new_g)       // axial coupling constant
+{
+	g_A = new_g;
+	propagate_values();
+	return;
+}
+void HolsteinVars::set_g_Scalar(double new_g)  // scalar coupling constant
+{
+	g_Scalar = new_g;
+	propagate_values();
+	return;
+}
+void HolsteinVars::set_g_Tensor(double new_g)  // tensor coupling constant
+{
+	g_Tensor = new_g;
+	propagate_values();
+	return;
+}
