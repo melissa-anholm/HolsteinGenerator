@@ -32,7 +32,8 @@ NUMBER_OF_PROTONS_DAUGHTER:18:                        #For columb correction
 BETA_PLUS_MINUS:1:                                    #1=beta^+ | -1=beta^-
 AVERAGE_KINETIC_ENERGY:2.307002:                      #Average kinetic energy from Severijns 2008.  probably not needed for anything??
 HBARC:197.3269631:                                    #[PDG, reviewed 2010].  units of eV*nm, I think.  
-ALPHA:7.2973525376e-3:                                #[PDG, reviewed 2010]
+#ALPHA:7.2973525376e-3:                                #[PDG, reviewed 2010]
+ALPHA:7.2973525693e-3:                                #[CODATA 2018]
 M_F:1.0000:                                           #Reduced matrix element from Ian Towner's shell model calculation
 M_GT:-0.62376:                                        #Reduced matrix element from Ian Towner's shell model calculation
 M_R2:12.899:                                          #Reduced matrix element from Ian Towner's shell model calculation needs to be divided by hbarc^2

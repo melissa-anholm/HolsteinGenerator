@@ -82,7 +82,8 @@ Holstein52Generator::Holstein52Generator(HolsteinVars * HV, K37AtomicSetup * ato
 	hbarc_eV_nm         = Params->get_hbarc_eV_nm();    // exact.  unitless. ... it is *not* fucking unitless.  ... it needs to be unitless for now though, because who fucking knows what units the matrix elements are supposed to have.
 	Z_daughter          = Params->get_Z_daughter();     // exact
 	speed_of_light      = Params->get_speed_of_light(); // exact.  double.  no G4units.
-	alpha_finestructure = Params->get_finestructure();
+//	alpha_finestructure = Params->get_finestructure();
+	alpha               = Params->get_alpha();
 	
 	E0    = Params->get_E0();    // uncertain (propagation) MeV.  comes out in MeV from HolsteinVars.
 	M     = Params->get_M();     // uncertain (propagation) MeV.  comes out in MeV from HolsteinVars.
@@ -96,8 +97,10 @@ Holstein52Generator::Holstein52Generator(HolsteinVars * HV, K37AtomicSetup * ato
 	mu_parent     = Params->get_mu_parent();     // uncertain (direct) 
 	mu_daughter   = Params->get_mu_daughter();   // uncertain (direct) 
 	
-	g_V  = Params->get_g_Vector();  // exact
-	g_A  = Params->get_g_Axial();  // exact-ish??
+	// dont' set up g_V and g_A, because I'll want to be able to update their values from within G4..
+//	g_V  = Params->get_g_Vector();  // exact
+//	g_A  = Params->get_g_Axial();  // exact-ish??
+	
 	g_II = Params->get_g_II(); // exact
 	g_S  = Params->get_g_S();  // exact
 	g_P  = Params->get_g_P();  // exact
@@ -117,7 +120,7 @@ Holstein52Generator::Holstein52Generator(HolsteinVars * HV, K37AtomicSetup * ato
 	M_rp    = Params->get_M_rp();    // uncertain (propagation)
 	// M_L = Params->M_L;  // exact
 	
-	a1 = Params->get_a1(); // uncertain (propagation, M1 M2, M_F)
+	a1 = Params->get_a1(); // uncertain (propagation, M1 M2, M_F)          // note:  a1 gets re-calculated in randomize_nuclear, so don't have to worry about propagating changes to g_V right now.  This is just a placeholder value.  
 	a2 = Params->get_a2(); // uncertain (propagation, M1 M2)
 	c1 = Params->get_c1(); // uncertain (propagation, M1 M2, M_GT, (g_A) )
 	c2 = Params->get_c2(); // uncertain (propagation, M1 M2, (g_A) )
@@ -133,22 +136,21 @@ Holstein52Generator::Holstein52Generator(HolsteinVars * HV, K37AtomicSetup * ato
 	j3 = Params->get_j3(); // uncertain (propagation, M1 M2, (g_A) )
 	
 	
-	
-	jtw_a1 = g_V*Params->FindValue("M_F");  // hasn't had isospin correction turned on yet.
-	jtw_c1 = g_A*Params->FindValue("M_GT"); // hasn't had isospin correction turned on yet.
+	jtw_a1 = (Params->get_g_Vector())*Params->FindValue("M_F");  // hasn't had isospin correction turned on yet.
+	jtw_c1 = (Params->get_g_Axial())*Params->FindValue("M_GT"); // hasn't had isospin correction turned on yet.
 	jtw_xi    = 2.0*(jtw_a1*jtw_a1 + jtw_c1*jtw_c1);
 	jtw_Abeta = 2.0*(jtw_c1*jtw_c1*(1.0/(3.0/2.0 + 1.0)) + 2.0*jtw_a1*jtw_c1*sqrt((3.0/2.0)/(3.0/2.0 + 1.0)) ) / (2.0*(jtw_a1*jtw_a1 + jtw_c1*jtw_c1));
 	jtw_rho   = jtw_c1/jtw_a1;
 	
 	// b_kludge, but I'll need this later anyway:
 //	alpha_finestructure = 
-	jtw_gamma = sqrt(1.0-alpha_finestructure*alpha_finestructure * Z_daughter*Z_daughter);
+	jtw_gamma = sqrt(1.0-alpha*alpha* Z_daughter*Z_daughter);
 	
 	// Fermi Function:
 	the_FF = new K37FermiFunction();
 	X_coulomb = HV->get_X(); 
 	Y_coulomb = HV->get_Y();
-	alpha     = HV->get_alpha();
+//	alpha     = HV->get_alpha();
 
 	
 	// Atomic:
@@ -161,6 +163,9 @@ Holstein52Generator::Holstein52Generator(HolsteinVars * HV, K37AtomicSetup * ato
 	
 	// Decay-specific Parameters:
 	initial_momentum = G4ThreeVector(0.0*MeV,0.0*MeV,0.0*MeV);  // 
+	
+	//
+//	cout << "in Holstein52Generator::Holstein52Generator(...), we have g_A = " << (Params->get_g_Axial()) << endl;
 }
 
 
@@ -233,38 +238,40 @@ void Holstein52Generator::randomize_nuclear(bool doit)  // needs Params.
 	
 	// Use experimental quadrupole moments for 'g'-->M_Q, rather than calculated M_Q.
 	double jterm = sqrt( (I_spin + 1.0)*(2.0*I_spin + 3.0)/( I_spin*(2.0*I_spin - 1.0) ));
-	M_Q = (2.0/3.0) * M_F_isospin * jterm* (quad_daughter-quad_parent) / (hbarc_eV_nm*hbarc_eV_nm) / ( -4.0/3.0 * g_V );
+	M_Q = (2.0/3.0) * M_F_isospin * jterm* (quad_daughter-quad_parent) / (hbarc_eV_nm*hbarc_eV_nm) / ( -4.0/3.0 * (Params->get_g_Vector()) );
 	// Set M_rp by M_Q:
 	M_rp = (E0/MeV)*M_Q/sqrt(6);
 	
 	// Calculate everything else:
-	a1  = g_V*(M_F - (Delta/MeV)*(Delta/MeV)/6.0*M_r2 + (Delta/MeV)/3.0*M_rdotp) / rc;
-	a2  = g_V*((M/MeV)*(M/MeV))*(M_r2/6.0) / rc;  
-	c1  = g_A*(M_GT - (Delta/MeV)*(Delta/MeV)/6.0*M_sr2 + M_1y*2.0*(Delta/MeV)*(Delta/MeV)/(6.0*sqrt(10.)) + A_nucleons*(Delta/MeV)/(2.0*(M/MeV))*M_sL + (Delta/MeV)/2.0*M_srp ) / rc;
-	c2  = g_A*((M/MeV)*(M/MeV))*( M_sr2/6.0 + M_1y/(6.0*sqrt(10.)) ) / rc;
+	a1  = (Params->get_g_Vector())*(M_F - (Delta/MeV)*(Delta/MeV)/6.0*M_r2 + (Delta/MeV)/3.0*M_rdotp) / rc;
+	a2  = (Params->get_g_Vector())*((M/MeV)*(M/MeV))*(M_r2/6.0) / rc;  
+	c1  = (Params->get_g_Axial())*(M_GT - (Delta/MeV)*(Delta/MeV)/6.0*M_sr2 + M_1y*2.0*(Delta/MeV)*(Delta/MeV)/(6.0*sqrt(10.)) + A_nucleons*(Delta/MeV)/(2.0*(M/MeV))*M_sL + (Delta/MeV)/2.0*M_srp ) / rc;
+	c2  = (Params->get_g_Axial())*((M/MeV)*(M/MeV))*( M_sr2/6.0 + M_1y/(6.0*sqrt(10.)) ) / rc;
 	
 	b   = A_nucleons*M_F_isospin * sqrt((I_spin+1.0)/I_spin) * (mu_parent-mu_daughter);
 	
-	double d_I  = g_A*(-1.0*M_GT + (Delta/MeV)*(Delta/MeV)*M_sr2/6.0 + M_1y*(Delta/MeV)*((M/MeV)+(Delta/MeV)/6.0)/sqrt(10.) + (A_nucleons*M_sL) + ((M/MeV)*M_srp) ) / rc;
+	double d_I  = (Params->get_g_Axial())*(-1.0*M_GT + (Delta/MeV)*(Delta/MeV)*M_sr2/6.0 + M_1y*(Delta/MeV)*((M/MeV)+(Delta/MeV)/6.0)/sqrt(10.) + (A_nucleons*M_sL) + ((M/MeV)*M_srp) ) / rc;
 	double d_II = -1.0*g_II*A_nucleons*M_GT;
 	d   = d_I + d_II;
 	
 	e   = 0; // Eq. (22).  assumes CVC.
 	g   = (2.0/3.0) * (M/MeV)*(M/MeV) * M_F_isospin * jterm*(quad_daughter-quad_parent) / (hbarc_eV_nm*hbarc_eV_nm);
-	f   = 2.0*g_V*(M/MeV)*M_rp; // for f, use new value of M_rp
-	h   = -1.0*(g_A*2.0*((M/MeV)*(M/MeV))*M_1y/sqrt(10.) + g_P*(A_nucleons*A_nucleons)*M_GT) / rc;
+	f   = 2.0*(Params->get_g_Vector())*(M/MeV)*M_rp; // for f, use new value of M_rp
+	h   = -1.0*((Params->get_g_Axial())*2.0*((M/MeV)*(M/MeV))*M_1y/sqrt(10.) + g_P*(A_nucleons*A_nucleons)*M_GT) / rc;
 	
-	j2  = -g_A*2.0*((M/MeV)*(M/MeV))*M_2y/3.0;
-	j3  = -g_A*2.0*((M/MeV)*(M/MeV))*M_3y/3.0;
+	j2  = -(Params->get_g_Axial())*2.0*((M/MeV)*(M/MeV))*M_2y/3.0;
+	j3  = -(Params->get_g_Axial())*2.0*((M/MeV)*(M/MeV))*M_3y/3.0;
 	
 	// must still update the jtw parameters, because I might have changed g_A or M_GT.
-	jtw_a1 = g_V*M_F *sqrt(1.0-deltaC);  // turn isospin correction back off for this.  it's already included in M_F.
-	jtw_c1 = g_A*M_GT*sqrt(1.0-deltaC);  // turn isospin correction back off for this.  it's already included in M_GT.
+	jtw_a1 = (Params->get_g_Vector())*M_F *sqrt(1.0-deltaC);  // turn isospin correction back off for this.  it's already included in M_F.
+	jtw_c1 = (Params->get_g_Axial())*M_GT*sqrt(1.0-deltaC);  // turn isospin correction back off for this.  it's already included in M_GT.
 	
 	jtw_xi    = 2.0*(jtw_a1*jtw_a1 + jtw_c1*jtw_c1);
 	jtw_Abeta = 2.0*(jtw_c1*jtw_c1*(1.0/(3.0/2.0 + 1.0)) + 2.0*jtw_a1*jtw_c1*sqrt((3.0/2.0)/(3.0/2.0 + 1.0)) ) / (2.0*(jtw_a1*jtw_a1 + jtw_c1*jtw_c1));
 	jtw_rho   = jtw_c1/jtw_a1;
 	
+//	cout << "in Holstein52Generator::randomize_nuclear(...), we have g_A = " << (Params->get_g_Axial()) << endl;
+
 	// ok, but actually turn a bunch of this shit off...
 	if(!use_roc)
 	{
@@ -289,8 +296,8 @@ void Holstein52Generator::randomize_nuclear(bool doit)  // needs Params.
 	//	M_F  = Params->FindValue("M_F");
 	//	M_GT = Params->FindValue("M_GT");
 		
-	//	jtw_a1 = g_V*M_F *sqrt(1.0-deltaC);  // turn isospin correction back off for this.  it's already included in M_F.
-	//	jtw_c1 = g_A*M_GT*sqrt(1.0-deltaC);  // turn isospin correction back off for this.  it's already included in M_GT.
+	//	jtw_a1 = (Params->get_g_Vector())*M_F *sqrt(1.0-deltaC);  // turn isospin correction back off for this.  it's already included in M_F.
+	//	jtw_c1 = (Params->get_g_Axial())*M_GT*sqrt(1.0-deltaC);  // turn isospin correction back off for this.  it's already included in M_GT.
 		
 		a1 = jtw_a1;
 		a2 = 0.0;
@@ -434,17 +441,24 @@ double Holstein52Generator::F_0(double E) // a1 a2 c1 c2 (M/MeV) (E0/MeV) (m_e/M
 {
 	bool verbose=false;
 	double t1, t2, t3, t4, t5;
+	double bsm_term = 0;
 	t1 = a1*a1 + 2.0*a1*a2/(3.0*(M/MeV)*(M/MeV))*(     (m_e/MeV)*(m_e/MeV) +  4.0*E*(E0/MeV) + 2.0*(m_e/MeV)*(m_e/MeV)*(E0/MeV)/E -  4.0*E*E);
 	t2 = c1*c1 + 2.0*c1*c2/(9.0*(M/MeV)*(M/MeV))*(11.0*(m_e/MeV)*(m_e/MeV) + 20.0*E*(E0/MeV) - 2.0*(m_e/MeV)*(m_e/MeV)*(E0/MeV)/E - 20.0*E*E);
 	t3 = -2.0*(E0/MeV)/(3.0*(M/MeV))*(c1*c1 + c1*d - c1*b);
 	t4 =  2.0*E /(3.0*(M/MeV))*(3.0*a1*a1 + 5.0*c1*c1 -2.0*c1*b);
 	t5 = -1.0*(m_e/MeV)*(m_e/MeV)/(3.0*(M/MeV)*E)*(-3.0*a1*e + 2.0*c1*c1 + c1*d - 2.0*c1*b - c1*h*((E0/MeV)-E)/(2.0*(M/MeV)));
 	
-	double F0 = t1 + t2 + t3 + t4 + t5;
+	double g_S = Params -> get_g_Scalar();
+	double g_T = Params -> get_g_Tensor();
+	
+	bsm_term = M_F*M_F*g_S*g_S + M_GT*M_GT*g_T*g_T;
+	
+	double F0 = t1 + t2 + t3 + t4 + t5 + bsm_term;
 	if(verbose) 
 	{ 
 		cout << "F0 = " << F0 << endl;
 		cout << "a1*a1 + c1*c1 = " << a1*a1 + c1*c1 << endl;   // JTW xi*factor.
+		cout << "F_0(E) bsm_term = " << bsm_term << endl;
 	}
 	return F0;
 }
@@ -454,6 +468,7 @@ double Holstein52Generator::F_1(double E) // a1 c1 c2 a2 (E0/MeV) (m_e/MeV) (M/M
 	
 	double f1, f2, f3;
 	double t1a, t1b, t2a, t2b, t3a, t3b;
+	double bsm_term = 0;
 	//
 	double u          = Params->get_u(); 
 	double delta_uv   = Params->get_delta_uv();
@@ -486,11 +501,16 @@ double Holstein52Generator::F_1(double E) // a1 c1 c2 a2 (E0/MeV) (m_e/MeV) (M/M
 	t3a = -5.0*E/(M/MeV)*c1*f + sqrt(3.0/2.0)*c1*g*((E0/MeV)*(E0/MeV) - 11.0*(E0/MeV)*E + 6.0*(m_e/MeV)*(m_e/MeV) + 4.0*E*E)/(6.0*(M/MeV)*(M/MeV));
 	t3b = -3.0*c1*j2*(8.0*E*E - 5.0*(E0/MeV)*E - 3.0*(m_e/MeV)*(m_e/MeV))/(6.0*(M/MeV)*(M/MeV));
 	
-	double F1 = f1*(t1a + t1b) + f2*(t2a + t2b) + f3*(t3a + t3b);
+	double g_S = Params -> get_g_Scalar();
+	double g_T = Params -> get_g_Tensor();
+	bsm_term = -1.0*f1*M_F*M_GT*g_S*g_T + f2*M_GT*M_GT*g_T*g_T;
+	
+	double F1 = f1*(t1a + t1b) + f2*(t2a + t2b) + f3*(t3a + t3b) + bsm_term;
 	if(verbose) 
 	{ 
 		cout << "F1 = " << F1 << endl;
 		cout << "c1*c1*(1.0/(3.0/2.0 + 1.0)) + 2*a1*c1*sqrt( (3.0/2.0) /(3.0/2.0 + 1.0)) = " << c1*c1*(1.0/(3.0/2.0 + 1.0)) + 2.0*a1*c1*sqrt( (3.0/2.0) /(3.0/2.0 + 1.0)) << endl; // JTW xi*factor*A_beta.
+		cout << "F_1(E) bsm_term = " << bsm_term << endl;
 	} 
 	return F1;
 }
@@ -705,16 +725,21 @@ double Holstein52Generator::get_probability(G4double E, double costheta) // want
 	double t2 = (F_2(E/MeV)*FermiFunction( (E-m_e)/MeV ) )                      * ( Lambda2 * (pbeta(E)/MeV)*(pbeta(E)/MeV) / ((E/MeV)*(E/MeV)) * (costheta*costheta - 1.0/3.0) );
 	double t3 = (F_3(E/MeV)*FermiFunction( (E-m_e)/MeV ) )                      * ( Lambda3 * (pow(costheta*(pbeta(E)/MeV)/(E/MeV), 3) - 3.0/5.0*costheta*pow((pbeta(E)/MeV)/(E/MeV), 3)) );
 	
-//	double kludge_b_term = jtw_gamma*b_kludge*( (m_e/MeV)/(E/MeV) );
+	double g_V = Params -> get_g_Vector();
+	double g_A = Params -> get_g_Axial();
+	double g_S = Params -> get_g_Scalar();
+	double g_T = Params -> get_g_Tensor();
+	double b_term = (m_e/E) * FermiFunction( (E-m_e)/MeV ) * (-2.0*jtw_gamma) * ( M_F*M_F*g_V*g_S + M_GT*M_GT*g_A*g_T  );
 	
+//	double kludge_b_term = jtw_gamma*b_kludge*( (m_e/MeV)/(E/MeV) );
 //	double the_prob      = the_scaling*(t0+t1+t2+t3);
 	holstein_Abeta       = F_1(E/MeV)/t0;  // Do I still believe this, what with the coulomb corrections?
-	
-//	holstein_probability = the_scaling*(t0+t1+t2+t3+kludge_b_term);
-	holstein_probability = the_scaling*(t0+t1+t2+t3+0.0);
+	holstein_probability = the_scaling*(t0+t1+t2+t3+b_term);
 	
 	if(verbose>0)
 	{
+	//	holstein_Abeta       = F_1(E/MeV)/t0;  // Do I still believe this, what with the coulomb corrections?  Also, does this var. do anything??
+		
 		cout << "Holstein52Generator::get_probability:  the_prob = " << holstein_probability << endl;
 	//	cout << "\tthe_scaling = " << the_scaling << endl;
 	//	cout << "\tholstein_Abeta = " << holstein_Abeta << endl;

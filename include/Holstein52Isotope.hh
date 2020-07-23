@@ -13,6 +13,7 @@
 
 
 #include "IsotopeValues.hh"
+#include "K37Config.hh"
 
 #ifndef SIMPLE_MC
 	#include "Holstein52_IsotopeMessenger.hh"
@@ -95,7 +96,7 @@ private:
 	double hbarc_eV_nm;  // don't use baked in G4 "hbarc" value, because we want things multiplied by this to be unitless.  At least some of the time...
 	double amu_to_mev, sigma_amu_to_mev;  // this is literally to convert units already.  it'll probably become obsolete.
 	double speed_of_light;
-	double alpha_finestructure;
+//	double alpha_finestructure;
 	
 	// mass, energy, all in MeV.
 	G4double E0, M, Delta;  // HolsteinVars: G4units propagated for Delta, E0, M.
@@ -165,7 +166,7 @@ public:  // getter methods, so that we can copy the variables over to the genera
 	double get_amu_to_mev()       { return amu_to_mev; };
 	double get_sigma_amu_to_mev() { return sigma_amu_to_mev; };  // this is literally to convert units already.  it'll probably become obsolete.
 	double get_speed_of_light()   { return speed_of_light; };
-	double get_finestructure()    { return alpha_finestructure; };
+//	double get_finestructure()    { return alpha_finestructure; };
 	
 	// coulomb corrections:
 	double get_X()       { return X_coulomb; }

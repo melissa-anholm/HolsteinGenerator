@@ -82,7 +82,7 @@ void HolsteinVars::initialize_physics_parameters()
 	
 	// kludge in the speed of light:
 	speed_of_light = 299792458.0;// *meter/second;  // meters per second.
-	alpha_finestructure = 0.0072973525693;  // (11)
+//	alpha_finestructure = 0.0072973525693;  // (11)
 	
 	// I_spin = u = v = 3/2 is only appropriate for the 98% branch.  Have to do something else for the 2% branch.
 	I_spin     = FindValue("SPIN");
@@ -315,7 +315,6 @@ void HolsteinVars::print_vars()
 	// print spin functions?
 	cout << "--" << endl;
 }
-
 void HolsteinVars::print_couplingconstants()
 {
 	cout << "g_V = " << g_V << endl;
@@ -346,7 +345,6 @@ void HolsteinVars::print_matrixelements()
 	//
 //	cout << "g_V = " << g_V << endl;
 }
-
 void HolsteinVars::print_calculatedJTW()
 {
 	double rho = (g_A*M_GT)/(g_V*M_F);
@@ -364,7 +362,6 @@ void HolsteinVars::print_calculatedJTW()
 	cout << "(m_e/MeV) = " << (m_e/MeV) <<  endl;
 	cout << std::setprecision(4);
 }
-
 void HolsteinVars::print_holsteinalphabet()
 {
 	// debug this stuff...
@@ -471,12 +468,12 @@ void HolsteinVars::set_g_Axial(double new_g)       // axial coupling constant
 void HolsteinVars::set_g_Scalar(double new_g)  // scalar coupling constant
 {
 	g_Scalar = new_g;
-	propagate_values();
+	propagate_values();  // g_Scalar doesn't actually get propagated to *anywhere* !
 	return;
 }
 void HolsteinVars::set_g_Tensor(double new_g)  // tensor coupling constant
 {
 	g_Tensor = new_g;
-	propagate_values();
+	propagate_values();  // g_Tensor doesn't actually get propagated to *anywhere* !
 	return;
 }

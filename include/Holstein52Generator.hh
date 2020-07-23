@@ -148,7 +148,8 @@ private:
 	double deltaC;
 	double quad_parent, quad_daughter;
 	double mu_parent, mu_daughter;
-	double g_V, g_A, g_II, g_S, g_P, g_M;
+//	double g_V, g_A, // not these.  I want to be able to change these at will.
+	double g_II, g_S, g_P, g_M;
 	
 	double M_F, M_GT;
 	double M_r2, M_sr2, M_sL, M_srp, M_rdotp, M_1y, M_2y, M_3y; // "exact".
@@ -191,13 +192,20 @@ private:
 	double get_lambda3();
 	double get_lambda4();
 	
-	double get_probability(G4double, double);  // E, costheta
-	double get_jtw_probability(G4double, double);
-	
 private:
 	HolsteinVars     * Params;
 	K37AtomicSetup   * the_atomic_setup;
 	K37FermiFunction * the_FF;
+	
+public:
+	double get_probability(G4double, double);  // E, costheta
+	double get_jtw_probability(G4double, double);
+	
+	// ONLY use these for the simple monte carlo!!!
+	void set_g_V(double newval) { Params->set_g_Vector(newval); };
+	void set_g_A(double newval) { Params->set_g_Axial( newval); };
+	void set_g_S(double newval) { Params->set_g_Scalar(newval); };
+	void set_g_T(double newval) { Params->set_g_Tensor(newval); };
 };
 
 #endif

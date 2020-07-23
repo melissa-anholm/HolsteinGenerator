@@ -389,7 +389,10 @@ int main(int argc, char *argv[])
 			jtw_rho        = the_PGA->GetHolsteinGenerator()->jtw_rho;
 			jtw_xi         = the_PGA->GetHolsteinGenerator()->jtw_xi;
 			jtw_Abeta      = the_PGA->GetHolsteinGenerator()->jtw_Abeta;
-			holstein_Abeta = the_PGA->GetHolsteinGenerator()->holstein_Abeta;
+			
+		//	holstein_Abeta = the_PGA->GetHolsteinGenerator()->holstein_Abeta;  // this is broken now.
+			holstein_Abeta = 0;  // this is broken now.  
+			
 		//	cout << "JTW:  rho    = " << jtw_rho   << endl;
 		//	cout << "      xi     = " << jtw_xi    << endl;
 		//	cout << "      A_beta = " << jtw_Abeta << endl;
