@@ -59,7 +59,7 @@ int main(int argc, char *argv[])
 	G4cout << "randseed: " << randseed << G4endl;
 	
 	
-	string filename = "output.root";
+	string filename = "output_2.root";
 	
 	/*
 	K37SublevelPopulations * thepops     = new K37SublevelPopulations(1);
@@ -282,11 +282,13 @@ int main(int argc, char *argv[])
 	the_PGA->GetHolsteinGenerator()->use_roc=true;
 	
 	bool event_accepted = false;
-	int nhalfevents =        10;
+//	int nhalfevents =        10;
 //	int nhalfevents =       100;
 //	int nhalfevents =      1000;
 //	int nhalfevents =   1000000;
 //	int nhalfevents = 100000000;
+	int nhalfevents = 1900000000;
+//	int nhalfevents = 300000000*10;  // no, this overflows.
 	
 //	int mismatch_eventcounter = 0;
 //	int jtw_accept_counter = 0;
@@ -294,12 +296,13 @@ int main(int argc, char *argv[])
 	cout << "Let's go!" << endl;
 	for(int sigmacount = 0; sigmacount <2; sigmacount++)
 	{
-		if(sigmacount==0)
-		{
-			the_PGA->GetHolsteinGenerator()->GetAtomicSetup()->set_sigma_plus();
-			cout << "Beginning event generation for sigma+." << endl;
-		}
-		else if(sigmacount==1)
+	//	if(sigmacount==0)  // skip sigma plus.  just leave it alone.
+	//	{
+	//		the_PGA->GetHolsteinGenerator()->GetAtomicSetup()->set_sigma_plus();
+	//		cout << "Beginning event generation for sigma+." << endl;
+	//	}
+		else 
+		if(sigmacount==1)
 		{
 			the_PGA->GetHolsteinGenerator()->GetAtomicSetup()->set_sigma_minus();
 			cout << "Beginning event generation for sigma-." << endl;
@@ -314,7 +317,7 @@ int main(int argc, char *argv[])
 		{
 			if( (i % 100000) == 0) 
 			{ 
-				cout<<"Working on event "<< i << endl; 
+				cout<<"Working on event "<< i/1000 << "k" << endl; 
 			}
 			
 			event_accepted = false;
@@ -338,6 +341,9 @@ int main(int argc, char *argv[])
 				
 				jtw_acceptance = the_PGA->GetHolsteinGenerator()      -> jtw_acceptance;
 				holstein_acceptance = the_PGA->GetHolsteinGenerator() -> holstein_acceptance;
+				
+			//	cout << "i=" << i << "jtw_acceptance=" << jtw_acceptance << ";\tholstein_acceptance=" << holstein_acceptance << endl;
+				
 				/*
 				// below:  this isn't a thing that makes sense anymore.
 				if( (jtw_acceptance && !holstein_acceptance) || (!jtw_acceptance && holstein_acceptance) )

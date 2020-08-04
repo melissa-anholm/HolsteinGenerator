@@ -4,20 +4,19 @@
 #include "MiniAggregator.hh"
 
 
-MiniAggregator::MiniAggregator()
+MiniAggregator::MiniAggregator(Holstein52Generator * gen)
 {
-	full_filename = string("simpleoutput.root");
-	
+	the_generator = gen;
 	//
+	full_filename = string("simpleoutput.root");
 	f = new TFile(full_filename.c_str(), "RECREATE");
 	f -> cd();
-	TTree * tree = new TTree("ntuple", "ntuple");
-	
+	tree = new TTree("ntuple", "ntuple");
 }
 
 MiniAggregator::~MiniAggregator()
 {
-	tree -> GetCurrentFile() -> Write("",TObject::kOverwrite);  
+//	tree -> GetCurrentFile() -> Write("",TObject::kOverwrite);  
 	tree -> GetCurrentFile() -> Close();
 }
 
@@ -75,4 +74,9 @@ void MiniAggregator::InitializeBranches()
 void MiniAggregator::FillBranches()
 {
 	
+}
+
+void MiniAggregator::WriteToFile()
+{
+	tree -> GetCurrentFile() -> Write("",TObject::kOverwrite);
 }

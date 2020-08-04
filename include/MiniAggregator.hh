@@ -13,6 +13,7 @@
 #include <TTree.h>
 #include <TBranch.h> // might not need this...
 
+#include "Holstein52Generator.hh"
 
 using std::string;
 using std::vector;
@@ -20,11 +21,12 @@ using std::vector;
 class MiniAggregator
 {
 public:
-	MiniAggregator();
+	MiniAggregator( Holstein52Generator * gen );
 	~MiniAggregator();
 	
-	void FillBranches();
 	void InitializeBranches();
+	void FillBranches();
+	void WriteToFile();
 	
 	string full_filename;
 private:
@@ -74,6 +76,8 @@ private:
 	Double_t jtw_xi;
 	Double_t jtw_rho;
 	Double_t holstein_Abeta;
+	
+	Holstein52Generator * the_generator;
 };
 
 
