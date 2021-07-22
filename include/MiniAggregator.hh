@@ -21,6 +21,27 @@ using std::vector;
 class MiniAggregator
 {
 public:
+	MiniAggregator():metadata_filename( string("Output/MetaData.txt") ) 
+	{
+		
+	};
+	
+	void PrintMetaDataHeader();
+	void SaveMetaData();
+//	void SaveMetaData(int n_events, HolsteinVars * pointervars, K37AtomicSetup * the_atomic_setup, Holstein52Generator *  the_decay, K37MiniaturePGA * the_PGA);
+	void SaveMetaData(int runno,  string filename, int ngen, int nsaved, double cloud_x, double cloud_y, double cloud_z, double cloud_dx, double cloud_dy, double cloud_dz);
+	~MiniAggregator();
+	
+private:
+	string metadata_filename;
+};
+
+
+
+/*
+class MiniAggregator
+{
+public:
 	MiniAggregator( Holstein52Generator * gen );
 	~MiniAggregator();
 	
@@ -79,6 +100,7 @@ private:
 	
 	Holstein52Generator * the_generator;
 };
+*/
 
 
 

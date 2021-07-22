@@ -51,7 +51,7 @@ public:
 
 	bool check_PDF_acceptance();         // uses initial_momentum
 	bool check_holstein_acceptance();
-	bool check_detector_acceptance();    // creates hit_position from initial_momentum and initial_position.  then checks.
+	bool check_detector_acceptance(G4ThreeVector);    // creates hit_position from initial_momentum and initial_position.  then checks.  only used in TheHolstein??
 	void randomize_nuclear(bool doit=true);
 	bool shoot_decayevent( G4double the_monoenergy=-10.0  );
 	
@@ -81,6 +81,10 @@ public:
 	double get_e_vX() { return initial_velocity.x(); }
 	double get_e_vY() { return initial_velocity.y(); }
 	double get_e_vZ() { return initial_velocity.z(); }
+	
+	double get_initial_X() { return initial_position.x()/mm; }
+	double get_initial_Y() { return initial_position.y()/mm; }
+	double get_initial_Z() { return initial_position.z()/mm; }
 	
 //	double get_beta_phi;
 	

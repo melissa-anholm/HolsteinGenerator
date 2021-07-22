@@ -46,7 +46,8 @@ public:
 
 public:
 //	void GeneratePrimaries(G4Event* anEvent);  // ok, what gets called after this?  what calls this??
-	void GeneratePrimaries();  // ok, what gets called after this?  what calls this??
+//	void GeneratePrimaries();  // ok, what gets called after this?  what calls this??
+	bool GeneratePrimaries();  
 	G4double getVelocity(G4double kineticEnergy, G4double massOfParticle = 0.510998);
 	
 //	void SetPolarization(G4double pol);
@@ -66,6 +67,8 @@ public:
 public:
 //	G4double ReturnChargeStateThisEvent() { return recoil_charge_this_event; }
 	G4double ReturnIs2p()                 { return is_2p;                    }
+	G4ThreeVector Get_DecayPosition() { return EventVertex; }
+	
 private:
 //	double recoil_charge_this_event;
 	double is_2p;

@@ -20,8 +20,6 @@ using std::map;
 struct K37SublevelPopulations  // Spin 3/2 only!!
 {
 public:
-//	K37SublevelPopulations();
-//	K37SublevelPopulations(int the_sigma);  // completely polarized, so the_sigma=+/-1.
 	K37SublevelPopulations(int the_sigma=1);  // completely polarized, so the_sigma=+/-1.
 	~K37SublevelPopulations();
 	
@@ -46,9 +44,11 @@ public: // functions that already lived in G4, and are included here for backwar
 	void setup_sigma();
 	void set_sigma_plus();
 	void set_sigma_minus();
+//	void set_sigma_zero();
+
 	int get_sigma();  // checks both physical- and recorded polarization directions.  Might break for M_z=0.
 	
-	void AdjustPolarization(double);  // not implemented yet!
+	void AdjustPolarization(double);  // not implemented yet!  ...or is it?!
 	
 private:
 	void Setup_Pops_From_InputsMap();
@@ -74,22 +74,14 @@ private:
 
 public:
 void Setup_Pops_From_InputsMap( map<string, isotope_values * > theInputs);
-	
-	/*
-	// failed functions:
-public:
-	void Setup_FromPolarizationOnly(double pol);  // use measured laser powers for OP:  <normal/repumper> to estimate NG2/NG1.  alignment comes out *almost* within 1 sigma experimental uncertainty.  
-	void Setup_FromPolarizationAlignment(double pol, double ali);
-private:
-	void killall_pops();  // must be private!!
-	void SetPops_Ns_NG1_NG2(double Ns, double NG1, double NG2, int sigma);
-	*/
+void Setup_Pops_Unpolarized();
 	
 	//
 private:
 	double allowed_mismatch;
 	double op_power_ratio;  // <P_op/P_re> = <NG2/NG2>, from laser power info with our toy model. 1.7557 +/- 0.2898 in 2014.
 	bool is_sigma_plus;
+	bool is_unpolarized;
 	void swap_states();  // swap *only* the states, not the 'sigma' flag.  This MUST BE PRIVATE!
 	
 	

@@ -127,24 +127,21 @@ void K37MiniaturePGA::GetMultipoleMomentsFromPops(K37AtomicSetup * the_atomic_se
 
 
 //void K37MiniaturePGA::GeneratePrimaries(G4Event* anEvent) 
-void K37MiniaturePGA::GeneratePrimaries() 
+//void K37MiniaturePGA::GeneratePrimaries() 
+bool K37MiniaturePGA::GeneratePrimaries() 
 {
-	cout << "Does K37MiniaturePGA::GeneratePrimaries() ever even get called?!  ... apparently so!" << endl;
-	
-	
-	if(makeTwoPercent /* && recoil_charge_ != -3 */ ) 
-	{ // 2% branch is allowed && not photoions.
-//		thisEventIsATwoPercent = TwoPercentEvent();
-	}
-//	recoil_charge_this_event = GetChargeStateThisEvent();
-//	is_2p                    = GetIs2p();
-	
+	bool the_bool = false;
+//	cout << "Does K37MiniaturePGA::GeneratePrimaries() ever even get called?!  ... apparently so!" << endl;
 	
 //	K37AtomicSetup * the_atomic_setup = K37RunManagerMT::GetMasterRunManager()->GetUserActionInitialization()->GetAtomicSetup();
 	K37AtomicSetup * the_atomic_setup = GetHolsteinGenerator()->GetAtomicSetup();
 	
 	GetMultipoleMomentsFromPops(the_atomic_setup);
-	GetEventPositionFromCloud(the_atomic_setup);  
+//	G4ThreeVector the_position = 
+	GetEventPositionFromCloud(the_atomic_setup);
+	
+	
+//	cout << "In GeneratePrimaries():  INitial Position is:  " << EventVertex.x()/mm << ", " << EventVertex.y()/mm << ", " << EventVertex.z()/mm << endl;
 	
 //	double tmp_P = the_atomic_setup->GetPops()->get_P();
 //	double tmp_T = the_atomic_setup->GetPops()->get_T();
@@ -188,11 +185,11 @@ void K37MiniaturePGA::GeneratePrimaries()
 		{
 			if(make_monoenergetic)
 			{
-				holstein52_generator -> shoot_decayevent(monoenergetic_energy);
+				the_bool = holstein52_generator -> shoot_decayevent(monoenergetic_energy);
 			}
 			else
 			{
-				holstein52_generator -> shoot_decayevent();  // this probably shoots from a different atomic position than we just calculated and will now save to the file...  ...wait, seriously?  No, it's fine -- this function literally doesn't deal with the initial position at all.  ...but it *does* re-calculate it in K37Run, before we save it.  .... wait, still?  Or did we fix it?
+				the_bool = holstein52_generator -> shoot_decayevent();  // this probably shoots from a different atomic position than we just calculated and will now save to the file...  ...wait, seriously?  No, it's fine -- this function literally doesn't deal with the initial position at all.  ...but it *does* re-calculate it in K37Run, before we save it.  .... wait, still?  Or did we fix it?
 			}
 		}
 	//	else
@@ -200,4 +197,6 @@ void K37MiniaturePGA::GeneratePrimaries()
 	//		evGenerator -> MakeEvent(the_atomic_setup -> GetPolarization(), the_atomic_setup -> GetAlignment() );
 	//	}
 	}
+	
+	return the_bool;
 }

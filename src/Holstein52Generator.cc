@@ -954,8 +954,10 @@ bool Holstein52Generator::check_holstein_acceptance()  // uses initial_momentum
 	return holstein_acceptance;
 }
 
-bool Holstein52Generator::check_detector_acceptance()  // probably only used in TheHolstein.
+bool Holstein52Generator::check_detector_acceptance(G4ThreeVector initial_thing)  // probably only used in TheHolstein.
 {
+	initial_position = initial_thing;
+	
 	bool verbose=false;
 	// Should have already randomized start, randomized direction, and checked PDF acceptance.
 	det_acceptance = false;

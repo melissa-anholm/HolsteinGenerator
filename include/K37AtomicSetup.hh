@@ -87,6 +87,8 @@ public:
 	
 	void set_sigma_plus()  { the_pops->set_sigma_plus();   };
 	void set_sigma_minus() { the_pops->set_sigma_minus();  };
+//	void set_sigma_zero()  { the_pops->set_sigma_zero();   };
+	
 	int get_sigma()        { return the_pops->get_sigma(); };
 	
 	void print_pops()      { the_pops->print_pops();       };
@@ -100,17 +102,41 @@ public:
 	void Setup_FromDipoleQuadrupoleOctopole(double dip, double quad, double oct)      { the_pops->Setup_FromDipoleQuadrupoleOctopole(dip, quad, oct);     }
 	*/
 	
-	void SetInitialCloudPosition(G4ThreeVector center) { the_cloud->SetInitialCloudPosition(center); }
-	void SetFinalCloudPosition(G4ThreeVector center)   { the_cloud->SetFinalCloudPosition(center);   }
-	void SetInitialCloudSize(G4ThreeVector size)       { the_cloud->SetInitialCloudSize(size);       }
-	void SetFinalCloudSize(G4ThreeVector size)         { the_cloud->SetFinalCloudSize(size);         }
+	void SetInitialCloudPosition(G4ThreeVector center) { the_cloud->SetInitialCloudPosition(center); };
+	void SetFinalCloudPosition(G4ThreeVector center)   { the_cloud->SetFinalCloudPosition(center);   };
+	void SetInitialCloudSize(G4ThreeVector size)       { the_cloud->SetInitialCloudSize(size);       };
+	void SetFinalCloudSize(G4ThreeVector size)         { the_cloud->SetFinalCloudSize(size);         };
 	
-	void SetInitialCloudSize(G4double size)            { the_cloud->SetInitialCloudSize(size);       }
-	void SetFinalCloudSize(G4double size)              { the_cloud->SetFinalCloudSize(size);         }
+	void SetInitialCloudSize(G4double size)            { the_cloud->SetInitialCloudSize(size);       };
+	void SetFinalCloudSize(G4double size)              { the_cloud->SetFinalCloudSize(size);         };
 	
-	void SetFreeExpansionTime(G4double time)           { the_cloud->SetFreeExpansionTime(time);      }
-	void SetOP_CycleTime(G4double time)                { the_cloud->SetOP_CycleTime(time);           }
+	void SetFreeExpansionTime(G4double time)           { the_cloud->SetFreeExpansionTime(time);      };
+	void SetOP_CycleTime(G4double time)                { the_cloud->SetOP_CycleTime(time);           };
+	
+	void SetDecayPosition(G4ThreeVector center)
+	{
+		the_cloud->SetDecayPosition(center);
+	}
+	void SetGenH1(bool doit)   { the_cloud->SetGenH1(doit);   };
+	void SetGenH2(bool doit)   { the_cloud->SetGenH2(doit);   };
+	void SetGenH3(bool doit)   { the_cloud->SetGenH3(doit);   };
+	void SetGenH4(bool doit)   { the_cloud->SetGenH4(doit);   };
 
+	void SetGenRMCP(bool doit)   { the_cloud->SetGenRMCP(doit);   };
+	void SetGenRing(bool doit)   { the_cloud->SetGenRing(doit);   };
+
+	void SetUseEdge(bool doit) { the_cloud->SetUseEdge(doit); };
+	
+	bool is_h1()      { return the_cloud->is_h1(); };
+	bool is_h2()      { return the_cloud->is_h2(); };
+	bool is_h3()      { return the_cloud->is_h3(); };
+	bool is_h4()      { return the_cloud->is_h4(); };
+	bool is_rmcpgen()       { return the_cloud->is_rmcpgen(); };
+	bool is_ceramicringgen(){ return the_cloud->is_ceramicringgen(); };
+
+	bool is_edgegen() { return the_cloud->is_edgegen(); };
+	
+	
 //	void SetTemperature(G4ThreeVector temp)            { the_cloud->SetTemperature(temp);            }
 //	void SetTemperature(G4double temp)                 { the_cloud->SetTemperature(temp);            }
 //	void SetSailVelocity(G4ThreeVector vel)            { the_cloud->SetSailVelocity(vel);            }
@@ -120,7 +146,7 @@ public:
 
 private:
 	G4String MatchedRunsetLetter;
-		
+	
 //	void SetupVelocitySigma(G4ThreeVector temperature) { the_cloud->SetupVelocitySigma(temperature); }
 //	G4double CalcSigma(G4double temperature)           { return the_cloud->CalcSigma(temperature);   }
 //	G4bool initialize_complete_;

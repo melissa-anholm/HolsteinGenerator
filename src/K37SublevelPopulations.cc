@@ -31,11 +31,10 @@ K37SublevelPopulations::K37SublevelPopulations()
 
 K37SublevelPopulations::K37SublevelPopulations(int the_sigma) :  // fully polarized up or down.
 	allowed_mismatch(1.0e-15),  // 1e-15 works well for Wisely.
-	op_power_ratio(1.7557)//,     // 1.7557 +/- 0.2898 for 2014, from laser power measurements.  
+	op_power_ratio(1.7557),     // 1.7557 +/- 0.2898 for 2014, from laser power measurements.  
+	is_unpolarized(false)
 //	atomic_filename(string("K_37_POPULATIONS_INPUT.txt"))
 {
-//	cout << "Called K37SublevelPopulations(" << the_sigma << ")." << endl;
-	
 	G4String configPath = CONFIGURATION_DIRECTORY;
 	atomic_filename = configPath + "K_37_POPULATIONS_INPUT.txt";
 
@@ -83,12 +82,11 @@ void K37SublevelPopulations::Setup_Pops_From_InputsMap( /*map<string, isotope_va
 // This will be a slow, computationally inefficient way to set up the populations.  
 // It will also be pretty inelegant.  I don't care.
 	
-//	theInputs = SS::loadup_textfile(atomic_filename);     // reads the atomic text file into 'theInputs'.
-	
 	bool tmp_sigma = FindValue("IS_SIGMA_PLUS");
 	if(tmp_sigma) { is_sigma_plus=true;  }
 	else          { is_sigma_plus=false; }
 	
+	is_unpolarized = false;
 //	set_pop(string level, int F, int M_F, double the_pop) // level=="ground" || level=="excited"
 //	cout << "ok, we're going to go set a bunch of pops now." << endl;
 	
@@ -120,9 +118,39 @@ void K37SublevelPopulations::Setup_Pops_From_InputsMap( /*map<string, isotope_va
 	// check if it has the right sigma?
 }
 
+void K37SublevelPopulations::Setup_Pops_Unpolarized()
+{
+	is_unpolarized = true;
+	// don't care whether it thinks it's sigma plus or not.
+
+	// ok, we're going to go set a bunch of pops now.
+	set_pop("ground", 2,  2, 1.0/8.0 );
+	set_pop("ground", 2,  1, 1.0/8.0 );
+	set_pop("ground", 2,  0, 1.0/8.0 );
+	set_pop("ground", 2, -1, 1.0/8.0 );
+	set_pop("ground", 2, -2, 1.0/8.0 );
+	
+	set_pop("ground", 1,  1, 1.0/8.0 );
+	set_pop("ground", 1,  0, 1.0/8.0 );
+	set_pop("ground", 1, -1, 1.0/8.0 );
+
+
+	set_pop("excited", 2,  2, 0.0 );
+	set_pop("excited", 2,  1, 0.0 );
+	set_pop("excited", 2,  0, 0.0 );
+	set_pop("excited", 2, -1, 0.0 );
+	set_pop("excited", 2, -2, 0.0 );
+
+	set_pop("excited", 1,  1, 0.0 );
+	set_pop("excited", 1,  0, 0.0 );
+	set_pop("excited", 1, -1, 0.0 );
+	
+	renormalize();
+}
+
+
 K37SublevelPopulations::~K37SublevelPopulations()
 {
-//	cout << "why has this even been called??" << endl;
 	G4cout << "Deleting the sublevel populations.  Apparently." << G4endl;
 }
 
@@ -179,8 +207,9 @@ int K37SublevelPopulations::get_sigma() // returns +/- 1 (or 0 if it's broken)
 void K37SublevelPopulations::setup_sigma() // sets is_sigma_plus from polarization value.
 {
 	double pol = get_P();
-	if(pol >= 0) { is_sigma_plus = true;  }
-	else         { is_sigma_plus = false; }
+	if(pol > 0)          { is_sigma_plus = true;  is_unpolarized=false; }
+	else if( pol < 0)    { is_sigma_plus = false; is_unpolarized=false; }
+	else if( pol == 0)   { is_unpolarized= true;  }
 }
 
 void K37SublevelPopulations::set_sigma_plus() // calls functions to swap populations, *and* adjusts the is_sigma_plus flag.
@@ -237,10 +266,7 @@ void K37SublevelPopulations::set_sigma_minus()
 
 double K37SublevelPopulations::get_Mz()
 {
-//	cout << "Called get_Mz()." << endl;
 	bool verbose=false;
-//	bool verbose = true;
-//	renormalize();
 	
 	double running_Mz = 0.0;
 	double the_pop   = 0.0;
@@ -279,8 +305,6 @@ double K37SublevelPopulations::get_Mz()
 }
 double K37SublevelPopulations::get_Mz2()
 {
-//	bool verbose = false;
-//	renormalize();
 	double running_Mz2 = 0.0;
 	
 	double the_pop   = 0.0;
@@ -297,14 +321,6 @@ double K37SublevelPopulations::get_Mz2()
 		the_pop     = get_pop("ground", F, M_F);
 		running_Mz2 += the_pop*the_scale;
 		//
-	//	if(verbose)
-	//	{
-	//		G4cout << "Ground:   F=" << F << ", M_F=" << M_F << ":  pop=" << get_pop("ground", F, M_F)  << ", scale=" << get_scale("M_z2", F, M_F);
-	//			G4cout << ";\tsubtotal=" << get_pop("ground", F, M_F)*get_scale("M_z2", F, M_F) << G4endl;
-	//		G4cout << "Excited:  F=" << F << ", M_F=" << M_F << ":  pop=" << get_pop("excited", F, M_F) << ", scale=" << get_scale("M_z2", F, M_F);
-	//			G4cout << ";\tsubtotal=" << get_pop("excited", F, M_F)*get_scale("M_z2", F, M_F) << G4endl;
-	//		G4cout << "running_Mz2 = " << running_Mz2 << G4endl;
-	//	}
 	}
 	F=1;
 	for(int M_F=-F; M_F<=F; M_F++)
@@ -316,21 +332,12 @@ double K37SublevelPopulations::get_Mz2()
 		the_pop     = get_pop("ground", F, M_F);
 		running_Mz2 += the_pop*the_scale;
 		//
-	//	if(verbose)
-	//	{
-	//		G4cout << "Ground:   F=" << F << ", M_F=" << M_F << ":  pop=" << get_pop("ground", F, M_F)  << ", scale=" << get_scale("M_z2", F, M_F);// << G4endl;
-	//			G4cout << ";\tsubtotal=" << get_pop("ground", F, M_F)*get_scale("M_z2", F, M_F) << G4endl;
-	//		G4cout << "Excited:  F=" << F << ", M_F=" << M_F << ":  pop=" << get_pop("excited", F, M_F) << ", scale=" << get_scale("M_z2", F, M_F);// << G4endl;
-	//			G4cout << ";\tsubtotal=" << get_pop("excited", F, M_F)*get_scale("M_z2", F, M_F) << G4endl;
-	//		G4cout << "running_Mz2 = " << running_Mz2 << G4endl;
-	//	}
 	}
 	
 	return running_Mz2;
 }
 double K37SublevelPopulations::get_Mz3()
 {
-//	renormalize();
 	double running_Mz3 = 0.0;
 	
 	double the_pop   = 0.0;
@@ -389,7 +396,6 @@ void K37SublevelPopulations::set_pop(string level, int F, int M_F, double the_po
 	// If we got here, it passed all sanity checks.
 	
 	// now actually set it.
-	// Now actually do the thing.
 	int offset;
 	if(F==1) { offset=1; }
 	if(F==2) { offset=2; }
@@ -545,7 +551,6 @@ double K37SublevelPopulations::get_scale(string the_parameter, int F, int M_F)
 }
 void K37SublevelPopulations::renormalize(bool verbose)
 {
-//	verbose = true;
 	bool do_the_thing = false;
 	double running_sum = 0.0;
 	
@@ -586,7 +591,6 @@ void K37SublevelPopulations::renormalize(bool verbose)
 	
 	if(verbose)
 	{
-	//	cout << std::fixed << std::setw(the_width) << std::setprecision(the_precision) << get_P();
 		cout << std::scientific << std::setprecision(4);
 		cout << "-" << endl;
 		cout << "renormalizeation:  " << endl;
@@ -726,15 +730,30 @@ void K37SublevelPopulations::AdjustPolarization(double new_Pol)
 	{
 		cout << "Adjusting polarization from P_old=" << get_P() << " to P_new=" << new_Pol << endl;
 	}
+	if( new_Pol == get_P() )
+	{
+		if(verbose)  { cout << "No change needed." << endl; }
+		return;
+	}
+	
+	//
+	bool was_unpolarized = is_unpolarized;
+	if( new_Pol == 0.0 )
+	{
+		is_unpolarized = true;
+		K37SublevelPopulations::Setup_Pops_Unpolarized();
+		return;
+	}
+	else
+	{
+		is_unpolarized = false;
+	}
+	
+	
 	double abs_old_Pol = abs(get_P());
-	if( abs_old_Pol+allowed_mismatch >= 1.0) // we've lost sublevel information.  reload states from inputs map.
+	if( abs_old_Pol+allowed_mismatch >= 1.0 || was_unpolarized ) // we've lost sublevel information.  reload states from inputs map.
 	{
 		K37SublevelPopulations::Setup_Pops_From_InputsMap(); // also sets the sigma.
-	//	if(verbose>1)
-	//	{
-	//		cout << "we've set up the populations from the saved inputs.  probably.  what even are the saved inputs?!" << endl;
-	//		print_pops();
-	//	}
 		abs_old_Pol = abs(get_P());  // we set this at the beginning, but we're going to use it for calculations later, and we want the reset value.
 	}
 	if(abs(new_Pol) > 1.0)
@@ -743,14 +762,6 @@ void K37SublevelPopulations::AdjustPolarization(double new_Pol)
 		cout << "Polarization will remain unchanged." << endl;
 		return;
 	}
-
-//	if(verbose>1)
-//	{
-//		G4cout << "Original populations:  " << G4endl;
-//		print_pops();
-//	}
-
-	
 	// check normalization first?
 	renormalize();
 	
@@ -759,22 +770,11 @@ void K37SublevelPopulations::AdjustPolarization(double new_Pol)
 	bool new_is_sigma_plus;
 	if(new_Pol >= 0) { new_is_sigma_plus = true;  }
 	else             { new_is_sigma_plus = false; }
-//	cout << "new_is_sigma_plus:  " << new_is_sigma_plus << endl;
-//	cout << "old is_sigma_plus:  " << is_sigma_plus << endl;
 	if(new_is_sigma_plus != is_sigma_plus) // if they're not the same sigma, we'll just swap the atomic states around now.
 	{
-	//	cout << "new sigma is different than (new) old sigma." << endl;
 		swap_states();
 		setup_sigma();  // sets is_sigma_plus to its new physically correct value.
 	}
-//	else if(new_is_sigma_plus == is_sigma_plus)
-//	{
-//		cout << "new sigma is same as old sigma." << endl;
-//	}
-//	else
-//	{
-//		cout << "sigma is broken." << endl;
-//	}
 	if(new_is_sigma_plus != is_sigma_plus)
 	{
 		cout << "Well fuck, you just broke mathematical logic." << endl;
@@ -808,30 +808,12 @@ void K37SublevelPopulations::AdjustPolarization(double new_Pol)
 	}
 	
 	double rescale_other = pop_other_new / pop_other_old;
-//	if(verbose>1)
-//	{
-//		G4cout << "pop_stretched_old = " << pop_stretched_old << endl;
-//		G4cout << "pop_stretched_new = " << pop_stretched_new << endl;
-//	}
 	if(rescale_other < 0)  // allow it to be equal to zero, for P=+/-1.  We don't divide by this.
 	{ 
 		cout << "This is bad.  Very bad." << endl; 
 		assert(0);
 		return;
 	}
-	
-//	bool verbose=false;
-//	if(verbose)
-//	{
-//		cout << "abs_old_Pol:  " << abs_old_Pol << ";\tnew_Pol:  " << new_Pol << endl;
-//		cout << "rescale_other   = " << rescale_other << endl;
-//		cout << "1/rescale_other = " << 1.0/rescale_other << endl;
-//		cout << "pop_stretched_old = " << pop_stretched_old << ";\tpop_other_old = " << pop_other_old << endl;
-//		cout << "pop_stretched_old + pop_other_old = " << pop_stretched_old + pop_other_old << endl;
-//		cout << "pop_stretched_new = " << pop_stretched_new << ";\tpop_other_new = " << pop_other_new << endl;
-//		cout << "pop_stretched_new + pop_other_new = " << pop_stretched_new + pop_other_new << endl;
-//	}
-	
 	
 	// Now we rescale:
 	int F, MF;
@@ -889,26 +871,9 @@ void K37SublevelPopulations::AdjustPolarization(double new_Pol)
 		new_tmp_pop = rescale_other*get_pop("ground", F, MF);
 		set_pop("ground", F, MF, new_tmp_pop );
 	}
-
-//	if(verbose)
-//	{
-//		cout << "Populations are rescaled according to polarization, but haven't been normalized again yet..." << endl;
-//		print_pops();
-//		print_moments();
-//		cout << "....Renormalizing now." << endl;
-//	}
 	
 	// Still normalized?
 	renormalize(false);  // argument is verbosity.
-
-//	if(verbose>1)
-//	{
-//		G4cout << "New set of moments:  " << G4endl;
-//		print_moments();
-//		G4cout << "New populations:  " << G4endl;
-//		print_pops();
-//	}
-//	renormalize(true);
 }
 
 
