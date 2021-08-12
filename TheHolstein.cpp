@@ -345,6 +345,7 @@ int main(int argc, char *argv[])
 	string fname="Output0.root";
 	double x_i, y_i, z_i, x_f, y_f, z_f; 
 	double sigma_x_i, sigma_y_i, sigma_z_i, sigma_x_f, sigma_y_f, sigma_z_f;
+	double g_S;
 	double t_tmp;
 	G4double t_expand = 300.0*microsecond;
 	
@@ -365,15 +366,18 @@ int main(int argc, char *argv[])
 	{
 		the_paramfile = "Output/"+string( argv[1] );
 		the_linenumber = atoi(argv[2]);
+		cout << "the_paramfile = " << the_paramfile << endl;
+		cout << "the_linenumber = " << the_linenumber << endl;
 	}
 	if( argc==2 || argc==3 )
 	{
 		std::ifstream ifs(the_paramfile.c_str(), std::ifstream::in);
 		if (!ifs.is_open())  { cout << "Error reading " << the_paramfile << endl; }
 		
-		for(int i=1; i<=the_linenumber && !ifs.eof() && ifs.good(); i++)
+		for(int i=1; i<=the_linenumber && !ifs.eof() /* && ifs.good()*/ ; i++)
 		{
-			ifs >> fname >> nevents >> t_tmp >> x_i >> y_i >> z_i >> sigma_x_i >> sigma_y_i >> sigma_z_i >> x_f >> y_f >> z_f >> sigma_x_f >> sigma_y_f >> sigma_z_f;
+			cout << "Reading line " << i << endl;
+			ifs >> fname >> nevents >> t_tmp >> x_i >> y_i >> z_i >> sigma_x_i >> sigma_y_i >> sigma_z_i >> x_f >> y_f >> z_f >> sigma_x_f >> sigma_y_f >> sigma_z_f >> g_S;
 		}
 	}
 	
@@ -407,6 +411,7 @@ int main(int argc, char *argv[])
 	cout << "x_f, y_f, z_f    = " << x_f << ", " << y_f << ", " << z_f << endl;
 	cout << "sx_i, sy_i, sz_i = " << sigma_x_i << ", " << sigma_y_i << ", " << sigma_z_i << endl;
 	cout << "sx_f, sy_f, sz_f = " << sigma_x_f << ", " << sigma_y_f << ", " << sigma_z_f << endl;
+	cout << "g_S = " << g_S << endl;
 	
 	/*
 	if(argc>=2)  // call with args:  ./holstein runno nevents
@@ -455,10 +460,14 @@ int main(int argc, char *argv[])
 	string filename = outputdir+fname; //"output_"+int_to_string(runno)+".root";	
 	
 	HolsteinVars           * pointervars      = new HolsteinVars();	
+	pointervars->set_g_Scalar( g_S);
+//	pointervars->set_g_Scalar( 0.1);
+//	pointervars->set_g_Scalar(-0.1);
+	cout << "Setting g_S = " << g_S << endl;
+	
 	K37AtomicSetup         * the_atomic_setup = new K37AtomicSetup();
 
 	the_atomic_setup->SetFreeExpansionTime( t_expand );
-	
 	the_atomic_setup->SetInitialCloudPosition( trap_center_i );
 	the_atomic_setup->SetFinalCloudPosition( trap_center_f );
 	the_atomic_setup->SetInitialCloudSize( trap_size_i );
